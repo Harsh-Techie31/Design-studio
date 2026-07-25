@@ -19,6 +19,9 @@ def _serialize_garment(g: Garment) -> dict:
         "id": str(g.id),
         "season_id": g.season_id,
         "name": g.name,
+        "category": g.category.value,
+        "style_number": g.style_number,
+        "current_version": g.current_version,
         "node_summary": {
             k.value: {
                 "run_count": v.run_count,
@@ -74,10 +77,13 @@ async def create_garment(season_id: str, body: GarmentCreate):
     season = await Season.get(season_id)
     if not season:
         raise HTTPException(status_code=404, detail="Season not found")
+    existing_count = await Garment.find(Garment.season_id == season_id).count()
     now = _now()
     garment = Garment(
         season_id=season_id,
         name=body.name.strip() or "Untitled Garment",
+        category=body.category,
+        style_number=existing_count + 1,
         created_at=now,
         updated_at=now,
     )
@@ -100,6 +106,8 @@ async def update_garment(garment_id: str, body: GarmentUpdate):
         raise HTTPException(status_code=404, detail="Garment not found")
     if body.name is not None:
         garment.name = body.name.strip() or garment.name
+    if body.category is not None:
+        garment.category = body.category
     garment.updated_at = _now()
     await garment.save()
     return _serialize_garment(garment)

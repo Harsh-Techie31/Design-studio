@@ -5,16 +5,21 @@ import { SeasonCard } from "../components/SeasonCard";
 import { Modal } from "../components/Modal";
 import { useStudio } from "../state/StudioContext";
 
+function normalizeCode(raw: string): string {
+  return raw.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 12);
+}
+
 export function SeasonsListPage() {
   const { seasons, garments, createSeason } = useStudio();
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
+  const [code, setCode] = useState("");
   const navigate = useNavigate();
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    const season = await createSeason(name);
-    setName("");
+    if (!code) return;
+    const season = await createSeason(code);
+    setCode("");
     setOpen(false);
     navigate(`/seasons/${season.id}`);
   }
@@ -59,22 +64,27 @@ export function SeasonsListPage() {
       </main>
 
       <Modal open={open} onClose={() => setOpen(false)} title="New Season">
+        <p className="mb-4 -mt-2 text-sm text-bone-dim">
+          A season is a fashion cycle. Give it a short code — you'll name the moodboard next.
+        </p>
         <form onSubmit={handleCreate} className="flex flex-col gap-4">
           <div>
             <label className="mb-1.5 block text-xs uppercase tracking-wide text-muted">
-              Season name
+              Season Code
             </label>
             <input
               autoFocus
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Ash & Ember"
-              className="w-full rounded-lg border border-line bg-ink-soft px-3.5 py-2.5 text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none"
+              value={code}
+              onChange={(e) => setCode(normalizeCode(e.target.value))}
+              placeholder="e.g. SS27, AW27, RESORT27"
+              maxLength={12}
+              className="w-full rounded-lg border border-line bg-ink-soft px-3.5 py-2.5 font-mono text-bone placeholder:font-sans placeholder:text-muted focus:border-brass/60 focus:outline-none"
             />
           </div>
           <button
             type="submit"
-            className="mt-1 rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-brass-soft"
+            disabled={!code}
+            className="mt-1 rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-brass-soft disabled:cursor-not-allowed disabled:opacity-40"
           >
             Create Season
           </button>

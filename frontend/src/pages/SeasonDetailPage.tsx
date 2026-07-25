@@ -8,7 +8,17 @@ import { GarmentCard } from "../components/GarmentCard";
 import { Modal } from "../components/Modal";
 import { StartMoodboardModal } from "../components/StartMoodboardModal";
 import { useStudio } from "../state/StudioContext";
-import { seedFromId, type MoodboardImage } from "../types";
+import { CATEGORY_DEFS, seedFromId, type GarmentCategory, type MoodboardImage } from "../types";
+
+type SeasonTab = "overview" | "fabrics" | "prints" | "sketches" | "garments";
+
+const SEASON_TABS: { key: SeasonTab; label: string }[] = [
+  { key: "overview", label: "Overview" },
+  { key: "fabrics", label: "Fabrics" },
+  { key: "prints", label: "Prints" },
+  { key: "sketches", label: "Sketches" },
+  { key: "garments", label: "Garments" },
+];
 
 export function SeasonDetailPage() {
   const { seasonId } = useParams<{ seasonId: string }>();
@@ -22,8 +32,10 @@ export function SeasonDetailPage() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
+  const [category, setCategory] = useState<GarmentCategory | null>(null);
   const [moodboardOpen, setMoodboardOpen] = useState(false);
   const [briefExpanded, setBriefExpanded] = useState(false);
+  const [tab, setTab] = useState<SeasonTab>("overview");
 
   const season = getSeason(seasonId ?? "");
 
@@ -51,14 +63,16 @@ export function SeasonDetailPage() {
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    const garment = await createGarment(season!.id, name);
+    if (!category) return;
+    const garment = await createGarment(season!.id, name, category);
     setName("");
+    setCategory(null);
     setOpen(false);
     navigate(`/seasons/${season!.id}/garments/${garment.id}`);
   }
 
-  async function handleMoodboardSave(images: MoodboardImage[]) {
-    await setMoodboardImages(season!.id, images);
+  async function handleMoodboardSave(images: MoodboardImage[], name: string) {
+    await setMoodboardImages(season!.id, images, name);
 
     const hasRealImages = images.some((img) => !img.url.startsWith("mood-placeholder:"));
     if (hasRealImages) {
@@ -66,20 +80,74 @@ export function SeasonDetailPage() {
     }
   }
 
+  const garmentsSection = (
+    <section className="mt-16 first:mt-0">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h2 className="font-display text-2xl text-bone">Garments</h2>
+          <p className="mt-1 text-sm text-bone-dim">
+            Everything you build here draws on this season's mood.
+          </p>
+        </div>
+        <button
+          onClick={() => setOpen(true)}
+          className="rounded-full bg-brass px-5 py-2 text-sm font-medium text-ink transition-colors hover:bg-brass-soft"
+        >
+          + New Garment
+        </button>
+      </div>
+
+      {garments.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-line py-20 text-center text-bone-dim">
+          No garments yet in this season.
+        </div>
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {garments.map((garment) => (
+            <GarmentCard key={garment.id} garment={garment} />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+
   return (
     <div className="min-h-screen bg-ink text-bone">
-      <NavBar crumbs={[{ label: "Seasons", to: "/seasons" }, { label: season.name }]} />
+      <NavBar crumbs={[{ label: "Seasons", to: "/seasons" }, { label: season.code }]} />
 
-      <main className="mx-auto max-w-6xl px-6 py-14">
-        <div className="mb-2 flex items-center justify-between">
-          <h1 className="font-display text-4xl text-bone">{season.name}</h1>
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        <div className="mb-6 flex items-center justify-between px-0">
+          <h1 className="font-display text-4xl text-bone">{season.code}</h1>
           <span className="text-sm text-muted">Created {season.created_at.slice(0, 10)}</span>
         </div>
 
+        <div className="mb-10 flex gap-1 border-b border-line">
+          {SEASON_TABS.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`-mb-px border-b-2 px-4 py-3 text-sm transition-colors ${
+                tab === t.key
+                  ? "border-brass text-bone"
+                  : "border-transparent text-muted hover:text-bone-dim"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {tab === "overview" && (
+        <>
         {/* Moodboard */}
-        <section className="mt-10">
+        <section>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-display text-xl text-bone-dim">Moodboard</h2>
+            <h2 className="font-display text-xl text-bone-dim">
+              Moodboard
+              {season.moodboard.name && (
+                <span className="font-normal italic text-brass"> - {season.moodboard.name}</span>
+              )}
+            </h2>
             {moodboardImages.length > 0 && (
               <span className="text-xs uppercase tracking-wide text-muted">
                 {moodboardImages.length} images
@@ -116,10 +184,7 @@ export function SeasonDetailPage() {
               {/* Analysis Status */}
               {status === "analyzing" && (
                 <div className="mt-4 flex items-center gap-3 rounded-xl border border-brass/20 bg-brass/[0.03] px-5 py-4">
-                  <svg className="h-5 w-5 animate-spin text-brass" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
+                  <i className="ti ti-loader-2 animate-spin text-lg text-brass" />
                   <span className="text-sm text-bone-dim">Analyzing your mood…</span>
                 </div>
               )}
@@ -162,15 +227,9 @@ export function SeasonDetailPage() {
                         onClick={() => setBriefExpanded(!briefExpanded)}
                         className="flex items-center gap-1.5 text-xs uppercase tracking-wide text-muted hover:text-bone-dim transition-colors"
                       >
-                        <svg
-                          className={`h-3 w-3 transition-transform ${briefExpanded ? "rotate-90" : ""}`}
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path d="M9 18l6-6-6-6" />
-                        </svg>
+                        <i
+                          className={`ti ti-chevron-right transition-transform ${briefExpanded ? "rotate-90" : ""}`}
+                        />
                         Creative Brief
                       </button>
                       {briefExpanded && (
@@ -184,39 +243,61 @@ export function SeasonDetailPage() {
           )}
         </section>
 
-        {/* Garments */}
-        <section className="mt-16">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h2 className="font-display text-2xl text-bone">Garments</h2>
-              <p className="mt-1 text-sm text-bone-dim">
-                Everything you build here draws on this season's mood.
-              </p>
-            </div>
-            <button
-              onClick={() => setOpen(true)}
-              className="rounded-full bg-brass px-5 py-2 text-sm font-medium text-ink transition-colors hover:bg-brass-soft"
-            >
-              + New Garment
-            </button>
-          </div>
+        <div className="mt-16">{garmentsSection}</div>
+        </>
+        )}
 
-          {garments.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-line py-20 text-center text-bone-dim">
-              No garments yet in this season.
-            </div>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {garments.map((garment) => (
-                <GarmentCard key={garment.id} garment={garment} />
-              ))}
-            </div>
-          )}
-        </section>
+        {tab === "fabrics" && (
+          <div className="py-16 text-center text-sm text-bone-dim">
+            Fabric library for this season. Add fabrics you want available across all garments.
+          </div>
+        )}
+
+        {tab === "prints" && (
+          <div className="py-16 text-center text-sm text-bone-dim">
+            Print library for this season.
+          </div>
+        )}
+
+        {tab === "sketches" && (
+          <div className="py-16 text-center text-sm text-bone-dim">
+            Reference sketches you have uploaded manually for this season.
+          </div>
+        )}
+
+        {tab === "garments" && garmentsSection}
       </main>
 
-      <Modal open={open} onClose={() => setOpen(false)} title="New Garment">
+      <Modal
+        open={open}
+        onClose={() => {
+          setOpen(false);
+          setCategory(null);
+        }}
+        title="New Garment"
+      >
         <form onSubmit={handleCreate} className="flex flex-col gap-4">
+          <div>
+            <label className="mb-1.5 block text-xs uppercase tracking-wide text-muted">
+              Category
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {CATEGORY_DEFS.map((c) => (
+                <button
+                  key={c.code}
+                  type="button"
+                  onClick={() => setCategory(c.code)}
+                  className={`rounded-lg border px-4 py-2.5 text-left text-sm transition-colors ${
+                    category === c.code
+                      ? "border-brass bg-brass/10 text-brass"
+                      : "border-line bg-ink-soft text-bone-dim hover:border-brass/40"
+                  }`}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </div>
           <div>
             <label className="mb-1.5 block text-xs uppercase tracking-wide text-muted">
               Garment name
@@ -231,7 +312,8 @@ export function SeasonDetailPage() {
           </div>
           <button
             type="submit"
-            className="mt-1 rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-brass-soft"
+            disabled={!category}
+            className="mt-1 rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-brass-soft disabled:cursor-not-allowed disabled:opacity-40"
           >
             Create Garment
           </button>

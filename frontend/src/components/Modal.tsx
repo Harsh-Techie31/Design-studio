@@ -32,7 +32,7 @@ export function Modal({
             aria-label="Close"
             className="text-muted transition-colors hover:text-bone"
           >
-            ✕
+            <i className="ti ti-x" />
           </button>
         </div>
         {children}

@@ -17,8 +17,11 @@ export function SeasonCard({ season, garmentCount }: { season: Season; garmentCo
       </div>
       <div className="p-5">
         <h3 className="font-display text-2xl text-bone transition-colors group-hover:text-brass">
-          {season.name}
+          {season.code}
         </h3>
+        {season.moodboard.name && (
+          <p className="text-xs text-brass">Moodboard - {season.moodboard.name}</p>
+        )}
         <p className="mt-1 text-sm text-muted">
           {garmentCount} garment{garmentCount === 1 ? "" : "s"} · {season.created_at.slice(0, 10)}
         </p>

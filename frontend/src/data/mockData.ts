@@ -89,8 +89,9 @@ const now = "2026-06-01T00:00:00Z";
 export const MOCK_SEASONS: Season[] = [
   {
     id: "s1",
-    name: "Ash & Ember",
+    code: "SS27",
     moodboard: {
+      name: "Ash & Ember",
       status: "ready",
       images: placeholderMoodboard(),
       analysis: {
@@ -107,8 +108,9 @@ export const MOCK_SEASONS: Season[] = [
   },
   {
     id: "s2",
-    name: "Quiet Coastline",
+    code: "AW26",
     moodboard: {
+      name: "Quiet Coastline",
       status: "ready",
       images: placeholderMoodboard(),
       analysis: {
@@ -130,6 +132,9 @@ export const MOCK_GARMENTS: Garment[] = [
     id: "g1",
     season_id: "s1",
     name: "Frayed Silk Trench",
+    category: "JACKET",
+    style_number: 1,
+    current_version: 1,
     node_summary: nodeSummaryForSeed(3),
     created_at: "2026-06-02T00:00:00Z",
     updated_at: "2026-06-02T00:00:00Z",
@@ -138,6 +143,9 @@ export const MOCK_GARMENTS: Garment[] = [
     id: "g2",
     season_id: "s1",
     name: "Wide-Leg Ash Trouser",
+    category: "PANT",
+    style_number: 1,
+    current_version: 1,
     node_summary: nodeSummaryForSeed(7),
     created_at: "2026-06-04T00:00:00Z",
     updated_at: "2026-06-04T00:00:00Z",
@@ -146,6 +154,9 @@ export const MOCK_GARMENTS: Garment[] = [
     id: "g3",
     season_id: "s1",
     name: "Bonded Shell Jacket",
+    category: "JACKET",
+    style_number: 1,
+    current_version: 1,
     node_summary: nodeSummaryForSeed(1),
     created_at: "2026-06-06T00:00:00Z",
     updated_at: "2026-06-06T00:00:00Z",
@@ -154,6 +165,9 @@ export const MOCK_GARMENTS: Garment[] = [
     id: "g4",
     season_id: "s2",
     name: "Draped Column Dress",
+    category: "DRESS",
+    style_number: 1,
+    current_version: 1,
     node_summary: nodeSummaryForSeed(9),
     created_at: "2026-05-14T00:00:00Z",
     updated_at: "2026-05-14T00:00:00Z",

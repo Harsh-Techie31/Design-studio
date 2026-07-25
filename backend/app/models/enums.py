@@ -11,6 +11,40 @@ class NodeKey(str, Enum):
     PHOTOSHOOT = "photoshoot"
 
 
+STAGE_ORDER = [
+    NodeKey.SKETCH,
+    NodeKey.FABRIC,
+    NodeKey.RENDER,
+    NodeKey.TECH_PACK,
+    NodeKey.PATTERN,
+    NodeKey.VISUALIZATION,
+    NodeKey.PHOTOSHOOT,
+]
+
+STAGE_ABBREVIATIONS = {
+    NodeKey.SKETCH: "SKTCH",
+    NodeKey.FABRIC: "FBRC",
+    NodeKey.RENDER: "RNDR",
+    NodeKey.TECH_PACK: "TECH",
+    NodeKey.PATTERN: "PTRN",
+    NodeKey.VISUALIZATION: "3D",
+    NodeKey.PHOTOSHOOT: "SHOOT",
+}
+
+
+class GarmentCategory(str, Enum):
+    SHIRT = "SHIRT"
+    TEE = "TEE"
+    TOP = "TOP"
+    DRESS = "DRESS"
+    SKIRT = "SKIRT"
+    PANT = "PANT"
+    SHORT = "SHORT"
+    JACKET = "JACKET"
+    SWEATSHIRT = "SWTSHRT"
+    JUMPSUIT = "JUMP"
+
+
 class RunStatus(str, Enum):
     PENDING = "pending"
     PROCESSING = "processing"

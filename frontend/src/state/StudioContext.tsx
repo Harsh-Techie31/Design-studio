@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { Garment, MoodboardImage, Season } from "../types";
+import type { Garment, GarmentCategory, MoodboardImage, Season } from "../types";
 import * as seasonsApi from "../api/seasons";
 import * as garmentsApi from "../api/garments";
 import * as uploadsApi from "../api/uploads";
@@ -20,9 +20,9 @@ interface StudioContextValue {
   getSeason: (id: string) => Season | undefined;
   getGarmentsForSeason: (seasonId: string) => Garment[];
   getGarment: (id: string) => Garment | undefined;
-  createSeason: (name: string) => Promise<Season>;
-  createGarment: (seasonId: string, name: string) => Promise<Garment>;
-  setMoodboardImages: (seasonId: string, images: MoodboardImage[]) => Promise<void>;
+  createSeason: (code: string) => Promise<Season>;
+  createGarment: (seasonId: string, name: string, category: GarmentCategory) => Promise<Garment>;
+  setMoodboardImages: (seasonId: string, images: MoodboardImage[], name?: string) => Promise<void>;
   analyzeMoodboard: (seasonId: string) => Promise<void>;
   refreshSeasons: () => Promise<void>;
 }
@@ -83,8 +83,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   );
 
   const createSeason = useCallback(
-    async (name: string) => {
-      const season = await seasonsApi.createSeason(name);
+    async (code: string) => {
+      const season = await seasonsApi.createSeason(code);
       setSeasons((prev) => [season, ...prev]);
       return season;
     },
@@ -92,8 +92,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   );
 
   const createGarment = useCallback(
-    async (seasonId: string, name: string) => {
-      const garment = await garmentsApi.createGarment(seasonId, name);
+    async (seasonId: string, name: string, category: GarmentCategory) => {
+      const garment = await garmentsApi.createGarment(seasonId, name, category);
       setGarments((prev) => [garment, ...prev]);
       return garment;
     },
@@ -101,11 +101,11 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   );
 
   const setMoodboardImages = useCallback(
-    async (seasonId: string, images: MoodboardImage[]) => {
+    async (seasonId: string, images: MoodboardImage[], name?: string) => {
       setSeasons((prev) =>
         prev.map((s) =>
           s.id === seasonId
-            ? { ...s, moodboard: { ...s.moodboard, images } }
+            ? { ...s, moodboard: { ...s.moodboard, images, name: name ?? s.moodboard.name } }
             : s,
         ),
       );
@@ -121,7 +121,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
 
       console.log(`[StudioContext] Uploading ${filesToUpload.length} files to backend`);
       try {
-        const res = await uploadsApi.uploadMoodboardImages(seasonId, filesToUpload);
+        const res = await uploadsApi.uploadMoodboardImages(seasonId, filesToUpload, name);
         console.log("[StudioContext] Upload response:", res);
         if (res.moodboard) {
           setSeasons((prev) =>

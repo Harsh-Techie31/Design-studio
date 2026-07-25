@@ -40,7 +40,7 @@ export function GarmentDetailPage() {
       <NavBar
         crumbs={[
           { label: "Seasons", to: "/seasons" },
-          { label: season.name, to: `/seasons/${season.id}` },
+          { label: season.code, to: `/seasons/${season.id}` },
           { label: garment.name },
         ]}
       />
@@ -52,7 +52,10 @@ export function GarmentDetailPage() {
             <div>
               <h1 className="font-display text-4xl text-bone">{garment.name}</h1>
               <p className="mt-1 text-sm text-bone-dim">
-                Inspired by <span className="text-brass">{season.name}</span>
+                Inspired by{" "}
+                <Link to={`/seasons/${season.id}`} className="text-brass hover:text-brass-soft">
+                  {season.moodboard.name ?? season.code}
+                </Link>
               </p>
             </div>
           </div>

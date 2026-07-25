@@ -13,6 +13,36 @@ export type MoodboardStatus = "empty" | "uploading" | "analyzing" | "ready" | "f
 
 export type ImageSource = "upload" | "pinterest";
 
+export type GarmentCategory =
+  | "SHIRT"
+  | "TEE"
+  | "TOP"
+  | "DRESS"
+  | "SKIRT"
+  | "PANT"
+  | "SHORT"
+  | "JACKET"
+  | "SWTSHRT"
+  | "JUMP";
+
+export interface CategoryDef {
+  code: GarmentCategory;
+  label: string;
+}
+
+export const CATEGORY_DEFS: CategoryDef[] = [
+  { code: "SHIRT", label: "Shirt" },
+  { code: "TEE", label: "Tee" },
+  { code: "TOP", label: "Top" },
+  { code: "DRESS", label: "Dress" },
+  { code: "SKIRT", label: "Skirt" },
+  { code: "PANT", label: "Pant" },
+  { code: "SHORT", label: "Short" },
+  { code: "JACKET", label: "Jacket" },
+  { code: "SWTSHRT", label: "Sweatshirt" },
+  { code: "JUMP", label: "Jumpsuit" },
+];
+
 // ─── Sub-models (mirror backend/app/models/) ─────────────────────────────────
 
 export interface MoodboardImage {
@@ -32,6 +62,7 @@ export interface MoodboardAnalysis {
 }
 
 export interface MoodboardData {
+  name: string | null;
   status: MoodboardStatus;
   images: MoodboardImage[];
   analysis: MoodboardAnalysis;
@@ -69,7 +100,7 @@ export interface NodeOutput {
 
 export interface Season {
   id: string;
-  name: string;
+  code: string;
   moodboard: MoodboardData;
   created_at: string;
   updated_at: string;
@@ -79,6 +110,9 @@ export interface Garment {
   id: string;
   season_id: string;
   name: string;
+  category: GarmentCategory;
+  style_number: number;
+  current_version: number;
   node_summary: Partial<Record<NodeKey, NodeSummary>>;
   created_at: string;
   updated_at: string;
@@ -90,6 +124,8 @@ export interface NodeRun {
   garment_id: string;
   node_key: NodeKey;
   iteration: number;
+  version: number;
+  code: string;
   status: RunStatus;
   liked: boolean;
   inputs: RunInputRef[];
