@@ -40,9 +40,9 @@ export function SeasonDetailPage() {
   const palette = season!.moodboard.analysis.palette;
   const keywords = season!.moodboard.analysis.keywords;
 
-  function handleCreate(e: React.FormEvent) {
+  async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    const garment = createGarment(season!.id, name);
+    const garment = await createGarment(season!.id, name);
     setName("");
     setOpen(false);
     navigate(`/seasons/${season!.id}/garments/${garment.id}`);

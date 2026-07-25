@@ -11,9 +11,9 @@ export function SeasonsListPage() {
   const [name, setName] = useState("");
   const navigate = useNavigate();
 
-  function handleCreate(e: React.FormEvent) {
+  async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    const season = createSeason(name);
+    const season = await createSeason(name);
     setName("");
     setOpen(false);
     navigate(`/seasons/${season.id}`);

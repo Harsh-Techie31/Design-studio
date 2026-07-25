@@ -54,7 +54,7 @@ async def upload_moodboard_images(season_id: str, files: list[UploadFile] = File
         ext = file.filename.rsplit(".", 1)[-1] if file.filename and "." in file.filename else "png"
         file_name = f"moodboard_{season_id}_{uuid.uuid4().hex[:8]}.{ext}"
 
-        result = await upload_image(file_bytes, folder="/moodboard/", file_name=file_name)
+        result = upload_image(file_bytes, folder="/moodboard/", file_name=file_name)
 
         img = MoodboardImage(
             url=result["url"],
@@ -92,7 +92,7 @@ async def delete_moodboard_image(season_id: str, image_index: int):
 
     if img.imagekit_file_id:
         try:
-            await delete_image(img.imagekit_file_id)
+            delete_image(img.imagekit_file_id)
         except Exception:
             pass
 

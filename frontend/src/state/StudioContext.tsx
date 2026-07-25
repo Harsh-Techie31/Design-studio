@@ -1,84 +1,152 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import type { Garment, MoodboardImage, Season } from "../types";
-import { MOCK_GARMENTS, MOCK_SEASONS, paletteForSeed, keywordsForSeed } from "../data/mockData";
+import * as seasonsApi from "../api/seasons";
+import * as garmentsApi from "../api/garments";
+import * as uploadsApi from "../api/uploads";
 
 interface StudioContextValue {
   seasons: Season[];
   garments: Garment[];
+  loading: boolean;
+  error: string | null;
   getSeason: (id: string) => Season | undefined;
   getGarmentsForSeason: (seasonId: string) => Garment[];
   getGarment: (id: string) => Garment | undefined;
-  createSeason: (name: string) => Season;
-  createGarment: (seasonId: string, name: string) => Garment;
-  setMoodboardImages: (seasonId: string, images: MoodboardImage[]) => void;
+  createSeason: (name: string) => Promise<Season>;
+  createGarment: (seasonId: string, name: string) => Promise<Garment>;
+  setMoodboardImages: (seasonId: string, images: MoodboardImage[]) => Promise<void>;
+  refreshSeasons: () => Promise<void>;
 }
 
 const StudioContext = createContext<StudioContextValue | null>(null);
 
-function newId(prefix: string): string {
-  return `${prefix}_${crypto.randomUUID().slice(0, 8)}`;
-}
-
 export function StudioProvider({ children }: { children: ReactNode }) {
-  const [seasons, setSeasons] = useState<Season[]>(MOCK_SEASONS);
-  const [garments, setGarments] = useState<Garment[]>(MOCK_GARMENTS);
+  const [seasons, setSeasons] = useState<Season[]>([]);
+  const [garments, setGarments] = useState<Garment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const refreshSeasons = useCallback(async () => {
+    try {
+      setError(null);
+      const data = await seasonsApi.listSeasons();
+      setSeasons(data);
+    } catch (e: any) {
+      setError(e.message);
+    }
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const s = await seasonsApi.listSeasons();
+        setSeasons(s);
+        const ids = s.map((x) => x.id);
+        if (ids.length > 0) {
+          const all: Garment[] = [];
+          for (const sid of ids) {
+            const gs = await garmentsApi.listGarments(sid);
+            all.push(...gs);
+          }
+          setGarments(all);
+        }
+      } catch (e: any) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  const getSeason = useCallback(
+    (id: string) => seasons.find((s) => s.id === id),
+    [seasons],
+  );
+
+  const getGarmentsForSeason = useCallback(
+    (seasonId: string) => garments.filter((g) => g.season_id === seasonId),
+    [garments],
+  );
+
+  const getGarment = useCallback(
+    (id: string) => garments.find((g) => g.id === id),
+    [garments],
+  );
+
+  const createSeason = useCallback(
+    async (name: string) => {
+      const season = await seasonsApi.createSeason(name);
+      setSeasons((prev) => [season, ...prev]);
+      return season;
+    },
+    [],
+  );
+
+  const createGarment = useCallback(
+    async (seasonId: string, name: string) => {
+      const garment = await garmentsApi.createGarment(seasonId, name);
+      setGarments((prev) => [garment, ...prev]);
+      return garment;
+    },
+    [],
+  );
+
+  const setMoodboardImages = useCallback(
+    async (seasonId: string, images: MoodboardImage[]) => {
+      setSeasons((prev) =>
+        prev.map((s) =>
+          s.id === seasonId
+            ? { ...s, moodboard: { ...s.moodboard, images } }
+            : s,
+        ),
+      );
+
+      try {
+        const res = await uploadsApi.uploadMoodboardImages(
+          seasonId,
+          images
+            .filter((img) => img.url.startsWith("data:"))
+            .map((img) => dataUrlToFile(img.url, `moodboard_${Date.now()}.png`)),
+        );
+        if (res.moodboard) {
+          setSeasons((prev) =>
+            prev.map((s) =>
+              s.id === seasonId
+                ? { ...s, moodboard: res.moodboard as any }
+                : s,
+            ),
+          );
+        }
+      } catch {
+        // If upload fails, local data URLs remain as fallback
+      }
+    },
+    [],
+  );
 
   const value = useMemo<StudioContextValue>(
     () => ({
       seasons,
       garments,
-      getSeason: (id) => seasons.find((s) => s.id === id),
-      getGarmentsForSeason: (seasonId) =>
-        garments.filter((g) => g.season_id === seasonId),
-      getGarment: (id) => garments.find((g) => g.id === id),
-      createSeason: (name) => {
-        const seed = Math.floor(seasons.length * 5 + name.length + 11);
-        const now = new Date().toISOString();
-        const season: Season = {
-          id: newId("s"),
-          name: name.trim() || "Untitled Season",
-          moodboard: {
-            status: "empty",
-            images: [],
-            analysis: {
-              palette: paletteForSeed(seed),
-              keywords: keywordsForSeed(seed),
-              brief: null,
-              model: null,
-              analyzed_at: null,
-              error: null,
-            },
-          },
-          created_at: now,
-          updated_at: now,
-        };
-        setSeasons((prev) => [season, ...prev]);
-        return season;
-      },
-      setMoodboardImages: (seasonId, images) => {
-        setSeasons((prev) =>
-          prev.map((s) =>
-            s.id === seasonId
-              ? { ...s, moodboard: { ...s.moodboard, images } }
-              : s,
-          ),
-        );
-      },
-      createGarment: (seasonId, name) => {
-        const now = new Date().toISOString();
-        const garment: Garment = {
-          id: newId("g"),
-          season_id: seasonId,
-          name: name.trim() || "Untitled Garment",
-          node_summary: {},
-          created_at: now,
-          updated_at: now,
-        };
-        setGarments((prev) => [garment, ...prev]);
-        return garment;
-      },
+      loading,
+      error,
+      getSeason,
+      getGarmentsForSeason,
+      getGarment,
+      createSeason,
+      createGarment,
+      setMoodboardImages,
+      refreshSeasons,
     }),
-    [seasons, garments],
+    [seasons, garments, loading, error, getSeason, getGarmentsForSeason, getGarment, createSeason, createGarment, setMoodboardImages, refreshSeasons],
   );
 
   return <StudioContext.Provider value={value}>{children}</StudioContext.Provider>;
@@ -88,4 +156,13 @@ export function useStudio(): StudioContextValue {
   const ctx = useContext(StudioContext);
   if (!ctx) throw new Error("useStudio must be used within StudioProvider");
   return ctx;
+}
+
+function dataUrlToFile(dataUrl: string, filename: string): File {
+  const [header, data] = dataUrl.split(",");
+  const mime = header.match(/:(.*?);/)?.[1] ?? "image/png";
+  const binary = atob(data);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new File([bytes], filename, { type: mime });
 }

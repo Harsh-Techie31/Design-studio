@@ -10,13 +10,11 @@ def get_imagekit() -> ImageKit:
     if _imagekit is None:
         _imagekit = ImageKit(
             private_key=settings.imagekit_private_key,
-            public_key=settings.imagekit_public_key,
-            url_endpoint=settings.imagekit_url_endpoint,
         )
     return _imagekit
 
 
-async def upload_image(file_bytes: bytes, folder: str, file_name: str) -> dict:
+def upload_image(file_bytes: bytes, folder: str, file_name: str) -> dict:
     ik = get_imagekit()
     result = ik.files.upload(
         file=file_bytes,
@@ -27,6 +25,6 @@ async def upload_image(file_bytes: bytes, folder: str, file_name: str) -> dict:
     return {"file_id": result.file_id, "url": result.url}
 
 
-async def delete_image(file_id: str) -> None:
+def delete_image(file_id: str) -> None:
     ik = get_imagekit()
     ik.files.delete(file_id=file_id)
