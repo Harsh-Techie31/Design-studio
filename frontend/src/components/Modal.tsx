@@ -5,9 +5,16 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: ReactNode;
+  maxWidthClass?: string;
 }
 
-export function Modal({ open, onClose, title, children }: ModalProps) {
+export function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  maxWidthClass = "max-w-md",
+}: ModalProps) {
   if (!open) return null;
   return (
     <div
@@ -15,7 +22,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-xl border border-line bg-surface p-6 shadow-2xl"
+        className={`w-full ${maxWidthClass} rounded-xl border border-line bg-surface p-6 shadow-2xl`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-5 flex items-center justify-between">

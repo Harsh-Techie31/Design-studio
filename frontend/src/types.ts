@@ -34,4 +34,6 @@ export interface Season {
   palette: string[];
   keywords: string[];
   garmentIds: string[];
+  /** Each entry is either a real uploaded data URL, or a "mood-placeholder:<index>" marker for demo seasons. */
+  moodboardImages: string[];
 }

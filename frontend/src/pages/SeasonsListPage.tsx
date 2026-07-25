@@ -72,9 +72,6 @@ export function SeasonsListPage() {
               className="w-full rounded-lg border border-line bg-ink-soft px-3.5 py-2.5 text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none"
             />
           </div>
-          <div className="rounded-lg border border-dashed border-line px-3.5 py-4 text-center text-xs text-muted">
-            Moodboard import (12 images) will go here — placeholder tiles for now.
-          </div>
           <button
             type="submit"
             className="mt-1 rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-brass-soft"

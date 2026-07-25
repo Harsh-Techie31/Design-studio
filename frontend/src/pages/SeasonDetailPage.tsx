@@ -1,19 +1,21 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { NavBar } from "../components/NavBar";
-import { PlaceholderTile } from "../components/PlaceholderTile";
+import { MoodboardTile } from "../components/MoodboardTile";
 import { PaletteSwatches } from "../components/PaletteSwatches";
 import { KeywordChips } from "../components/KeywordChips";
 import { GarmentCard } from "../components/GarmentCard";
 import { Modal } from "../components/Modal";
+import { StartMoodboardModal } from "../components/StartMoodboardModal";
 import { useStudio } from "../state/StudioContext";
 
 export function SeasonDetailPage() {
   const { seasonId } = useParams<{ seasonId: string }>();
-  const { getSeason, getGarmentsForSeason, createGarment } = useStudio();
+  const { getSeason, getGarmentsForSeason, createGarment, setMoodboardImages } = useStudio();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
+  const [moodboardOpen, setMoodboardOpen] = useState(false);
 
   const season = getSeason(seasonId ?? "");
 
@@ -55,30 +57,51 @@ export function SeasonDetailPage() {
         <section className="mt-10">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-display text-xl text-bone-dim">Moodboard</h2>
-            <span className="text-xs uppercase tracking-wide text-muted">12 images · collection import</span>
+            {season.moodboardImages.length > 0 && (
+              <span className="text-xs uppercase tracking-wide text-muted">
+                {season.moodboardImages.length} images
+              </span>
+            )}
           </div>
 
-          <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6">
-            {Array.from({ length: 12 }).map((_, i) => (
-              <PlaceholderTile
-                key={i}
-                seed={season.seed}
-                index={i}
-                className="aspect-square rounded-md"
-              />
-            ))}
-          </div>
+          {season.moodboardImages.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-line py-20 text-center">
+              <p className="text-sm text-bone-dim">
+                No moodboard yet — import up to 12 images to set the mood for this season.
+              </p>
+              <button
+                onClick={() => setMoodboardOpen(true)}
+                className="rounded-full bg-brass px-5 py-2 text-sm font-medium text-ink transition-colors hover:bg-brass-soft"
+              >
+                Start Moodboard
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6">
+                {season.moodboardImages.map((src, i) => (
+                  <MoodboardTile
+                    key={i}
+                    src={src}
+                    seed={season.seed}
+                    index={i}
+                    className="aspect-square rounded-md"
+                  />
+                ))}
+              </div>
 
-          <div className="mt-6 flex flex-col gap-5 rounded-xl border border-line bg-surface p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="mb-2 text-xs uppercase tracking-wide text-muted">Palette</p>
-              <PaletteSwatches colors={season.palette} />
-            </div>
-            <div>
-              <p className="mb-2 text-xs uppercase tracking-wide text-muted">Mood</p>
-              <KeywordChips keywords={season.keywords} />
-            </div>
-          </div>
+              <div className="mt-6 flex flex-col gap-5 rounded-xl border border-line bg-surface p-5 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="mb-2 text-xs uppercase tracking-wide text-muted">Palette</p>
+                  <PaletteSwatches colors={season.palette} />
+                </div>
+                <div>
+                  <p className="mb-2 text-xs uppercase tracking-wide text-muted">Mood</p>
+                  <KeywordChips keywords={season.keywords} />
+                </div>
+              </div>
+            </>
+          )}
         </section>
 
         {/* Garments */}
@@ -134,6 +157,12 @@ export function SeasonDetailPage() {
           </button>
         </form>
       </Modal>
+
+      <StartMoodboardModal
+        open={moodboardOpen}
+        onClose={() => setMoodboardOpen(false)}
+        onSave={(images) => setMoodboardImages(season.id, images)}
+      />
     </div>
   );
 }
