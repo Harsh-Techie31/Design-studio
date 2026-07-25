@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+:root {
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: #0b0c0e;
+  color: #f3f4f6;
+  min-height: 100vh;
+}
+
+/* Custom chess-board grid backdrop for transparent canvas viewports */
+.transparent-grid {
+  background-color: #12131a;
+  background-image: 
+    linear-gradient(45deg, #1a1b24 25%, transparent 25%), 
+    linear-gradient(-45deg, #1a1b24 25%, transparent 25%), 
+    linear-gradient(45deg, transparent 75%, #1a1b24 75%), 
+    linear-gradient(-45deg, transparent 75%, #1a1b24 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+/* Premium gradient loaders and shimmers */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #12131a 25%, #1f2130 50%, #12131a 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* Pulse glow for button generating state */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+    opacity: 0.9;
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(16, 185, 129, 0.8);
+    opacity: 1;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+/* Spinning preview animation */
+@keyframes pattern-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-pattern-spin {
+  animation: pattern-spin 12s infinite linear;
+}
+
+/* Smooth zoom transition */
+.transition-zoom {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}

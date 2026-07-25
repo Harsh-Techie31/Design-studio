@@ -3,9 +3,9 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
-echo "========================================="
-echo "🎨 Starting Design Studio: First Render 🎨"
-echo "========================================="
+echo "========================================================="
+echo "🎨 Starting Design Studio: Fabric Motif Repeater (Tool 2) 🎨"
+echo "========================================================="
 
 # Get absolute path of script folder
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -23,12 +23,12 @@ if [ ! -d "venv" ]; then
     python3 -m venv venv
 fi
 
-echo "🔌 Installing dependencies..."
+echo "🔌 Installing backend dependencies (including Pillow)..."
 ./venv/bin/python3 -m pip install -r requirements.txt
 
 # Run backend in the background
-echo "⚡ Starting FastAPI Backend on http://localhost:8000..."
-./venv/bin/python3 -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload &
+echo "⚡ Starting FastAPI Backend on http://localhost:8001..."
+./venv/bin/python3 -m uvicorn main:app --host 127.0.0.1 --port 8001 --reload &
 BACKEND_PID=$!
 
 # Trap signals to ensure backend process gets killed when exiting script
@@ -47,6 +47,3 @@ npm install
 
 echo "🚀 Starting Frontend dev server..."
 npm run dev
-
-# Wait for frontend process
-wait

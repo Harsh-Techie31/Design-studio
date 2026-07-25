@@ -4,6 +4,7 @@ import {
   Upload,
   Image as ImageIcon,
   Plus,
+  Minus,
   Trash2,
   Cpu,
   RefreshCw,
@@ -15,7 +16,8 @@ import {
   Layers,
   Info,
   Scissors,
-  Maximize2
+  Maximize2,
+  Heart
 } from "lucide-react";
 
 interface FabricItem {
@@ -23,6 +25,8 @@ interface FabricItem {
   image: File | null;
   previewUrl: string;
   prompt: string;
+  placements: string[]; // Supports multiple chip selection
+  scale: number;
 }
 
 export default function App() {
@@ -31,9 +35,10 @@ export default function App() {
   const [sketchPreview, setSketchPreview] = useState<string>("");
   const [sketchPrompt, setSketchPrompt] = useState<string>("");
   
-  // Fabric sections
+  // Fabric sections (Initially 2 fabrics shown)
   const [fabrics, setFabrics] = useState<FabricItem[]>([
-    { id: "fab-1", image: null, previewUrl: "", prompt: "" }
+    { id: "fab-1", image: null, previewUrl: "", prompt: "", placements: ["all-over"], scale: 1.0 },
+    { id: "fab-2", image: null, previewUrl: "", prompt: "", placements: ["collar"], scale: 1.0 }
   ]);
 
   // Abort controller for stopping/canceling active generation
@@ -43,7 +48,12 @@ export default function App() {
   const [selectedModel, setSelectedModel] = useState<string>("gemini-3.1-flash-image");
   const [selectedRatio, setSelectedRatio] = useState<string>("1:1");
   const [selectedQuality, setSelectedQuality] = useState<string>("2K");
-  const [selectedGender, setSelectedGender] = useState<string>("Female");
+  const [selectedGender, setSelectedGender] = useState<string>("Male");
+  
+  // Multi-image generation option
+  const [numOutputs, setNumOutputs] = useState<number>(1);
+  const [generatedImages, setGeneratedImages] = useState<string[]>([]);
+  const [likedImages, setLikedImages] = useState<string[]>([]); // Track favorited images
 
   // Custom API key override
   const [customApiKey, setCustomApiKey] = useState<string>("");
@@ -147,14 +157,39 @@ export default function App() {
     );
   };
 
+  const toggleFabricPlacement = (id: string, placement: string) => {
+    setFabrics(prev =>
+      prev.map(item => {
+        if (item.id === id) {
+          const currentPlacements = item.placements || [];
+          const exists = currentPlacements.includes(placement);
+          const newPlacements = exists
+            ? currentPlacements.filter(p => p !== placement)
+            : [...currentPlacements, placement];
+          
+          // Ensure at least one is selected or default to empty
+          return { ...item, placements: newPlacements };
+        }
+        return item;
+      })
+    );
+  };
+
+  const handleFabricScaleChange = (id: string, scale: number) => {
+    setFabrics(prev =>
+      prev.map(item => (item.id === id ? { ...item, scale } : item))
+    );
+  };
+
   const addFabricField = () => {
+    if (fabrics.length >= 3) return;
     const newId = `fab-${Date.now()}`;
-    setFabrics(prev => [...prev, { id: newId, image: null, previewUrl: "", prompt: "" }]);
+    setFabrics(prev => [...prev, { id: newId, image: null, previewUrl: "", prompt: "", placements: ["all-over"], scale: 1.0 }]);
   };
 
   const removeFabricField = (id: string) => {
     if (fabrics.length === 1) {
-      setFabrics([{ id: "fab-1", image: null, previewUrl: "", prompt: "" }]);
+      setFabrics([{ id: "fab-1", image: null, previewUrl: "", prompt: "", placements: ["all-over"], scale: 1.0 }]);
       return;
     }
     setFabrics(prev => {
@@ -185,6 +220,7 @@ export default function App() {
     setIsGenerating(true);
     setErrorMsg("");
     setGeneratedImageUrl("");
+    setGeneratedImages([]);
     setGeneratedPrompt("");
 
     // Create abort controller for stopping the request
@@ -198,15 +234,20 @@ export default function App() {
     formData.append("ratio", selectedRatio);
     formData.append("quality", selectedQuality);
     formData.append("gender", selectedGender);
+    formData.append("num_outputs", numOutputs.toString());
 
-    // Build lists of active fabric files & their corresponding prompts
+    // Build lists of active fabric files & their corresponding prompts/placements/scales
     const activeFabrics = fabrics.filter(f => f.image !== null);
-    const fabricPromptsList: string[] = [];
+    const fabricPromptsList: { prompt: string; placements: string[]; scale: number }[] = [];
 
     activeFabrics.forEach((fab) => {
       if (fab.image) {
         formData.append("fabric_images", fab.image);
-        fabricPromptsList.push(fab.prompt);
+        fabricPromptsList.push({
+          prompt: fab.prompt,
+          placements: fab.placements || [],
+          scale: fab.scale
+        });
       }
     });
 
@@ -230,6 +271,7 @@ export default function App() {
 
       if (data.success) {
         setGeneratedImageUrl(data.image);
+        setGeneratedImages(data.images || [data.image]);
         setGeneratedPrompt(data.prompt);
       } else {
         throw new Error("Unable to parse render output from Gemini Imagen API.");
@@ -325,8 +367,8 @@ export default function App() {
       {/* Main Studio Body */}
       <main className="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         
-        {/* Left Input Sidebar Panel (Columns 1-7) */}
-        <section className="lg:col-span-7 flex flex-col gap-5 text-left">
+        {/* Left Input Sidebar Panel (Columns 1-4) - 1/3 Width */}
+        <section className="lg:col-span-4 flex flex-col gap-5 text-left">
           
           {/* Section title */}
           <div className="flex items-center justify-between border-b border-gray-800 pb-3">
@@ -430,89 +472,185 @@ export default function App() {
               <button
                 type="button"
                 onClick={addFabricField}
-                className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 bg-purple-950/30 hover:bg-purple-950/60 px-2.5 py-1 rounded-lg border border-purple-900/60 font-semibold transition-all cursor-pointer"
+                disabled={fabrics.length >= 3}
+                className={`flex items-center gap-1 text-xs px-2.5 py-1 rounded-lg border font-semibold transition-all cursor-pointer ${
+                  fabrics.length >= 3 
+                    ? "bg-gray-900 border-gray-800 text-gray-500 cursor-not-allowed opacity-55"
+                    : "text-purple-400 hover:text-purple-300 bg-purple-950/30 hover:bg-purple-950/60 border-purple-900/60"
+                }`}
               >
                 <Plus className="w-3.5 h-3.5" />
-                Add Fabric Card
+                Add Fabric Card ({fabrics.length}/3)
               </button>
             </div>
 
             <p className="text-xs text-gray-400 leading-normal bg-gray-950/40 p-3 rounded-lg border border-gray-800/40 flex items-start gap-2">
               <Info className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
-              Upload swatches of the fabric textures. Describe exactly where to apply each texture in the input prompt fields below (e.g. <em>"Sleeves made of fabric 1"</em>).
+              Upload swatches of the fabric textures. Specify where you want to apply them and set their texture scale using the seekbars.
             </p>
 
             {/* Dynamic Fabric Cards List */}
-            <div className="flex flex-col gap-3.5 max-h-[340px] overflow-y-auto pr-1">
-              {fabrics.map((fabric, idx) => (
-                <div
-                  key={fabric.id}
-                  className="grid grid-cols-1 sm:grid-cols-12 gap-3 p-3 bg-gray-950/60 border border-gray-800/70 rounded-xl hover:border-gray-800 transition-all items-center relative group"
-                >
-                  {/* Fabric Swatch Upload (Cols 1-4) */}
-                  <div className="sm:col-span-4 relative h-20 rounded-lg overflow-hidden border border-gray-800 group-hover:border-gray-700 bg-gray-950/80 flex items-center justify-center">
-                    {fabric.previewUrl ? (
-                      <div className="relative w-full h-full flex items-center justify-center">
-                        <img
-                          src={fabric.previewUrl}
-                          alt={`Fabric ${idx + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <div className="flex flex-col gap-4 max-h-[460px] overflow-y-auto pr-1">
+              {fabrics.map((fabric, idx) => {
+                // Determine placement options based on fabric index
+                let placementOptions: { value: string; label: string }[] = [];
+                if (idx === 0) {
+                  placementOptions = [
+                    { value: "all-over", label: "All Over (Full Garment)" },
+                    { value: "chest", label: "Chest Panel" },
+                    { value: "back", label: "Back Panel" },
+                    { value: "hem", label: "Hem Line" },
+                    { value: "sleeve", label: "Sleeves" }
+                  ];
+                } else if (idx === 1) {
+                  placementOptions = [
+                    { value: "collar", label: "Collar Accent" },
+                    { value: "cuff", label: "Cuffs" },
+                    { value: "pocket", label: "Pockets" },
+                    { value: "yoke", label: "Yoke Panel" }
+                  ];
+                } else {
+                  // Optional 3rd fabric gets combined options
+                  placementOptions = [
+                    { value: "all-over", label: "All Over" },
+                    { value: "chest", label: "Chest Panel" },
+                    { value: "back", label: "Back Panel" },
+                    { value: "hem", label: "Hem Line" },
+                    { value: "sleeve", label: "Sleeves" },
+                    { value: "collar", label: "Collar Accent" },
+                    { value: "cuff", label: "Cuffs" },
+                    { value: "pocket", label: "Pockets" },
+                    { value: "yoke", label: "Yoke Panel" }
+                  ];
+                }
+
+                return (
+                  <div
+                    key={fabric.id}
+                    className="flex flex-col gap-3.5 p-3.5 bg-gray-950/60 border border-gray-800/70 rounded-xl hover:border-gray-800 transition-all relative group"
+                  >
+                    {/* Top Row: Image Swatch & Prompt Text */}
+                    <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                      {/* Fabric Swatch Upload (Cols 1-4) */}
+                      <div className="sm:col-span-4 relative h-20 rounded-lg overflow-hidden border border-gray-800 group-hover:border-gray-700 bg-gray-950/80 flex items-center justify-center">
+                        {fabric.previewUrl ? (
+                          <div className="relative w-full h-full flex items-center justify-center">
+                            <img
+                              src={fabric.previewUrl}
+                              alt={`Fabric ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <label
+                                htmlFor={`fabric-upload-${fabric.id}`}
+                                className="p-1.5 bg-purple-600 hover:bg-purple-500 rounded text-white cursor-pointer text-[10px] font-bold"
+                              >
+                                Replace
+                              </label>
+                            </div>
+                          </div>
+                        ) : (
                           <label
                             htmlFor={`fabric-upload-${fabric.id}`}
-                            className="p-1.5 bg-purple-600 hover:bg-purple-500 rounded text-white cursor-pointer text-[10px] font-bold"
+                            className="flex flex-col items-center justify-center w-full h-full cursor-pointer hover:bg-purple-950/10 transition-colors p-2 text-center"
                           >
-                            Replace
+                            <Upload className="w-5 h-5 text-gray-500 mb-1" />
+                            <span className="text-[10px] text-gray-400 font-semibold">Upload Fabric {idx + 1}</span>
                           </label>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFabricImageChange(fabric.id, e.target.files?.[0] || null)}
+                          id={`fabric-upload-${fabric.id}`}
+                          className="hidden"
+                        />
+                      </div>
+
+                      {/* Fabric Prompt Details (Cols 5-11) */}
+                      <div className="sm:col-span-7 flex flex-col gap-1.5">
+                        <label className="text-[10px] text-gray-400 font-semibold flex items-center gap-1">
+                          <Scissors className="w-3 h-3 text-purple-400" />
+                          Fabric #{idx + 1} Prompt / Material Style
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. leather mesh / luxury silk jacquard / fine corduroy"
+                          value={fabric.prompt}
+                          onChange={(e) => handleFabricPromptChange(fabric.id, e.target.value)}
+                          className="w-full bg-gray-950/80 border border-gray-800 focus:border-purple-500 text-xs text-white rounded-lg px-2.5 py-1.5 outline-none transition-all placeholder-gray-600 font-normal"
+                        />
+                      </div>
+
+                      {/* Remove Button (Col 12) */}
+                      <div className="sm:col-span-1 flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={() => removeFabricField(fabric.id)}
+                          className="p-2 text-gray-500 hover:text-rose-400 hover:bg-rose-950/20 rounded-lg transition-all cursor-pointer"
+                          title="Remove Fabric"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Bottom Row: Placement Target & Scale Slider Seekbar */}
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 pt-3.5 border-t border-gray-900/50">
+                      {/* Placement Selector as Chips */}
+                      <div className="md:col-span-8 flex flex-col gap-2">
+                        <label className="text-[10px] text-gray-400 font-semibold text-left">
+                          Apply Fabric Placement To: (Select Multiple)
+                        </label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {placementOptions.map((opt) => {
+                            const isSelected = (fabric.placements || []).includes(opt.value);
+                            return (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => toggleFabricPlacement(fabric.id, opt.value)}
+                                className={`px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all border cursor-pointer ${
+                                  isSelected
+                                    ? "bg-purple-600 border-purple-500 text-white shadow-md shadow-purple-500/10"
+                                    : "bg-gray-950/80 border-gray-800 text-gray-400 hover:text-white hover:border-gray-700"
+                                }`}
+                              >
+                                {opt.label}
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
-                    ) : (
-                      <label
-                        htmlFor={`fabric-upload-${fabric.id}`}
-                        className="flex flex-col items-center justify-center w-full h-full cursor-pointer hover:bg-purple-950/10 transition-colors p-2 text-center"
-                      >
-                        <Upload className="w-5 h-5 text-gray-500 mb-1" />
-                        <span className="text-[10px] text-gray-400 font-semibold">Upload Fabric {idx + 1}</span>
-                      </label>
-                    )}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFabricImageChange(fabric.id, e.target.files?.[0] || null)}
-                      id={`fabric-upload-${fabric.id}`}
-                      className="hidden"
-                    />
-                  </div>
 
-                  {/* Fabric Prompt Details (Cols 5-11) */}
-                  <div className="sm:col-span-7 flex flex-col gap-1.5">
-                    <label className="text-[10px] text-gray-400 font-semibold flex items-center gap-1">
-                      <Scissors className="w-3 h-3 text-purple-400" />
-                      Fabric #{idx + 1} Prompt Specification
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. main dress / pocket patches / inner jacket lining"
-                      value={fabric.prompt}
-                      onChange={(e) => handleFabricPromptChange(fabric.id, e.target.value)}
-                      className="w-full bg-gray-950/80 border border-gray-800 focus:border-purple-500 text-xs text-white rounded-lg px-2.5 py-1.5 outline-none transition-all placeholder-gray-600 font-normal"
-                    />
+                      {/* Scale Slider (Seekbar) */}
+                      <div className="md:col-span-4 flex flex-col gap-1.5 justify-center">
+                        <div className="flex justify-between items-center">
+                          <label className="text-[10px] text-gray-400 font-semibold">
+                            Texture Pattern Scale:
+                          </label>
+                          <span className="text-[10px] text-purple-400 font-mono font-bold">
+                            {fabric.scale.toFixed(1)}x
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] text-gray-500 font-mono">0.1x</span>
+                          <input
+                            type="range"
+                            min="0.1"
+                            max="3.0"
+                            step="0.1"
+                            value={fabric.scale}
+                            onChange={(e) => handleFabricScaleChange(fabric.id, parseFloat(e.target.value))}
+                            className="flex-grow accent-purple-500 h-1 bg-gray-900 rounded-lg appearance-none cursor-pointer"
+                          />
+                          <span className="text-[9px] text-gray-500 font-mono">3.0x</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-
-                  {/* Remove Button (Col 12) */}
-                  <div className="sm:col-span-1 flex items-center justify-center">
-                    <button
-                      type="button"
-                      onClick={() => removeFabricField(fabric.id)}
-                      className="p-2 text-gray-500 hover:text-rose-400 hover:bg-rose-950/20 rounded-lg transition-all cursor-pointer"
-                      title="Remove Fabric"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -551,7 +689,7 @@ export default function App() {
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs text-gray-400 font-semibold flex items-center justify-between">
                   <span>Sizing & Cut</span>
-                  <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-wider bg-emerald-950/50 px-1 py-0.2 rounded border border-emerald-900/50">Working Feature</span>
+                  <span className="text-[9px] text-emerald-400 font-bold uppercase tracking-wider bg-emerald-950/50 px-1 py-0.2 rounded border border-emerald-900/50">Men Only</span>
                 </label>
                 <div className="relative">
                   <select
@@ -559,12 +697,12 @@ export default function App() {
                     onChange={(e) => setSelectedGender(e.target.value)}
                     className="w-full bg-gray-950 border border-gray-800 text-xs text-white rounded-xl py-2 px-3 outline-none focus:border-purple-500 cursor-pointer appearance-none transition-all"
                   >
-                    <option value="Female">Female (Tailored Cuts)</option>
                     <option value="Male">Male (Structured Cuts)</option>
+                    <option value="Female" disabled>Female (Disabled: Men Only)</option>
                   </select>
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 text-[10px]">▼</div>
                 </div>
-                <span className="text-[10px] text-gray-500">Specify design target cut style.</span>
+                <span className="text-[10px] text-gray-500">Specify design target cut style. Built exclusively for menswear.</span>
               </div>
 
               {/* ASPECT RATIO (WORKING FEATURE) */}
@@ -612,6 +750,42 @@ export default function App() {
               </div>
 
             </div>
+
+            {/* NUMBER OF IMAGES TO GENERATE (BATCH OPTION WITH PLUS / MINUS CONTROLS) */}
+            <div className="border-t border-gray-900 pt-4 mt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-purple-950/50 rounded-lg border border-purple-900/40 text-purple-400">
+                  <ImageIcon className="w-4 h-4" />
+                </div>
+                <div className="text-left">
+                  <span className="text-xs font-semibold text-gray-200 block">Batch Generation Quantity</span>
+                  <span className="text-[10px] text-gray-500">How many image design variants you want to generate (Min: 1, Max: 4).</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3 bg-gray-950 px-3 py-1.5 rounded-xl border border-gray-800">
+                <button
+                  type="button"
+                  disabled={numOutputs <= 1}
+                  onClick={() => setNumOutputs(prev => Math.max(1, prev - 1))}
+                  className="p-1 rounded-lg bg-gray-900 hover:bg-gray-850 hover:text-white text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all border border-gray-800 cursor-pointer"
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+                <span className="text-sm font-bold text-white min-w-[24px] text-center font-mono">
+                  {numOutputs}
+                </span>
+                <button
+                  type="button"
+                  disabled={numOutputs >= 4}
+                  onClick={() => setNumOutputs(prev => Math.min(4, prev + 1))}
+                  className="p-1 rounded-lg bg-gray-900 hover:bg-gray-850 hover:text-white text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-all border border-gray-800 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
           </div>
 
           {/* GENERATE ACTION BUTTON */}
@@ -653,198 +827,200 @@ export default function App() {
 
         </section>
 
-        {/* Right Output Side (Columns 8-12) */}
-        <section className="lg:col-span-5 flex flex-col bg-[#121420]/30 border border-gray-800/80 rounded-3xl overflow-hidden shadow-2xl items-stretch h-full min-h-[500px]">
+        {/* Right Output Side (Columns 5-12) - 2/3 Width */}
+        <section className="lg:col-span-8 flex flex-col gap-6 h-full">
           
-          {/* Output Header */}
-          <div className="border-b border-gray-800 bg-[#0f111a]/80 px-5 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-purple-400" />
-              <h3 className="text-sm font-bold text-white text-left">High-Fidelity Virtual Canvas</h3>
-            </div>
-            {generatedImageUrl && (
-              <span className="flex items-center gap-1.5 text-xs text-emerald-400 font-semibold bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-900/60">
-                <CheckCircle className="w-3 h-3" />
-                Rendered
-              </span>
-            )}
-          </div>
-
-          {/* Interactive Container Area */}
-          <div className="flex-grow flex flex-col items-center justify-center p-6 min-h-[380px] relative bg-gray-950/40">
-            
-            {/* INITIAL BLANK PLACEHOLDER STATE */}
-            {!isGenerating && !generatedImageUrl && (
-              <div className="text-center max-w-sm flex flex-col items-center gap-4">
-                <div className="w-16 h-16 bg-gray-900/80 border border-gray-800 rounded-2xl flex items-center justify-center text-gray-500 shadow-md">
-                  <ImageIcon className="w-8 h-8" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-semibold text-gray-300">Ready for first render</h4>
-                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                    Upload a sketch and fabrics on the parameters panel, select your model, and click <strong className="text-gray-400">First Render Garment Layout</strong> to launch your design shoot.
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2 justify-center">
-                  <span className="text-[9px] bg-gray-900 text-gray-400 border border-gray-800/80 px-2 py-0.5 rounded font-medium">Gemini 1.5 Synthesis</span>
-                  <span className="text-[9px] bg-gray-900 text-gray-400 border border-gray-800/80 px-2 py-0.5 rounded font-medium">Google Imagen 3 Studio</span>
-                </div>
+          {/* Main Visual Canvas Container (Contains only header and images / loaders / placeholders) */}
+          <div className="flex flex-col bg-[#121420]/30 border border-gray-800/80 rounded-3xl overflow-hidden shadow-2xl items-stretch">
+            {/* Output Header */}
+            <div className="border-b border-gray-800 bg-[#0f111a]/80 px-5 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Layers className="w-4 h-4 text-purple-400" />
+                <h3 className="text-sm font-bold text-white text-left">High-Fidelity Virtual Canvas</h3>
               </div>
-            )}
+              {generatedImageUrl && (
+                <span className="flex items-center gap-1.5 text-xs text-emerald-400 font-semibold bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-900/60">
+                  <CheckCircle className="w-3 h-3" />
+                  Rendered
+                </span>
+              )}
+            </div>
 
-            {/* GENERATING ANIMATION STATE (SPECIFIED FEATURE) */}
-            {isGenerating && (
-              <div className="absolute inset-0 z-40 bg-[#0d0e12]/95 p-6 flex flex-col items-center justify-center text-center">
-                
-                {/* Advanced Multi-step Animation Loop */}
-                <div className="relative mb-8">
-                  {/* Outer spinning threads */}
-                  <div className="w-32 h-32 rounded-full border border-dashed border-indigo-500/20 animate-thread-spin flex items-center justify-center">
-                    <div className="w-24 h-24 rounded-full border border-purple-500/40 border-t-transparent animate-spin flex items-center justify-center">
-                      <div className="w-16 h-16 rounded-full bg-gray-900/80 border border-purple-500/60 shadow-lg shadow-purple-500/10 flex items-center justify-center">
-                        <Sparkles className="w-6 h-6 text-purple-400 animate-pulse" />
+            {/* Interactive Container Area */}
+            <div className="flex-grow flex flex-col items-center justify-center p-6 min-h-[380px] relative bg-gray-950/40">
+              
+              {/* INITIAL BLANK PLACEHOLDER STATE */}
+              {!isGenerating && !generatedImageUrl && (
+                <div className="text-center max-w-sm flex flex-col items-center gap-4 py-8">
+                  <div className="w-16 h-16 bg-gray-900/80 border border-gray-800 rounded-2xl flex items-center justify-center text-gray-500 shadow-md">
+                    <ImageIcon className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-300">Ready for first render</h4>
+                    <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                      Upload a sketch and fabrics on the parameters panel, select your model, and click <strong className="text-gray-400">First Render Garment Layout</strong> to launch your design shoot.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    <span className="text-[9px] bg-gray-900 text-gray-400 border border-gray-800/80 px-2 py-0.5 rounded font-medium">Gemini 1.5 Synthesis</span>
+                    <span className="text-[9px] bg-gray-900 text-gray-400 border border-gray-800/80 px-2 py-0.5 rounded font-medium">Google Imagen 3 Studio</span>
+                  </div>
+                </div>
+              )}
+
+              {/* GENERATING ANIMATION STATE (SPECIFIED FEATURE) */}
+              {isGenerating && (
+                <div className="absolute inset-0 z-40 bg-[#0d0e12]/95 p-6 flex flex-col items-center justify-center text-center">
+                  
+                  {/* Advanced Multi-step Animation Loop */}
+                  <div className="relative mb-8">
+                    {/* Outer spinning threads */}
+                    <div className="w-32 h-32 rounded-full border border-dashed border-indigo-500/20 animate-thread-spin flex items-center justify-center">
+                      <div className="w-24 h-24 rounded-full border border-purple-500/40 border-t-transparent animate-spin flex items-center justify-center">
+                        <div className="w-16 h-16 rounded-full bg-gray-900/80 border border-purple-500/60 shadow-lg shadow-purple-500/10 flex items-center justify-center">
+                          <Sparkles className="w-6 h-6 text-purple-400 animate-pulse" />
+                        </div>
                       </div>
+                    </div>
+
+                    {/* Absolute elements floating */}
+                    <div className="absolute top-0 right-0 p-1.5 bg-gray-900 border border-gray-800 text-[10px] rounded font-bold text-pink-400 animate-spark">
+                      🎨 Fusing Textures
+                    </div>
+                    <div className="absolute bottom-1.5 -left-4 p-1.5 bg-gray-900 border border-gray-800 text-[10px] rounded font-bold text-cyan-400 animate-bounce">
+                      ⚡ Studio Lights
                     </div>
                   </div>
 
-                  {/* Absolute elements floating */}
-                  <div className="absolute top-0 right-0 p-1.5 bg-gray-900 border border-gray-800 text-[10px] rounded font-bold text-pink-400 animate-spark">
-                    🎨 Fusing Textures
-                  </div>
-                  <div className="absolute bottom-1.5 -left-4 p-1.5 bg-gray-900 border border-gray-800 text-[10px] rounded font-bold text-cyan-400 animate-bounce">
-                    ⚡ Studio Lights
-                  </div>
-                </div>
+                  {/* Status Messages */}
+                  <div className="max-w-md w-full flex flex-col gap-3.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-semibold text-purple-400 tracking-wider uppercase">Stitching Progress</span>
+                      <span className="font-mono text-gray-300 font-bold">{generationProgress}%</span>
+                    </div>
 
-                {/* Status Messages */}
-                <div className="max-w-md w-full flex flex-col gap-3.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-semibold text-purple-400 tracking-wider uppercase">Stitching Progress</span>
-                    <span className="font-mono text-gray-300 font-bold">{generationProgress}%</span>
-                  </div>
+                    {/* Custom progress loading bar */}
+                    <div className="w-full h-2 bg-gray-900 rounded-full border border-gray-800/80 overflow-hidden p-0.5">
+                      <div
+                        className="h-full bg-gradient-to-r from-purple-500 via-indigo-500 to-indigo-600 rounded-full transition-all duration-700 ease-out"
+                        style={{ width: `${generationProgress}%` }}
+                      />
+                    </div>
 
-                  {/* Custom progress loading bar */}
-                  <div className="w-full h-2 bg-gray-900 rounded-full border border-gray-800/80 overflow-hidden p-0.5">
-                    <div
-                      className="h-full bg-gradient-to-r from-purple-500 via-indigo-500 to-indigo-600 rounded-full transition-all duration-700 ease-out"
-                      style={{ width: `${generationProgress}%` }}
-                    />
-                  </div>
+                    {/* Stage descriptive update */}
+                    <div className="h-10 flex items-center justify-center">
+                      <p className="text-xs text-gray-300 font-semibold flex items-center gap-2 animate-pulse">
+                        <Cpu className="w-4 h-4 text-purple-400 animate-spin" />
+                        {currentStageText}
+                      </p>
+                    </div>
 
-                  {/* Stage descriptive update */}
-                  <div className="h-10 flex items-center justify-center">
-                    <p className="text-xs text-gray-300 font-semibold flex items-center gap-2 animate-pulse">
-                      <Cpu className="w-4 h-4 text-purple-400 animate-spin" />
-                      {currentStageText}
+                    <p className="text-[10px] text-gray-500 max-w-xs mx-auto leading-relaxed mt-1">
+                      Please hold tight. Gemini is compiling materials, generating lighting angles, and stitching textures together.
                     </p>
-                  </div>
 
-                  <p className="text-[10px] text-gray-500 max-w-xs mx-auto leading-relaxed mt-1">
-                    Please hold tight. Gemini is compiling materials, generating lighting angles, and stitching textures together.
-                  </p>
-
-                  {/* STOP GENERATION BUTTON */}
-                  <button
-                    type="button"
-                    onClick={handleStopGeneration}
-                    className="mt-3 py-2 px-4 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-900/40 text-rose-300 text-xs font-semibold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 mx-auto"
-                  >
-                    <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping inline-block"></span>
-                    Stop Generation
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* GENERATED FINAL IMAGE RENDER (SPECIFIED FEATURE) */}
-            {generatedImageUrl && (
-              <div className="w-full h-full flex flex-col gap-4">
-                
-                {/* Image display frame */}
-                <div className="relative flex-grow rounded-2xl overflow-hidden border border-gray-800 shadow-inner bg-gray-950 flex items-center justify-center group h-[300px]">
-                  <img
-                    src={generatedImageUrl}
-                    alt="AI Generated Garment Render"
-                    className="max-h-full max-w-full object-contain p-2 hover:scale-105 transition-transform duration-500 cursor-pointer"
-                    onClick={() => {
-                      setShowFullscreen(true);
-                      setZoomLevel(1);
-                    }}
-                  />
-                  
-                  {/* Floating Action Bars */}
-                  <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    {/* STOP GENERATION BUTTON */}
                     <button
-                      onClick={() => {
-                        setShowFullscreen(true);
-                        setZoomLevel(1);
-                      }}
-                      className="p-2 bg-gray-900/95 hover:bg-purple-600 text-white border border-gray-800 hover:border-purple-500 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all shadow-lg cursor-pointer"
-                      title="View Fullscreen"
+                      type="button"
+                      onClick={handleStopGeneration}
+                      className="mt-3 py-2 px-4 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-900/40 text-rose-300 text-xs font-semibold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 mx-auto"
                     >
-                      <Maximize2 className="w-4 h-4" />
-                      Fullscreen
+                      <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping inline-block"></span>
+                      Stop Generation
                     </button>
-                    <a
-                      href={generatedImageUrl}
-                      download={`design-studio-${selectedModel}-${Date.now()}.jpg`}
-                      className="p-2 bg-gray-900/90 hover:bg-purple-600 text-white border border-gray-800 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-lg"
-                      title="Download Rendered Image"
-                    >
-                      <Download className="w-4 h-4" />
-                      Download
-                    </a>
-                  </div>
-
-                  <div className="absolute bottom-3 left-3 right-3 bg-black/75 border border-gray-800/80 px-3 py-2 rounded-xl text-[10px] text-gray-400 flex items-center justify-between">
-                    <span>Styled model: <strong className="text-gray-200">{selectedModel}</strong></span>
-                    <span>Format: <strong className="text-gray-200">{selectedRatio} Ratio</strong></span>
                   </div>
                 </div>
+              )}
 
-                {/* Gemini synthesized prompt reveal */}
-                {generatedPrompt && (
-                  <div className="bg-[#121420]/80 border border-gray-800/80 rounded-xl p-3.5 flex flex-col gap-2 text-left">
-                    <span className="text-[10px] font-bold text-purple-400 uppercase tracking-wider flex items-center gap-1.5">
-                      <Cpu className="w-3.5 h-3.5" />
-                      Gemini Synthesized Prompt Formulation
-                    </span>
-                    <p className="text-[11px] text-gray-300 leading-relaxed max-h-[110px] overflow-y-auto italic font-normal bg-gray-950/60 p-2.5 rounded-lg border border-gray-800">
-                      "{generatedPrompt}"
-                    </p>
+              {/* GENERATED FINAL IMAGE RENDER (SPECIFIED FEATURE) */}
+              {generatedImageUrl && (
+                <div className="w-full h-full">
+                  {/* Image display Grid with larger sizes */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
+                    {generatedImages.map((imgUrl, index) => {
+                      const isLiked = likedImages.includes(imgUrl);
+                      return (
+                        <div
+                          key={index}
+                          className="relative rounded-2xl overflow-hidden border border-gray-800 shadow-xl bg-gray-950 flex flex-col items-center justify-center group aspect-[4/5] md:aspect-[3/4] transition-all duration-300 hover:border-purple-500/50"
+                        >
+                          {/* Main Image */}
+                          <img
+                            src={imgUrl}
+                            alt={`AI Generated Garment Render ${index + 1}`}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-pointer"
+                            onClick={() => {
+                              setGeneratedImageUrl(imgUrl);
+                              setShowFullscreen(true);
+                              setZoomLevel(1);
+                            }}
+                          />
+
+                          {/* Top Indicator Badge */}
+                          <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-md text-[10px] text-gray-300 px-2.5 py-1 rounded-full border border-gray-800/80 font-bold">
+                            Design #{index + 1}
+                          </div>
+
+                          {/* Floating Action Bar with Heart, Preview (Zoom), and Download Icons */}
+                          <div className="absolute top-3 right-3 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-[-4px] group-hover:translate-y-0">
+                            {/* Heart / Favorite Button */}
+                            <button
+                              onClick={() => {
+                                if (isLiked) {
+                                  setLikedImages(prev => prev.filter(url => url !== imgUrl));
+                                } else {
+                                  setLikedImages(prev => [...prev, imgUrl]);
+                                }
+                              }}
+                              className={`p-2 rounded-lg text-xs font-semibold flex items-center justify-center border transition-all shadow-md cursor-pointer ${
+                                isLiked 
+                                  ? "bg-rose-600 hover:bg-rose-500 text-white border-rose-500" 
+                                  : "bg-gray-900/95 hover:bg-rose-600/20 text-gray-300 hover:text-rose-400 border-gray-800 hover:border-rose-900/40"
+                              }`}
+                              title={isLiked ? "Unlike Design" : "Like Design"}
+                            >
+                              <Heart className={`w-4 h-4 ${isLiked ? "fill-white" : ""}`} />
+                            </button>
+
+                            {/* Preview / Zoom Button */}
+                            <button
+                              onClick={() => {
+                                setGeneratedImageUrl(imgUrl);
+                                setShowFullscreen(true);
+                                setZoomLevel(1);
+                              }}
+                              className="p-2 bg-gray-900/95 hover:bg-purple-600 text-white border border-gray-800 hover:border-purple-500 rounded-lg text-xs font-semibold flex items-center justify-center transition-all shadow-md cursor-pointer"
+                              title="Preview Fullscreen"
+                            >
+                              <Maximize2 className="w-4 h-4" />
+                            </button>
+
+                            {/* Download Button */}
+                            <a
+                              href={imgUrl}
+                              download={`design-studio-${index + 1}-${Date.now()}.jpg`}
+                              className="p-2 bg-gray-900/95 hover:bg-indigo-600 text-white border border-gray-800 hover:border-indigo-500 rounded-lg text-xs font-semibold flex items-center justify-center transition-all shadow-md"
+                              title="Download Render"
+                            >
+                              <Download className="w-4 h-4" />
+                            </a>
+                          </div>
+
+                          {/* Info details overlay on hover */}
+                          <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black via-black/80 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-left flex flex-col gap-1.5">
+                            <div className="flex justify-between items-center">
+                              <span className="text-xs font-bold text-gray-200">{selectedModel}</span>
+                              <span className="text-[10px] text-purple-400 font-bold uppercase">{selectedRatio} Ratio</span>
+                            </div>
+                            <span className="text-[10px] text-gray-400 line-clamp-2">Built exclusively for Men's styled outerwear and tailoring fits.</span>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                )}
-
-                {/* Action footer */}
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => {
-                      setGeneratedImageUrl("");
-                      setGeneratedPrompt("");
-                    }}
-                    className="py-2.5 px-4 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-xl text-xs font-semibold text-gray-300 transition-colors cursor-pointer"
-                  >
-                    Clear Canvas
-                  </button>
-                  <button
-                    onClick={triggerFirstRender}
-                    className="py-2.5 px-4 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                  >
-                    <RefreshCw className="w-3.5 h-3.5" />
-                    Re-render Options
-                  </button>
                 </div>
-              </div>
-            )}
+              )}
 
-          </div>
-
-          {/* Quick instructions bottom banner */}
-          <div className="bg-[#0f111a]/80 border-t border-gray-800 p-4.5 text-xs text-gray-400 flex items-start gap-2.5 text-left">
-            <Info className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5 animate-spark" />
-            <div className="leading-relaxed">
-              <span className="font-semibold text-gray-300 block mb-0.5">Fashion Design Fusing Workflow</span>
-              First Render analyzes details of your sketched outerwear, dresses, or coordinates and stitches uploaded custom textures using a combined prompt flow designed automatically for the Imagen 3 generator.
             </div>
           </div>
 
