@@ -2,14 +2,13 @@ from enum import Enum
 
 
 class NodeKey(str, Enum):
-    RESEARCH = "research"
     SKETCH = "sketch"
     FABRIC = "fabric"
-    COLOR_TRIM = "colorTrim"
+    RENDER = "render"
+    TECH_PACK = "techPack"
     PATTERN = "pattern"
-    MOCKUP = "mockup"
-    FIT_CHECK = "fitCheck"
-    MODEL_SHOOT = "modelShoot"
+    VISUALIZATION = "visualization"
+    PHOTOSHOOT = "photoshoot"
 
 
 class RunStatus(str, Enum):

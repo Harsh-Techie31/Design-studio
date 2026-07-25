@@ -44,21 +44,21 @@ One document per garment, inside a season.
 |---|---|---|
 | `season_id` | indexed str | |
 | `name` | str | |
-| `node_summary` | `dict[NodeKey, NodeSummary]` | **denormalized read cache** — `{run_count, liked_count, has_processing, has_failed, last_run_at}` per node, updated whenever a `node_runs` write happens. Exists purely so the garment list/detail views (8 node-card statuses, "x/8 done" badges) don't need an aggregation query against `node_runs` on every page load. Source of truth is still `node_runs`; this is a cache, never edited directly. |
+| `node_summary` | `dict[NodeKey, NodeSummary]` | **denormalized read cache** — `{run_count, liked_count, has_processing, has_failed, last_run_at}` per node, updated whenever a `node_runs` write happens. Exists purely so the garment list/detail views (7 node-card statuses, "x/7 done" badges) don't need an aggregation query against `node_runs` on every page load. Source of truth is still `node_runs`; this is a cache, never edited directly. |
 | `created_at` / `updated_at` | datetime | |
 
 ## `node_runs` — the versioning core
 
 This is the collection that matters most, and the pattern to reuse when we model the actual
-8 tools: **every time any node/tool executes, it creates a new `NodeRun` document.** Nothing is
+7 tools: **every time any node/tool executes, it creates a new `NodeRun` document.** Nothing is
 overwritten. This directly implements what you described: run tool 4 six times, `liked` marks
-the 3 you want to keep, and tool 8 can later pull in a *specific* liked (or manually-selected
+the 3 you want to keep, and tool 7 can later pull in a *specific* liked (or manually-selected
 non-liked) run from tool 4 as one of its inputs.
 
 | Field | Type | Notes |
 |---|---|---|
 | `season_id`, `garment_id` | indexed str | `season_id` is denormalized here too (skips a join for "show all liked outputs across this season" style queries later) |
-| `node_key` | enum | `research \| sketch \| fabric \| colorTrim \| pattern \| mockup \| fitCheck \| modelShoot` |
+| `node_key` | enum | `sketch \| fabric \| render \| techPack \| pattern \| visualization \| photoshoot` |
 | `iteration` | int | 1, 2, 3… per `(garment_id, node_key)` — enforced unique via a compound index, so two concurrent runs can't collide on the same number |
 | `status` | enum | `pending → processing → complete` (or `failed`) — full lifecycle per your answer |
 | `liked` | bool | the "keep this one" flag from your example |

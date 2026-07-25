@@ -1,6 +1,6 @@
 # Design Studio — Project Analysis
 
-An AI-assisted fashion design tool where designers build **Seasons** (12-image moodboards with AI-extracted style profiles) and create **Garments** inside them, each moving through an 8-node fashion pipeline from research to final model shoot.
+An AI-assisted fashion design tool where designers build **Seasons** (12-image moodboards with AI-extracted style profiles) and create **Garments** inside them, each moving through a 7-stage fashion pipeline from sketch to photoshoot.
 
 ---
 
@@ -299,7 +299,7 @@ seasons ──1:N── garments ──1:N── node_runs
 
 | Enum | Values |
 |------|--------|
-| `NodeKey` | `research`, `sketch`, `fabric`, `colorTrim`, `pattern`, `mockup`, `fitCheck`, `modelShoot` |
+| `NodeKey` | `sketch`, `fabric`, `render`, `techPack`, `pattern`, `visualization`, `photoshoot` |
 | `RunStatus` | `pending`, `processing`, `complete`, `failed` |
 | `MoodboardStatus` | `empty`, `uploading`, `analyzing`, `ready`, `failed` |
 | `ImageSource` | `upload`, `pinterest` |
@@ -410,7 +410,7 @@ GarmentDetailPage → clicks NodeCard → shows modal (placeholder)
 | Node Pipeline | ⚠️ Stub only | Backend returns placeholder data, frontend shows "not wired" |
 | Auth System | ⚠️ Configured | JWT + bcrypt in deps, no login endpoint or middleware |
 | Pinterest Import | ⚠️ Simulated | Creates placeholder tiles, not real import |
-| Node Tools | ⚠️ Not wired | 8 tools (research, sketch, fabric, etc.) need AI backends |
+| Node Tools | ⚠️ Not wired | 7 tools (sketch, fabric, render, etc.) need AI backends |
 
 ---
 
@@ -486,20 +486,19 @@ GarmentDetailPage → clicks NodeCard → shows modal (placeholder)
 
 ---
 
-## The 8-Node Pipeline
+## The 7-Stage Pipeline
 
-Each garment moves through these nodes sequentially:
+Each garment moves through these stages sequentially:
 
 | # | NodeKey | Label | Hint | Status |
 |---|---------|-------|------|--------|
-| 1 | `research` | Research | Moodboard, refs, direction | Stub |
-| 2 | `sketch` | Sketch | Initial concept sketches | Stub |
-| 3 | `fabric` | Fabric | Material selection | Stub |
-| 4 | `colorTrim` | Color & Trim | Palette, buttons, details | Stub |
-| 5 | `pattern` | Pattern | Pattern making | Stub |
-| 6 | `mockup` | Mockup | Digital mockup render | Stub |
-| 7 | `fitCheck` | Fit Check | Fit analysis | Stub |
-| 8 | `modelShoot` | Model Shoot | Final photoshoot | Stub |
+| 1 | `sketch` | Sketch | Generate flat sketch of the garment silhouette | Stub |
+| 2 | `fabric` | Fabric/Print | Pick or generate fabric and print options | Stub |
+| 3 | `render` | Render | Combine sketch + fabric into a colored flat render | Stub |
+| 4 | `techPack` | Tech Pack | Construction spec, measurements, BOM | Stub |
+| 5 | `pattern` | Pattern | Technical flat pattern | Stub |
+| 6 | `visualization` | 3D Visualization | 3D mockup of the garment | Stub |
+| 7 | `photoshoot` | Photoshoot | Final photoshoot render on model | Stub |
 
 ---
 

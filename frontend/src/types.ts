@@ -1,12 +1,11 @@
 export type NodeKey =
-  | "research"
   | "sketch"
   | "fabric"
-  | "colorTrim"
+  | "render"
+  | "techPack"
   | "pattern"
-  | "mockup"
-  | "fitCheck"
-  | "modelShoot";
+  | "visualization"
+  | "photoshoot";
 
 export type RunStatus = "pending" | "processing" | "complete" | "failed";
 

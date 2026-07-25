@@ -125,14 +125,6 @@ async def toggle_like(run_id: str, body: NodeRunLikeToggle):
 
 
 def _stub_node_output(node_key: NodeKey, palette: list[str]) -> NodeOutput:
-    if node_key == NodeKey.RESEARCH:
-        return NodeOutput(
-            text="Trend brief: Emerging textures and deconstructed silhouettes dominate the season. "
-                 "Raw edges, translucent layers, and earthy tones create a tension between "
-                 "industrial precision and organic imperfection.",
-            extra={"tags": ["raw texture", "deconstruction", "earth tones", "translucency"]},
-        )
-
     if node_key == NodeKey.SKETCH:
         return NodeOutput(
             images=[
@@ -150,11 +142,22 @@ def _stub_node_output(node_key: NodeKey, palette: list[str]) -> NodeOutput:
             extra={"labels": ["Raw Silk", "Bonded Nylon"]},
         )
 
-    if node_key == NodeKey.COLOR_TRIM:
+    if node_key == NodeKey.RENDER:
         return NodeOutput(
+            images=[
+                "https://placehold.co/800x1000/1a1a1a/c9a24d?text=Render+Front",
+                "https://placehold.co/800x1000/1a1a1a/c9a24d?text=Render+Back",
+            ],
+        )
+
+    if node_key == NodeKey.TECH_PACK:
+        return NodeOutput(
+            text="Tech Pack: Relaxed-fit wide-leg trouser. 100% organic cotton twill. "
+                 "Front zip fly, elasticated back waistband. Two side pockets, "
+                 "two back welt pockets. Hem width 22cm. Inseam 82cm.",
             extra={
-                "palette": palette[:3] if palette else ["#c9a24d", "#1a1a1a", "#f3efe7"],
-                "trims": ["Brass zipper", "Matte snap buttons"],
+                "measurements": {"waist": "76cm", "inseam": "82cm", "hem": "22cm"},
+                "materials": ["Organic cotton twill", "YKK zipper"],
             },
         )
 
@@ -166,20 +169,12 @@ def _stub_node_output(node_key: NodeKey, palette: list[str]) -> NodeOutput:
             ],
         )
 
-    if node_key == NodeKey.MOCKUP:
+    if node_key == NodeKey.VISUALIZATION:
         return NodeOutput(
-            images=["https://placehold.co/800x1000/1a1a1a/c9a24d?text=Garment+Mockup"],
+            images=["https://placehold.co/800x1000/1a1a1a/c9a24d?text=3D+Mockup"],
         )
 
-    if node_key == NodeKey.FIT_CHECK:
-        return NodeOutput(
-            text="Fit notes: Shoulder seam sits correctly. Hem length may need "
-                 "adjustment — consider 2cm shorter for movement. Sleeve taper "
-                 "looks good. Recommend trying in muslin before final fabric.",
-            extra={"adjustments": ["Hem: shorten 2cm", "Sleeve: confirmed"]},
-        )
-
-    if node_key == NodeKey.MODEL_SHOOT:
+    if node_key == NodeKey.PHOTOSHOOT:
         return NodeOutput(
             images=[
                 "https://placehold.co/800x1200/1a1a1a/c9a24d?text=Model+Shoot+1",

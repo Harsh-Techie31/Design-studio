@@ -12,7 +12,7 @@ const FEATURES = [
   },
   {
     title: "Pipeline",
-    body: "Take every garment from research to final shoot through a guided design pipeline.",
+    body: "Take every garment from sketch to photoshoot through a 7-stage guided design pipeline.",
   },
 ];
 
@@ -48,7 +48,7 @@ export function LandingPage() {
           </h1>
           <p className="mt-6 max-w-xl text-lg text-bone-dim">
             Build a season from a moodboard, then design each garment inside it —
-            research, sketch, fabric, and shoot, all inspired by the same visual world.
+            sketch, fabric, render, and shoot, all inspired by the same visual world.
           </p>
           <div className="mt-10 flex items-center gap-4">
             <Link
