@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.11.0/dist/tabler-icons.min.css">
+<style>
+:root {
+  --bg-page: #0A0908;
+  --bg-card: rgba(255, 255, 255, 0.025);
+  --bg-card-hover: rgba(255, 255, 255, 0.04);
+  --bg-elevated: #14130F;
+  --bg-modal: #1A1815;
+  --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.14);
+  --border-gold: rgba(184, 150, 74, 0.5);
+  --text-primary: #E8E4DA;
+  --text-secondary: #8B8579;
+  --text-muted: #5A5750;
+  --gold: #B8964A;
+  --gold-hover: #C4A555;
+  --gold-bg: rgba(184, 150, 74, 0.15);
+  --green: #7A9560;
+  --green-bg: rgba(122, 149, 96, 0.15);
+  --yellow: #B8964A;
+  --yellow-bg: rgba(184, 150, 74, 0.15);
+  --grey: #5A5750;
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-sans: 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, textarea, select { font-family: inherit; color: inherit; }
+h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 500; letter-spacing: -0.01em; }
+
+/* ================ VIEW SWITCHING ================ */
+.view { display: none; min-height: 100vh; }
+.view.active { display: block; }
+
+/* ================ TOP NAV BAR (common) ================ */
+.nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 48px;
+  border-bottom: 0.5px solid var(--border);
+}
+.nav-logo {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  letter-spacing: 0.005em;
+}
+.breadcrumb {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; color: var(--text-secondary);
+  font-family: var(--font-serif); font-size: 16px;
+}
+.breadcrumb .crumb { cursor: pointer; transition: color 0.15s; }
+.breadcrumb .crumb:hover { color: var(--text-primary); }
+.breadcrumb .sep { color: var(--text-muted); }
+.breadcrumb .current { color: var(--text-primary); }
+
+/* ================ BUTTONS ================ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--gold);
+  color: #1a1611;
+}
+.btn-primary:hover { background: var(--gold-hover); transform: translateY(-1px); }
+.btn-ghost {
+  border: 0.5px solid var(--border-strong);
+  color: var(--text-primary);
+  background: transparent;
+}
+.btn-ghost:hover { border-color: var(--text-secondary); background: rgba(255,255,255,0.02); }
+.btn-large { padding: 14px 32px; font-size: 14px; }
+
+/* ================ VIEW 1: LANDING ================ */
+#view-landing {
+  background: radial-gradient(ellipse at center, #14130F 0%, #0A0908 60%);
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+.landing-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 48px;
+  position: relative; z-index: 2;
+}
+.landing-hero {
+  position: relative; z-index: 2;
+  padding: 100px 48px 80px;
+  text-align: center;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.landing-bg-gradient {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 40%, rgba(80, 60, 100, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 60%, rgba(60, 100, 80, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(100, 70, 50, 0.1) 0%, transparent 50%);
+  z-index: 1;
+}
+.landing-pill {
+  display: inline-block;
+  padding: 8px 20px;
+  border: 0.5px solid var(--border-gold);
+  border-radius: 999px;
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  margin-bottom: 40px;
+  text-transform: uppercase;
+}
+.landing-hero h1 {
+  font-family: var(--font-serif);
+  font-size: 84px;
+  line-height: 1.05;
+  font-weight: 500;
+  margin-bottom: 32px;
+  letter-spacing: -0.02em;
+}
+.landing-hero p {
+  font-size: 17px;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto 48px;
+  line-height: 1.6;
+}
+.landing-cta { display: flex; gap: 14px; justify-content: center; }
+
+/* ================ VIEW 2: SEASONS DASHBOARD ================ */
+#view-seasons { padding-bottom: 80px; }
+.seasons-header {
+  padding: 60px 48px 40px;
+}
+.seasons-header h1 {
+  font-size: 56px;
+  margin-bottom: 10px;
+}
+.seasons-header p {
+  color: var(--text-secondary);
+  font-size: 15px;
+  max-width: 700px;
+}
+.seasons-grid {
+  padding: 20px 48px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px;
+}
+.season-card {
+  background: var(--bg-card);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.season-card:hover { background: var(--bg-card-hover); border-color: var(--border-strong); transform: translateY(-2px); }
+.season-card-mood {
+  height: 130px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+.mood-tile { background-size: cover; }
+.season-card-body { padding: 20px 22px 22px; }
+.season-card-title {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  letter-spacing: 0.02em;
+}
+.season-card-moodboard {
+  color: var(--gold);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+.season-card-meta {
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+.season-card-palette { display: flex; gap: 6px; }
+.palette-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 0.5px solid var(--border);
+}
+
+/* ================ VIEW 3: SEASON DETAIL ================ */
+#view-season { padding-bottom: 100px; }
+.season-header {
+  padding: 40px 48px 24px;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 40px;
+}
+.season-title-block h1 {
+  font-size: 56px;
+  margin-bottom: 6px;
+}
+.season-created { color: var(--text-secondary); font-size: 13px; }
+
+.season-tabs {
+  padding: 0 48px;
+  border-bottom: 0.5px solid var(--border);
+  display: flex; gap: 4px;
+  margin-bottom: 40px;
+}
+.season-tab {
+  padding: 14px 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  border-bottom: 1.5px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-sans);
+  margin-bottom: -1px;
+}
+.season-tab:hover { color: var(--text-primary); }
+.season-tab.active { color: var(--text-primary); border-bottom-color: var(--gold); }
+
+.season-content { padding: 0 48px; }
+
+/* Moodboard */
+.moodboard-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.moodboard-header h2 { font-size: 32px; }
+.moodboard-header .moodboard-name-label {
+  color: var(--gold);
+  font-weight: 400;
+  font-style: italic;
+}
+.moodboard-count { color: var(--text-secondary); font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; }
+
+.moodboard-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.moodboard-tile {
+  aspect-ratio: 1;
+  border-radius: 6px;
+  overflow: hidden;
+  background-size: cover;
+}
+.moodboard-empty {
+  border: 1px dashed var(--border-strong);
+  border-radius: 12px;
+  padding: 100px 40px;
+  text-align: center;
+  margin-bottom: 32px;
+}
+.moodboard-empty p {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+  font-size: 15px;
+}
+
+.mood-info {
+  background: var(--bg-card);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 22px 26px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 40px;
+  margin-bottom: 60px;
+}
+.mood-info-block .label {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+.mood-info-palette { display: flex; gap: 10px; }
+.mood-info-palette .palette-dot { width: 24px; height: 24px; }
+.mood-info-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.mood-tag {
+  padding: 6px 14px;
+  border: 0.5px solid var(--border-strong);
+  border-radius: 999px;
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.garments-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 24px;
+}
+.garments-header h2 { font-size: 32px; margin-bottom: 4px; }
+.garments-header p { color: var(--text-secondary); font-size: 13px; }
+
+.garments-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.garment-card {
+  background: var(--bg-card);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.garment-card:hover { background: var(--bg-card-hover); border-color: var(--border-strong); transform: translateY(-2px); }
+.garment-card-preview { height: 240px; background-size: cover; }
+.garment-card-body { padding: 20px 22px; }
+.garment-card-title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+.garment-progress-bar {
+  height: 2px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.garment-progress-fill {
+  height: 100%;
+  background: var(--gold);
+}
+.garment-progress-text {
+  display: flex; justify-content: space-between;
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.garments-empty {
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 80px 40px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* ================ VIEW 4: GARMENT DETAIL ================ */
+#view-garment { padding-bottom: 80px; }
+.garment-header {
+  padding: 60px 48px 40px;
+  display: flex; align-items: flex-start; gap: 32px;
+  justify-content: space-between;
+}
+.garment-header-left { display: flex; gap: 24px; align-items: center; }
+.garment-icon {
+  width: 100px; height: 100px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #3a1c2b 0%, #2a1220 100%);
+  border: 0.5px solid var(--border);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.garment-icon::after {
+  content: ""; position: absolute; inset: 0;
+  background: repeating-linear-gradient(45deg, transparent 0 6px, rgba(255,255,255,0.02) 6px 7px);
+}
+.garment-title h1 { font-size: 48px; margin-bottom: 8px; }
+.garment-title p { color: var(--text-secondary); font-size: 14px; }
+.garment-title p .season-link { color: var(--gold); cursor: pointer; }
+.garment-title p .season-link:hover { text-decoration: underline; }
+
+.garment-header-palette { display: flex; gap: 10px; }
+.garment-header-palette .palette-dot { width: 22px; height: 22px; }
+
+.garment-stages {
+  padding: 0 48px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.stage-card {
+  background: var(--bg-card);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 26px 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  min-height: 170px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.stage-card:hover { background: var(--bg-card-hover); border-color: var(--border-strong); transform: translateY(-2px); }
+.stage-card-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 28px;
+}
+.stage-num {
+  font-family: var(--font-serif);
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+.stage-status {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.stage-status.not-started { background: rgba(255,255,255,0.05); color: var(--text-secondary); }
+.stage-status.in-progress { background: var(--gold-bg); color: var(--gold); }
+.stage-status.done { background: var(--gold); color: #1a1611; }
+.stage-card-title {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.stage-card-sub {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+/* ================ VIEW 5: SKETCH STAGE ================ */
+#view-sketch { background: var(--bg-page); }
+.stage-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 32px;
+  border-bottom: 0.5px solid var(--border);
+  background: var(--bg-page);
+  gap: 24px;
+}
+.stage-topbar-left {
+  display: flex; align-items: center; gap: 20px;
+  flex-shrink: 0;
+}
+.stage-close {
+  width: 32px; height: 32px;
+  border-radius: 999px;
+  border: 0.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+.stage-close:hover { border-color: var(--text-primary); color: var(--text-primary); }
+.stage-arrows { display: flex; gap: 4px; }
+.stage-arrow {
+  width: 32px; height: 32px;
+  border-radius: 999px;
+  border: 0.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+.stage-arrow:hover { border-color: var(--text-primary); color: var(--text-primary); }
+.stage-arrow:disabled { opacity: 0.35; cursor: not-allowed; }
+.stage-info {
+  display: flex; flex-direction: column;
+}
+.stage-info-name {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 500;
+}
+.stage-info-code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stepper {
+  display: flex; align-items: center;
+  gap: 2px;
+}
+.step {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.step:hover { background: rgba(255,255,255,0.03); color: var(--text-primary); }
+.step-num {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  color: var(--text-secondary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  font-weight: 500;
+}
+.step.done .step-num { background: var(--gold); color: #1a1611; }
+.step.active { background: var(--gold-bg); color: var(--gold); }
+.step.active .step-num { background: var(--gold); color: #1a1611; }
+.step-sep { color: var(--text-muted); font-size: 11px; }
+
+.stage-topbar-right {
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+}
+.version-chip {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px;
+  border: 0.5px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.saved-indicator {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; color: var(--text-muted);
+}
+
+.stage-main {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 20px;
+  padding: 20px 32px 40px;
+  align-items: start;
+}
+
+/* Left panel */
+.left-panel {
+  background: var(--bg-card);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex; flex-direction: column;
+  gap: 20px;
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+.left-panel::-webkit-scrollbar { width: 6px; }
+.left-panel::-webkit-scrollbar-track { background: transparent; }
+.left-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.category-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px;
+  background: rgba(255,255,255,0.03);
+  border: 0.5px solid var(--border);
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  align-self: flex-start;
+}
+.category-badge strong { color: var(--text-primary); font-weight: 500; }
+
+.field-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.field-label .hint { color: var(--text-muted); text-transform: none; letter-spacing: 0; font-size: 10px; }
+
+.chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.chip {
+  padding: 6px 12px;
+  border: 0.5px solid var(--border);
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: transparent;
+  transition: all 0.15s;
+}
+.chip:hover { background: rgba(255,255,255,0.03); color: var(--text-primary); }
+.chip.active {
+  background: var(--gold-bg);
+  color: var(--gold);
+  border-color: var(--border-gold);
+}
+
+.prompt-box {
+  width: 100%;
+  min-height: 60px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.02);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  resize: vertical;
+  line-height: 1.5;
+  margin-top: 8px;
+}
+.prompt-box:focus { outline: none; border-color: var(--border-gold); }
+.prompt-box::placeholder { color: var(--text-muted); }
+
+.moodboard-refs {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 5px;
+}
+.moodboard-ref-tile {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  border: 1.5px solid transparent;
+  transition: all 0.15s;
+  background-size: cover;
+}
+.moodboard-ref-tile:hover { transform: scale(1.05); }
+.moodboard-ref-tile.selected {
+  border-color: var(--gold);
+}
+.moodboard-ref-tile.selected::after {
+  content: ""; position: absolute; inset: 0;
+  background: rgba(184, 150, 74, 0.2);
+}
+
+.qty-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.02);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+}
+.qty-label { font-size: 12px; color: var(--text-secondary); }
+.qty-controls { display: flex; align-items: center; gap: 10px; }
+.qty-btn {
+  width: 26px; height: 26px;
+  border-radius: 4px;
+  border: 0.5px solid var(--border-strong);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+}
+.qty-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
+.qty-val { font-size: 14px; font-weight: 500; min-width: 20px; text-align: center; }
+
+.generate-btn {
+  padding: 14px;
+  background: var(--gold);
+  color: #1a1611;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 4px;
+}
+.generate-btn:hover { background: var(--gold-hover); }
+
+/* Right panel */
+.right-panel {
+  background: var(--bg-card);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex; flex-direction: column;
+  gap: 18px;
+}
+
+.filter-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 0.5px solid var(--border);
+  gap: 10px;
+}
+.filter-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-chip {
+  padding: 6px 12px;
+  border: 0.5px solid var(--border);
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: transparent;
+  display: flex; align-items: center; gap: 5px;
+}
+.filter-chip:hover { color: var(--text-primary); }
+.filter-chip.active {
+  background: var(--text-primary);
+  color: var(--bg-page);
+  border-color: var(--text-primary);
+}
+.filter-chip .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.filter-chip.active .dot { }
+.dot-green { background: var(--green); }
+.dot-yellow { background: var(--yellow); }
+.dot-grey { background: var(--grey); }
+
+.filter-meta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.batch { display: flex; flex-direction: column; gap: 12px; }
+.batch-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 2px;
+}
+.batch-title {
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono);
+}
+.batch-actions { display: flex; gap: 8px; }
+.icon-btn {
+  padding: 5px 10px;
+  border: 0.5px solid var(--border);
+  border-radius: 6px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  display: flex; align-items: center; gap: 5px;
+  transition: all 0.15s;
+}
+.icon-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
+
+.render-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.render-tile {
+  background: rgba(255,255,255,0.02);
+  border: 1.5px solid transparent;
+  border-radius: 10px;
+  padding: 10px;
+  transition: all 0.2s;
+}
+.render-tile.green {
+  border-color: var(--green);
+  background: rgba(122, 149, 96, 0.05);
+}
+.render-tile.yellow {
+  border-color: var(--yellow);
+  background: rgba(184, 150, 74, 0.05);
+}
+.render-tile-img {
+  background: #EDEAE0;
+  border-radius: 6px;
+  aspect-ratio: 1 / 1.15;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.render-tile-img svg { width: 65%; height: 90%; }
+.render-tile-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 4px 2px;
+}
+.tile-code { font-size: 10px; font-family: var(--font-mono); color: var(--text-muted); }
+.tile-actions { display: flex; align-items: center; gap: 8px; }
+.state-dot {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  color: #1a1611;
+  transition: all 0.15s;
+}
+.state-dot.dot-green-btn { border-color: var(--green); background: transparent; }
+.state-dot.dot-yellow-btn { border-color: var(--yellow); background: transparent; }
+.state-dot.dot-grey-btn { border-color: var(--grey); background: transparent; }
+.state-dot.active.dot-green-btn { background: var(--green); color: #E8E4DA; }
+.state-dot.active.dot-yellow-btn { background: var(--yellow); color: #1a1611; }
+.state-dot.active.dot-grey-btn { background: var(--grey); color: #E8E4DA; }
+.state-dot:hover { transform: scale(1.1); }
+.note-btn {
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted);
+}
+.note-btn:hover { color: var(--text-primary); }
+
+.proceed-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 16px;
+  border-top: 0.5px solid var(--border);
+  margin-top: 4px;
+}
+.proceed-info {
+  display: flex; align-items: center; gap: 8px;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+.proceed-check {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #1a2811;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+}
+
+/* ================ MODAL ================ */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 100;
+  padding: 40px;
+}
+.modal-backdrop.active { display: flex; }
+.modal {
+  background: var(--bg-modal);
+  border: 0.5px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 32px 32px 28px;
+  width: 100%;
+  max-width: 520px;
+}
+.modal.wide { max-width: 780px; }
+.modal-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 24px;
+}
+.modal-head h2 { font-size: 32px; font-weight: 500; }
+.modal-close {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary);
+  transition: color 0.15s;
+}
+.modal-close:hover { color: var(--text-primary); }
+.modal-sub { color: var(--text-secondary); font-size: 14px; margin-bottom: 24px; line-height: 1.6; }
+.modal-field { margin-bottom: 20px; }
+.modal-field .label {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+.modal-input {
+  width: 100%;
+  padding: 14px 18px;
+  background: transparent;
+  border: 0.5px solid var(--border-gold);
+  border-radius: 8px;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+.modal-input:focus { outline: none; border-color: var(--gold); }
+.modal-input::placeholder { color: var(--text-muted); }
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.category-option {
+  padding: 14px 16px;
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.02);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.category-option:hover { background: rgba(255,255,255,0.04); border-color: var(--border-strong); }
+.category-option.selected {
+  border-color: var(--gold);
+  background: var(--gold-bg);
+  color: var(--gold);
+}
+.category-option .check {
+  opacity: 0;
+  color: var(--gold);
+}
+.category-option.selected .check { opacity: 1; }
+
+.modal-actions {
+  display: flex; gap: 10px; margin-top: 24px;
+}
+.modal-actions .btn { flex: 1; }
+
+/* Start Moodboard modal specifics */
+.moodboard-sources {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  margin-bottom: 24px;
+}
+.moodboard-source {
+  padding: 44px 20px;
+  border: 0.5px dashed var(--border-strong);
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-primary);
+}
+.moodboard-source:hover { background: rgba(255,255,255,0.03); border-color: var(--gold); }
+.moodboard-source i { font-size: 24px; margin-bottom: 10px; display: block; color: var(--text-secondary); }
+.moodboard-source-name { font-size: 14px; }
+
+.moodboard-slots-info {
+  padding: 12px 0;
+  border-top: 0.5px solid var(--border);
+  border-bottom: 0.5px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-bottom: 20px;
+}
+
+.guidance-grid {
+  display: grid; grid-template-columns: 100px 1fr; gap: 20px 16px;
+  margin-bottom: 24px;
+  align-items: center;
+}
+.guidance-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.guidance-icon {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.guidance-icon.good { background: var(--green); color: #1a2811; }
+.guidance-icon.bad { background: rgba(184, 74, 74, 0.8); color: #E8E4DA; }
+.guidance-label-name { font-weight: 500; color: var(--text-primary); font-size: 13px; }
+.guidance-label-sub { font-size: 11px; color: var(--text-muted); }
+.guidance-images {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+}
+.guidance-image {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background-size: cover;
+  background-position: center;
+  background-color: #2a2620;
+}
+.guidance-image.bad-frame { border: 1px solid rgba(184, 74, 74, 0.5); }
+
+.save-moodboard-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--gold);
+  color: #1a1611;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+}
+.save-moodboard-btn:hover { background: var(--gold-hover); }
+
+/* Utility */
+.hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- =========================================================== -->
+<!-- VIEW 1: LANDING -->
+<!-- =========================================================== -->
+<div id="view-landing" class="view active">
+  <div class="landing-bg-gradient"></div>
+  <div class="landing-nav">
+    <div class="nav-logo">Design Studio</div>
+    <button class="btn btn-ghost" onclick="go('seasons')">Enter Studio</button>
+  </div>
+  <div class="landing-hero">
+    <div class="landing-pill">AI FASHION STUDIO</div>
+    <h1>Every collection<br>starts with a mood.</h1>
+    <p>Build a season from a moodboard, then design each garment inside it. Sketch, fabric, and shoot, all inspired by the same visual world.</p>
+    <div class="landing-cta">
+      <button class="btn btn-primary btn-large" onclick="go('seasons')">Enter the Studio</button>
+      <button class="btn btn-ghost btn-large">How it works</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- VIEW 2: SEASONS DASHBOARD -->
+<!-- =========================================================== -->
+<div id="view-seasons" class="view">
+  <div class="nav">
+    <div class="nav-logo" onclick="go('landing')">Design Studio</div>
+    <button class="btn btn-primary" onclick="openModal('new-season')">+ New Season</button>
+  </div>
+  <div class="seasons-header">
+    <h1>Seasons</h1>
+    <p>Each season is a moodboard. Import 12 images to set the tone for a collection, then build garments inside it.</p>
+  </div>
+  <div class="seasons-grid" id="seasons-grid">
+    <!-- SS27 -->
+    <div class="season-card" onclick="goToSeason('SS27', 'Ash and Ember')">
+      <div class="season-card-mood">
+        <div class="mood-tile" style="background: radial-gradient(circle at 30% 40%, #3d5a3a 0%, #1a2618 100%);"></div>
+        <div class="mood-tile" style="background: radial-gradient(circle at 30% 40%, #2a3c58 0%, #14202e 100%);"></div>
+        <div class="mood-tile" style="background: radial-gradient(circle at 30% 40%, #4a2952 0%, #251230 100%);"></div>
+        <div class="mood-tile" style="background: radial-gradient(circle at 30% 40%, #58252a 0%, #2c1214 100%);"></div>
+      </div>
+      <div class="season-card-body">
+        <div class="season-card-title">SS27</div>
+        <div class="season-card-moodboard">Moodboard - Ash and Ember</div>
+        <div class="season-card-meta">3 garments · Created 2026-06-01</div>
+        <div class="season-card-palette">
+          <div class="palette-dot" style="background: #4a7a4a;"></div>
+          <div class="palette-dot" style="background: #a0d0a8;"></div>
+          <div class="palette-dot" style="background: #4a8ac0;"></div>
+          <div class="palette-dot" style="background: #232838;"></div>
+          <div class="palette-dot" style="background: #d0c8e8;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AW26 -->
+    <div class="season-card" onclick="goToSeason('AW26', 'Quiet Coastline')">
+      <div class="season-card-mood">
+        <div class="mood-tile" style="background: radial-gradient(circle at 30% 40%, #6a6528 0%, #383418 100%);"></div>
+        <div class="mood-tile" style="background: radial-gradient(circle at 30% 40%, #3a5a3a 0%, #1c2c1c 100%);"></div>
+        <div class="mood-tile" style="background: radial-gradient(circle at 30% 40%, #2a4448 0%, #14222a 100%);"></div>
+        <div class="mood-tile" style="background: radial-gradient(circle at 30% 40%, #3a2c50 0%, #1c1428 100%);"></div>
+      </div>
+      <div class="season-card-body">
+        <div class="season-card-title">AW26</div>
+        <div class="season-card-moodboard">Moodboard - Quiet Coastline</div>
+        <div class="season-card-meta">1 garment · Created 2026-05-10</div>
+        <div class="season-card-palette">
+          <div class="palette-dot" style="background: #98944e;"></div>
+          <div class="palette-dot" style="background: #a8c088;"></div>
+          <div class="palette-dot" style="background: #5aa06a;"></div>
+          <div class="palette-dot" style="background: #90a898;"></div>
+          <div class="palette-dot" style="background: #c8e0d8;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- VIEW 3: SEASON DETAIL -->
+<!-- =========================================================== -->
+<div id="view-season" class="view">
+  <div class="nav">
+    <div class="breadcrumb">
+      <span class="crumb" onclick="go('landing')">Design Studio</span>
+      <span class="sep">/</span>
+      <span class="crumb" onclick="go('seasons')">Seasons</span>
+      <span class="sep">/</span>
+      <span class="current" id="season-crumb-name">SS27</span>
+    </div>
+  </div>
+
+  <div class="season-header">
+    <div class="season-title-block">
+      <h1 id="season-name">SS27</h1>
+      <div class="season-created" id="season-created">Created 2026-06-01</div>
+    </div>
+  </div>
+
+  <div class="season-tabs">
+    <div class="season-tab active" onclick="switchSeasonTab(this, 'overview')">Overview</div>
+    <div class="season-tab" onclick="switchSeasonTab(this, 'fabrics')">Fabrics</div>
+    <div class="season-tab" onclick="switchSeasonTab(this, 'prints')">Prints</div>
+    <div class="season-tab" onclick="switchSeasonTab(this, 'sketches')">Sketches</div>
+    <div class="season-tab" onclick="switchSeasonTab(this, 'garments')">Garments</div>
+  </div>
+
+  <div class="season-content">
+    <!-- OVERVIEW TAB CONTENT -->
+    <div class="season-tab-content" id="tab-overview">
+      <!-- Moodboard section (with data by default) -->
+      <div id="moodboard-filled">
+        <div class="moodboard-header">
+          <h2>Moodboard <span class="moodboard-name-label" id="moodboard-name-label">- Ash and Ember</span></h2>
+          <div class="moodboard-count">12 IMAGES</div>
+        </div>
+        <div class="moodboard-grid" id="moodboard-grid">
+          <div class="moodboard-tile" style="background: radial-gradient(circle at 30% 40%, #3d5a3a 0%, #1a2618 100%);"></div>
+          <div class="moodboard-tile" style="background: radial-gradient(circle at 30% 40%, #2a3c58 0%, #14202e 100%);"></div>
+          <div class="moodboard-tile" style="background: radial-gradient(circle at 30% 40%, #4a2952 0%, #251230 100%);"></div>
+          <div class="moodboard-tile" style="background: radial-gradient(circle at 30% 40%, #58252a 0%, #2c1214 100%);"></div>
+          <div class="moodboard-tile" style="background: radial-gradient(circle at 30% 40%, #6a6528 0%, #383418 100%);"></div>
+          <div class="moodboard-tile" style="background: radial-gradient(circle at 30% 40%, #4a6640 0%, #1e2c1a 100%);"></div>
+          <div class="moodboard-tile" style="background: radial-gradient(circle at 30% 40%, #2a4448 0%, #14222a 100%);"></div>
+          <div class="moodboard-tile" style="background: radial-gradient(circle at 30% 40%, #3a2c50 0%, #1c1428 100%);"></div>
+          <div class="moodboard-tile" style="background: radial-gradient(circle at 30% 40%, #4a2a48 0%, #241222 100%);"></div>
+          <div class="moodboard-tile" style="background: radial-gradient(circle at 30% 40%, #6a4028 0%, #382018 100%);"></div>
+          <div class="moodboard-tile" style="background: radial-gradient(circle at 30% 40%, #5a6a30 0%, #2c341a 100%);"></div>
+          <div class="moodboard-tile" style="background: radial-gradient(circle at 30% 40%, #2a4a48 0%, #14262a 100%);"></div>
+        </div>
+        <div class="mood-info">
+          <div class="mood-info-block">
+            <div class="label">Palette</div>
+            <div class="mood-info-palette">
+              <div class="palette-dot" style="background: #4a7a4a;"></div>
+              <div class="palette-dot" style="background: #a0d0a8;"></div>
+              <div class="palette-dot" style="background: #4a8ac0;"></div>
+              <div class="palette-dot" style="background: #232838;"></div>
+              <div class="palette-dot" style="background: #d0c8e8;"></div>
+            </div>
+          </div>
+          <div class="mood-info-block">
+            <div class="label">Mood</div>
+            <div class="mood-info-tags">
+              <div class="mood-tag">Nocturne</div>
+              <div class="mood-tag">Industrial</div>
+              <div class="mood-tag">Coastal Fog</div>
+              <div class="mood-tag">Deconstructed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty moodboard state (hidden by default) -->
+      <div id="moodboard-empty" class="hidden">
+        <div class="moodboard-header">
+          <h2>Moodboard</h2>
+        </div>
+        <div class="moodboard-empty">
+          <p>No moodboard yet. Import up to 12 images to set the mood for this season.</p>
+          <button class="btn btn-primary" onclick="openModal('start-moodboard')">Start Moodboard</button>
+        </div>
+      </div>
+
+      <!-- Garments section -->
+      <div class="garments-header">
+        <div>
+          <h2>Garments</h2>
+          <p>Everything you build here draws on this season's mood.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('new-garment')">+ New Garment</button>
+      </div>
+
+      <!-- Garments filled state -->
+      <div id="garments-filled">
+        <div class="garments-grid">
+          <div class="garment-card" onclick="goToGarment('wide-leg-ash-trouser')">
+            <div class="garment-card-preview" style="background: radial-gradient(circle at 30% 40%, #3d5a3a 0%, #1a2618 100%);"></div>
+            <div class="garment-card-body">
+              <div class="garment-card-title">Frayed Silk Trench</div>
+              <div class="garment-progress-bar"><div class="garment-progress-fill" style="width: 25%;"></div></div>
+              <div class="garment-progress-text"><span></span><span>2/7 stages</span></div>
+            </div>
+          </div>
+          <div class="garment-card" onclick="goToGarment('wide-leg-ash-trouser')">
+            <div class="garment-card-preview" style="background: radial-gradient(circle at 30% 40%, #4a2952 0%, #251230 100%);"></div>
+            <div class="garment-card-body">
+              <div class="garment-card-title">Wide-Leg Ash Trouser</div>
+              <div class="garment-progress-bar"><div class="garment-progress-fill" style="width: 40%;"></div></div>
+              <div class="garment-progress-text"><span></span><span>3/7 stages</span></div>
+            </div>
+          </div>
+          <div class="garment-card" onclick="goToGarment('wide-leg-ash-trouser')">
+            <div class="garment-card-preview" style="background: radial-gradient(circle at 30% 40%, #6a6528 0%, #383418 100%);"></div>
+            <div class="garment-card-body">
+              <div class="garment-card-title">Bonded Shell Jacket</div>
+              <div class="garment-progress-bar"><div class="garment-progress-fill" style="width: 25%;"></div></div>
+              <div class="garment-progress-text"><span></span><span>2/7 stages</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Garments empty state -->
+      <div id="garments-empty" class="hidden">
+        <div class="garments-empty">No garments yet in this season.</div>
+      </div>
+    </div>
+
+    <!-- Other tab contents (placeholders) -->
+    <div class="season-tab-content hidden" id="tab-fabrics">
+      <div style="padding: 60px 0; text-align: center; color: var(--text-secondary);">Fabric library for this season. Add fabrics you want available across all garments.</div>
+    </div>
+    <div class="season-tab-content hidden" id="tab-prints">
+      <div style="padding: 60px 0; text-align: center; color: var(--text-secondary);">Print library for this season.</div>
+    </div>
+    <div class="season-tab-content hidden" id="tab-sketches">
+      <div style="padding: 60px 0; text-align: center; color: var(--text-secondary);">Reference sketches you have uploaded manually for this season.</div>
+    </div>
+    <div class="season-tab-content hidden" id="tab-garments">
+      <div style="padding: 60px 0; text-align: center; color: var(--text-secondary);">All garments in this season, same as the Overview list.</div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- VIEW 4: GARMENT DETAIL -->
+<!-- =========================================================== -->
+<div id="view-garment" class="view">
+  <div class="nav">
+    <div class="breadcrumb">
+      <span class="crumb" onclick="go('landing')">Design Studio</span>
+      <span class="sep">/</span>
+      <span class="crumb" onclick="go('seasons')">Seasons</span>
+      <span class="sep">/</span>
+      <span class="crumb" onclick="goToSeason('SS27', 'Ash and Ember')">SS27</span>
+      <span class="sep">/</span>
+      <span class="current" id="garment-crumb-name">Wide-Leg Ash Trouser</span>
+    </div>
+  </div>
+
+  <div class="garment-header">
+    <div class="garment-header-left">
+      <div class="garment-icon"></div>
+      <div class="garment-title">
+        <h1 id="garment-name">Wide-Leg Ash Trouser</h1>
+        <p>Inspired by <span class="season-link" onclick="goToSeason('SS27', 'Ash and Ember')">Ash and Ember</span></p>
+      </div>
+    </div>
+    <div class="garment-header-palette">
+      <div class="palette-dot" style="background: #4a7a4a;"></div>
+      <div class="palette-dot" style="background: #a0d0a8;"></div>
+      <div class="palette-dot" style="background: #4a8ac0;"></div>
+      <div class="palette-dot" style="background: #232838;"></div>
+      <div class="palette-dot" style="background: #d0c8e8;"></div>
+    </div>
+  </div>
+
+  <div class="garment-stages">
+    <div class="stage-card" onclick="goToSketch()">
+      <div class="stage-card-top">
+        <div class="stage-num">01</div>
+        <div class="stage-status in-progress">In Progress</div>
+      </div>
+      <div>
+        <div class="stage-card-title">Sketch</div>
+        <div class="stage-card-sub">Concept line drawings</div>
+      </div>
+    </div>
+    <div class="stage-card">
+      <div class="stage-card-top">
+        <div class="stage-num">02</div>
+        <div class="stage-status not-started">Not Started</div>
+      </div>
+      <div>
+        <div class="stage-card-title">Fabric/Print</div>
+        <div class="stage-card-sub">Material and print selection</div>
+      </div>
+    </div>
+    <div class="stage-card">
+      <div class="stage-card-top">
+        <div class="stage-num">03</div>
+        <div class="stage-status not-started">Not Started</div>
+      </div>
+      <div>
+        <div class="stage-card-title">Render</div>
+        <div class="stage-card-sub">Sketch and fabric combined</div>
+      </div>
+    </div>
+    <div class="stage-card">
+      <div class="stage-card-top">
+        <div class="stage-num">04</div>
+        <div class="stage-status not-started">Not Started</div>
+      </div>
+      <div>
+        <div class="stage-card-title">Tech Pack</div>
+        <div class="stage-card-sub">Construction spec</div>
+      </div>
+    </div>
+    <div class="stage-card">
+      <div class="stage-card-top">
+        <div class="stage-num">05</div>
+        <div class="stage-status not-started">Not Started</div>
+      </div>
+      <div>
+        <div class="stage-card-title">Pattern</div>
+        <div class="stage-card-sub">Technical flat pattern</div>
+      </div>
+    </div>
+    <div class="stage-card">
+      <div class="stage-card-top">
+        <div class="stage-num">06</div>
+        <div class="stage-status not-started">Not Started</div>
+      </div>
+      <div>
+        <div class="stage-card-title">3D Visualization</div>
+        <div class="stage-card-sub">Rendered garment mockup</div>
+      </div>
+    </div>
+    <div class="stage-card">
+      <div class="stage-card-top">
+        <div class="stage-num">07</div>
+        <div class="stage-status not-started">Not Started</div>
+      </div>
+      <div>
+        <div class="stage-card-title">Photoshoot</div>
+        <div class="stage-card-sub">Final photoshoot render</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- VIEW 5: SKETCH STAGE (STAGE 1) -->
+<!-- =========================================================== -->
+<div id="view-sketch" class="view">
+  <div class="stage-topbar">
+    <div class="stage-topbar-left">
+      <button class="stage-close" onclick="go('garment')" title="Close"><i class="ti ti-x"></i></button>
+      <div class="stage-arrows">
+        <button class="stage-arrow" disabled title="No previous stage"><i class="ti ti-chevron-left"></i></button>
+        <button class="stage-arrow" title="Next stage: Fabric/Print"><i class="ti ti-chevron-right"></i></button>
+      </div>
+      <div class="stage-info">
+        <div class="stage-info-name">Sketch</div>
+        <div class="stage-info-code">SS27_PANT_001_v1_SKTCH</div>
+      </div>
+    </div>
+
+    <div class="stepper">
+      <div class="step active"><span class="step-num">1</span>Sketch</div>
+      <span class="step-sep">›</span>
+      <div class="step"><span class="step-num">2</span>Fabric/Print</div>
+      <span class="step-sep">›</span>
+      <div class="step"><span class="step-num">3</span>Render</div>
+      <span class="step-sep">›</span>
+      <div class="step"><span class="step-num">4</span>Tech Pack</div>
+      <span class="step-sep">›</span>
+      <div class="step"><span class="step-num">5</span>Pattern</div>
+      <span class="step-sep">›</span>
+      <div class="step"><span class="step-num">6</span>3D</div>
+      <span class="step-sep">›</span>
+      <div class="step"><span class="step-num">7</span>Shoot</div>
+    </div>
+
+    <div class="stage-topbar-right">
+      <div class="version-chip">
+        <i class="ti ti-git-branch" style="font-size: 13px;"></i>
+        v1
+        <i class="ti ti-chevron-down" style="font-size: 11px;"></i>
+      </div>
+      <div class="saved-indicator"><i class="ti ti-check" style="font-size: 11px;"></i>Saved</div>
+    </div>
+  </div>
+
+  <div class="stage-main">
+    <!-- LEFT PANEL -->
+    <aside class="left-panel">
+      <div class="category-badge">
+        <i class="ti ti-hanger" style="font-size: 14px;"></i>
+        Category: <strong>Pant</strong>
+      </div>
+
+      <div>
+        <div class="field-label">Gender</div>
+        <div class="chip-row">
+          <button class="chip" onclick="pickChip(this)">Menswear</button>
+          <button class="chip active" onclick="pickChip(this)">Womenswear</button>
+          <button class="chip" onclick="pickChip(this)">Unisex</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="field-label">Silhouette</div>
+        <div class="chip-row">
+          <button class="chip" onclick="pickChip(this)">Fitted</button>
+          <button class="chip" onclick="pickChip(this)">Straight</button>
+          <button class="chip active" onclick="pickChip(this)">Wide-leg</button>
+          <button class="chip" onclick="pickChip(this)">Relaxed</button>
+          <button class="chip" onclick="pickChip(this)">Oversized</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="field-label">Style descriptors</div>
+        <div class="chip-row">
+          <button class="chip-mini chip" style="padding: 4px 8px; font-size: 10px;">Minimalist</button>
+          <button class="chip-mini chip" style="padding: 4px 8px; font-size: 10px;">Tailored</button>
+          <button class="chip-mini chip" style="padding: 4px 8px; font-size: 10px;">Deconstructed</button>
+          <button class="chip-mini chip" style="padding: 4px 8px; font-size: 10px;">Editorial</button>
+        </div>
+        <textarea class="prompt-box" placeholder="Add styling notes, references, or specific details">High waist, pleated front, cropped ankle length</textarea>
+      </div>
+
+      <div>
+        <div class="field-label">
+          Moodboard reference
+          <span class="hint">Pick up to 3</span>
+        </div>
+        <div class="moodboard-refs">
+          <div class="moodboard-ref-tile selected" style="background: radial-gradient(circle at 30% 40%, #3d5a3a 0%, #1a2618 100%);" onclick="toggleRef(this)"></div>
+          <div class="moodboard-ref-tile" style="background: radial-gradient(circle at 30% 40%, #2a3c58 0%, #14202e 100%);" onclick="toggleRef(this)"></div>
+          <div class="moodboard-ref-tile selected" style="background: radial-gradient(circle at 30% 40%, #4a2952 0%, #251230 100%);" onclick="toggleRef(this)"></div>
+          <div class="moodboard-ref-tile" style="background: radial-gradient(circle at 30% 40%, #58252a 0%, #2c1214 100%);" onclick="toggleRef(this)"></div>
+          <div class="moodboard-ref-tile" style="background: radial-gradient(circle at 30% 40%, #6a6528 0%, #383418 100%);" onclick="toggleRef(this)"></div>
+          <div class="moodboard-ref-tile" style="background: radial-gradient(circle at 30% 40%, #4a6640 0%, #1e2c1a 100%);" onclick="toggleRef(this)"></div>
+          <div class="moodboard-ref-tile" style="background: radial-gradient(circle at 30% 40%, #2a4448 0%, #14222a 100%);" onclick="toggleRef(this)"></div>
+          <div class="moodboard-ref-tile" style="background: radial-gradient(circle at 30% 40%, #3a2c50 0%, #1c1428 100%);" onclick="toggleRef(this)"></div>
+          <div class="moodboard-ref-tile" style="background: radial-gradient(circle at 30% 40%, #4a2a48 0%, #241222 100%);" onclick="toggleRef(this)"></div>
+          <div class="moodboard-ref-tile" style="background: radial-gradient(circle at 30% 40%, #6a4028 0%, #382018 100%);" onclick="toggleRef(this)"></div>
+          <div class="moodboard-ref-tile" style="background: radial-gradient(circle at 30% 40%, #5a6a30 0%, #2c341a 100%);" onclick="toggleRef(this)"></div>
+          <div class="moodboard-ref-tile" style="background: radial-gradient(circle at 30% 40%, #2a4a48 0%, #14262a 100%);" onclick="toggleRef(this)"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="field-label">View</div>
+        <div class="chip-row">
+          <button class="chip" onclick="pickChip(this)">Front only</button>
+          <button class="chip active" onclick="pickChip(this)">Front and back</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="field-label">Output quantity</div>
+        <div class="qty-row">
+          <span class="qty-label">Sketches per batch</span>
+          <div class="qty-controls">
+            <button class="qty-btn" onclick="changeQty(-1)">−</button>
+            <span class="qty-val" id="sketch-qty">4</span>
+            <button class="qty-btn" onclick="changeQty(1)">+</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="generate-btn">
+        <i class="ti ti-sparkles"></i>
+        Generate sketches
+      </button>
+    </aside>
+
+    <!-- RIGHT PANEL -->
+    <section class="right-panel">
+      <div class="filter-bar">
+        <div class="filter-chips">
+          <button class="filter-chip active" onclick="pickFilter(this)">All</button>
+          <button class="filter-chip" onclick="pickFilter(this)"><span class="dot dot-green"></span>Selected 1</button>
+          <button class="filter-chip" onclick="pickFilter(this)"><span class="dot dot-yellow"></span>Wishlist 1</button>
+          <button class="filter-chip" onclick="pickFilter(this)"><span class="dot dot-grey"></span>Non-selected 2</button>
+        </div>
+        <div class="filter-meta">1 batch · 4 sketches</div>
+      </div>
+
+      <div class="batch">
+        <div class="batch-head">
+          <div class="batch-title">
+            Batch 01
+            <span style="color: var(--text-muted); font-family: var(--font-sans);">Today, 4:12 PM · 4 sketches</span>
+          </div>
+          <div class="batch-actions">
+            <button class="icon-btn"><i class="ti ti-eye" style="font-size: 12px;"></i>View inputs</button>
+            <button class="icon-btn"><i class="ti ti-refresh" style="font-size: 12px;"></i>Regenerate</button>
+          </div>
+        </div>
+
+        <div class="render-grid">
+          <!-- Sketch 1 - Green -->
+          <div class="render-tile green">
+            <div class="render-tile-img">
+              <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#2a2620" stroke-width="1.4" stroke-linejoin="round">
+                <path d="M75 20 L125 20 L128 40 L130 45 L132 55 L135 90 L140 220 L112 220 L100 130 L88 220 L60 220 L65 90 L68 55 L70 45 L72 40 Z"/>
+                <line x1="75" y1="20" x2="125" y2="20" stroke-dasharray="3,2"/>
+                <path d="M100 20 L100 130" stroke-dasharray="2,2" stroke-width="0.8"/>
+                <circle cx="82" cy="30" r="1.5" fill="#2a2620"/>
+                <circle cx="118" cy="30" r="1.5" fill="#2a2620"/>
+                <path d="M65 80 L135 80" stroke-width="0.5" stroke-dasharray="2,3"/>
+              </svg>
+            </div>
+            <div class="render-tile-foot">
+              <span class="tile-code">R01</span>
+              <div class="tile-actions">
+                <button class="note-btn" title="Add note"><i class="ti ti-note" style="font-size: 12px;"></i></button>
+                <button class="state-dot dot-green-btn active" title="Selected" onclick="cycleState(this, 'green')"><i class="ti ti-check"></i></button>
+                <button class="state-dot dot-yellow-btn" title="Wishlist" onclick="cycleState(this, 'yellow')"></button>
+                <button class="state-dot dot-grey-btn" title="Non-selected" onclick="cycleState(this, 'grey')"></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sketch 2 - Yellow -->
+          <div class="render-tile yellow">
+            <div class="render-tile-img">
+              <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#2a2620" stroke-width="1.4" stroke-linejoin="round">
+                <path d="M72 18 L128 18 L131 42 L134 55 L140 100 L148 220 L110 220 L100 140 L90 220 L52 220 L60 100 L66 55 L69 42 Z"/>
+                <line x1="72" y1="18" x2="128" y2="18" stroke-dasharray="3,2"/>
+                <path d="M100 18 L100 140" stroke-dasharray="2,2" stroke-width="0.8"/>
+                <path d="M85 30 L100 42 L115 30" stroke-width="1"/>
+                <circle cx="82" cy="28" r="1.5" fill="#2a2620"/>
+                <circle cx="118" cy="28" r="1.5" fill="#2a2620"/>
+                <path d="M60 90 L140 90" stroke-width="0.5" stroke-dasharray="2,3"/>
+              </svg>
+            </div>
+            <div class="render-tile-foot">
+              <span class="tile-code">R02</span>
+              <div class="tile-actions">
+                <button class="note-btn"><i class="ti ti-note" style="font-size: 12px;"></i></button>
+                <button class="state-dot dot-green-btn" onclick="cycleState(this, 'green')"></button>
+                <button class="state-dot dot-yellow-btn active" onclick="cycleState(this, 'yellow')"><i class="ti ti-check"></i></button>
+                <button class="state-dot dot-grey-btn" onclick="cycleState(this, 'grey')"></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sketch 3 - Grey -->
+          <div class="render-tile">
+            <div class="render-tile-img">
+              <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#2a2620" stroke-width="1.4" stroke-linejoin="round">
+                <path d="M78 22 L122 22 L126 42 L130 60 L145 220 L108 220 L100 150 L92 220 L55 220 L70 60 L74 42 Z"/>
+                <line x1="78" y1="22" x2="122" y2="22" stroke-dasharray="3,2"/>
+                <path d="M100 22 L100 150" stroke-dasharray="2,2" stroke-width="0.8"/>
+                <circle cx="86" cy="32" r="1.5" fill="#2a2620"/>
+                <circle cx="114" cy="32" r="1.5" fill="#2a2620"/>
+                <path d="M70 100 L130 100" stroke-width="0.5" stroke-dasharray="2,3"/>
+                <path d="M62 220 L145 220" stroke-width="1"/>
+              </svg>
+            </div>
+            <div class="render-tile-foot">
+              <span class="tile-code">R03</span>
+              <div class="tile-actions">
+                <button class="note-btn"><i class="ti ti-note" style="font-size: 12px;"></i></button>
+                <button class="state-dot dot-green-btn" onclick="cycleState(this, 'green')"></button>
+                <button class="state-dot dot-yellow-btn" onclick="cycleState(this, 'yellow')"></button>
+                <button class="state-dot dot-grey-btn active" onclick="cycleState(this, 'grey')"><i class="ti ti-check"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sketch 4 - unrated -->
+          <div class="render-tile">
+            <div class="render-tile-img">
+              <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#2a2620" stroke-width="1.4" stroke-linejoin="round">
+                <path d="M74 20 L126 20 L129 40 L132 52 L138 95 L145 225 L112 225 L100 145 L88 225 L55 225 L62 95 L68 52 L71 40 Z"/>
+                <line x1="74" y1="20" x2="126" y2="20" stroke-dasharray="3,2"/>
+                <path d="M100 20 L100 145" stroke-dasharray="2,2" stroke-width="0.8"/>
+                <path d="M85 30 L100 44 L115 30 L115 55 L85 55 Z" stroke-width="1"/>
+                <circle cx="82" cy="30" r="1.5" fill="#2a2620"/>
+                <circle cx="118" cy="30" r="1.5" fill="#2a2620"/>
+                <path d="M62 85 L138 85" stroke-width="0.5" stroke-dasharray="2,3"/>
+                <path d="M76 40 L82 40 L82 100 L76 100" stroke-width="1"/>
+              </svg>
+            </div>
+            <div class="render-tile-foot">
+              <span class="tile-code">R04</span>
+              <div class="tile-actions">
+                <button class="note-btn"><i class="ti ti-note" style="font-size: 12px;"></i></button>
+                <button class="state-dot dot-green-btn" onclick="cycleState(this, 'green')"></button>
+                <button class="state-dot dot-yellow-btn" onclick="cycleState(this, 'yellow')"></button>
+                <button class="state-dot dot-grey-btn" onclick="cycleState(this, 'grey')"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="proceed-bar">
+        <div class="proceed-info">
+          <span class="proceed-check"><i class="ti ti-check"></i></span>
+          1 selected sketch ready to move forward
+        </div>
+        <button class="btn btn-primary">
+          Proceed to Fabric/Print
+          <i class="ti ti-arrow-right"></i>
+        </button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- MODAL: NEW SEASON -->
+<!-- =========================================================== -->
+<div class="modal-backdrop" id="modal-new-season">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>New Season</h2>
+      <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-sub">A season is a fashion cycle. Give it a short code. You will name the moodboard after this.</div>
+    <div class="modal-field">
+      <div class="label">Season Code</div>
+      <input type="text" class="modal-input" id="new-season-name" placeholder="e.g. SS27, AW27, RESORT27" maxlength="12">
+    </div>
+    <button class="save-moodboard-btn" onclick="createSeason()">Create Season</button>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- MODAL: START MOODBOARD -->
+<!-- =========================================================== -->
+<div class="modal-backdrop" id="modal-start-moodboard">
+  <div class="modal wide">
+    <div class="modal-head">
+      <h2>Start Moodboard</h2>
+      <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-sub">Import up to 12 images that set the mood for this season. The palette and themes drive every garment inside it.</div>
+
+    <div class="modal-field">
+      <div class="label">Moodboard Name</div>
+      <input type="text" class="modal-input" id="new-moodboard-name" placeholder="e.g. Ash and Ember">
+    </div>
+
+    <div class="moodboard-sources">
+      <div class="moodboard-source">
+        <i class="ti ti-upload"></i>
+        <div class="moodboard-source-name">Upload images</div>
+      </div>
+      <div class="moodboard-source">
+        <i class="ti ti-map-pin"></i>
+        <div class="moodboard-source-name">Import from Pinterest</div>
+      </div>
+    </div>
+    <div class="moodboard-slots-info">12 of 12 slots left</div>
+
+    <div class="guidance-grid">
+      <div class="guidance-label">
+        <div class="guidance-icon good"><i class="ti ti-check" style="font-size: 11px;"></i></div>
+        <div>
+          <div class="guidance-label-name">Recommended</div>
+          <div class="guidance-label-sub">One cohesive style and mood</div>
+        </div>
+      </div>
+      <div class="guidance-images">
+        <div class="guidance-image" style="background: radial-gradient(circle at 30% 40%, #3d5a3a 0%, #1a2618 100%);"></div>
+        <div class="guidance-image" style="background: radial-gradient(circle at 30% 40%, #2a3c58 0%, #14202e 100%);"></div>
+        <div class="guidance-image" style="background: radial-gradient(circle at 30% 40%, #4a2952 0%, #251230 100%);"></div>
+        <div class="guidance-image" style="background: radial-gradient(circle at 30% 40%, #58252a 0%, #2c1214 100%);"></div>
+      </div>
+
+      <div class="guidance-label">
+        <div class="guidance-icon bad"><i class="ti ti-x" style="font-size: 11px;"></i></div>
+        <div>
+          <div class="guidance-label-name">Avoid</div>
+          <div class="guidance-label-sub">Mixed styles, inconsistent tone</div>
+        </div>
+      </div>
+      <div class="guidance-images">
+        <div class="guidance-image bad-frame" style="background: linear-gradient(135deg, #a04030 0%, #6a2818 100%);"></div>
+        <div class="guidance-image bad-frame" style="background: linear-gradient(135deg, #a08050 0%, #604838 100%);"></div>
+        <div class="guidance-image bad-frame" style="background: linear-gradient(135deg, #6a90a0 0%, #385868 100%);"></div>
+        <div class="guidance-image bad-frame" style="background: linear-gradient(135deg, #808080 0%, #505050 100%);"></div>
+      </div>
+    </div>
+
+    <button class="save-moodboard-btn" onclick="closeModal()">Save Moodboard (0/12)</button>
+  </div>
+</div>
+
+<!-- =========================================================== -->
+<!-- MODAL: NEW GARMENT -->
+<!-- =========================================================== -->
+<div class="modal-backdrop" id="modal-new-garment">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>New Garment</h2>
+      <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-sub">Pick a category and give this garment a name. Everything inside draws on the season's mood.</div>
+
+    <div class="modal-field">
+      <div class="label">Category</div>
+      <div class="category-grid" id="category-grid">
+        <div class="category-option" onclick="pickCategory(this)">Shirt<span class="check"><i class="ti ti-check"></i></span></div>
+        <div class="category-option" onclick="pickCategory(this)">Tee<span class="check"><i class="ti ti-check"></i></span></div>
+        <div class="category-option" onclick="pickCategory(this)">Top<span class="check"><i class="ti ti-check"></i></span></div>
+        <div class="category-option" onclick="pickCategory(this)">Dress<span class="check"><i class="ti ti-check"></i></span></div>
+        <div class="category-option" onclick="pickCategory(this)">Skirt<span class="check"><i class="ti ti-check"></i></span></div>
+        <div class="category-option selected" onclick="pickCategory(this)">Pant<span class="check"><i class="ti ti-check"></i></span></div>
+        <div class="category-option" onclick="pickCategory(this)">Short<span class="check"><i class="ti ti-check"></i></span></div>
+        <div class="category-option" onclick="pickCategory(this)">Jacket<span class="check"><i class="ti ti-check"></i></span></div>
+        <div class="category-option" onclick="pickCategory(this)">Sweatshirt<span class="check"><i class="ti ti-check"></i></span></div>
+        <div class="category-option" onclick="pickCategory(this)">Jumpsuit<span class="check"><i class="ti ti-check"></i></span></div>
+      </div>
+    </div>
+
+    <div class="modal-field">
+      <div class="label">Garment Name</div>
+      <input type="text" class="modal-input" id="new-garment-name" placeholder="e.g. Wide-Leg Ash Trouser">
+    </div>
+
+    <button class="save-moodboard-btn" onclick="createGarment()">Create Garment</button>
+  </div>
+</div>
+
+<script>
+// ============ NAVIGATION ============
+function go(viewName) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + viewName).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goToSeason(code, moodboardName) {
+  document.getElementById('season-name').textContent = code;
+  document.getElementById('season-crumb-name').textContent = code;
+  document.getElementById('moodboard-name-label').textContent = '- ' + moodboardName;
+  // Show filled state
+  document.getElementById('moodboard-filled').classList.remove('hidden');
+  document.getElementById('moodboard-empty').classList.add('hidden');
+  document.getElementById('garments-filled').classList.remove('hidden');
+  document.getElementById('garments-empty').classList.add('hidden');
+  go('season');
+}
+
+function goToNewSeason(code) {
+  document.getElementById('season-name').textContent = code;
+  document.getElementById('season-crumb-name').textContent = code;
+  document.getElementById('season-created').textContent = 'Created today';
+  // Show empty state (no moodboard yet)
+  document.getElementById('moodboard-filled').classList.add('hidden');
+  document.getElementById('moodboard-empty').classList.remove('hidden');
+  document.getElementById('garments-filled').classList.add('hidden');
+  document.getElementById('garments-empty').classList.remove('hidden');
+  go('season');
+}
+
+function goToGarment(garmentKey) {
+  go('garment');
+}
+
+function goToSketch() {
+  go('sketch');
+}
+
+// ============ MODALS ============
+function openModal(name) {
+  document.getElementById('modal-' + name).classList.add('active');
+}
+function closeModal() {
+  document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('active'));
+}
+// Close on backdrop click
+document.querySelectorAll('.modal-backdrop').forEach(m => {
+  m.addEventListener('click', (e) => {
+    if (e.target === m) closeModal();
+  });
+});
+
+function createSeason() {
+  const code = (document.getElementById('new-season-name').value.trim() || 'NEW').toUpperCase().replace(/\s+/g, '');
+  document.getElementById('new-season-name').value = '';
+  closeModal();
+  goToNewSeason(code);
+}
+
+function pickCategory(el) {
+  el.parentElement.querySelectorAll('.category-option').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function createGarment() {
+  const name = document.getElementById('new-garment-name').value.trim() || 'Untitled Garment';
+  document.getElementById('new-garment-name').value = '';
+  document.getElementById('garment-name').textContent = name;
+  document.getElementById('garment-crumb-name').textContent = name;
+  closeModal();
+  go('garment');
+}
+
+// ============ SEASON TABS ============
+function switchSeasonTab(el, tab) {
+  el.parentElement.querySelectorAll('.season-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.season-tab-content').forEach(c => c.classList.add('hidden'));
+  document.getElementById('tab-' + tab).classList.remove('hidden');
+}
+
+// ============ SKETCH STAGE INTERACTIONS ============
+function pickChip(el) {
+  el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function pickFilter(el) {
+  el.parentElement.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function toggleRef(el) {
+  const selected = document.querySelectorAll('.moodboard-ref-tile.selected');
+  if (el.classList.contains('selected')) {
+    el.classList.remove('selected');
+  } else if (selected.length < 3) {
+    el.classList.add('selected');
+  }
+}
+
+function changeQty(delta) {
+  const el = document.getElementById('sketch-qty');
+  let n = parseInt(el.textContent, 10) + delta;
+  if (n < 1) n = 1;
+  if (n > 4) n = 4;
+  el.textContent = n;
+}
+
+function cycleState(el, state) {
+  const actions = el.parentElement;
+  const tile = el.closest('.render-tile');
+  actions.querySelectorAll('.state-dot').forEach(d => {
+    d.classList.remove('active');
+    d.innerHTML = '';
+  });
+  el.classList.add('active');
+  el.innerHTML = '<i class="ti ti-check"></i>';
+  tile.classList.remove('green', 'yellow');
+  if (state === 'green') tile.classList.add('green');
+  if (state === 'yellow') tile.classList.add('yellow');
+}
+</script>
+
+</body>
+</html>
