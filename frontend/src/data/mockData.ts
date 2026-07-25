@@ -118,6 +118,10 @@ export const MOCK_GARMENTS: Garment[] = [
   },
 ];
 
+export function placeholderMoodboard(): string[] {
+  return Array.from({ length: 12 }, (_, i) => `mood-placeholder:${i}`);
+}
+
 export const MOCK_SEASONS: Season[] = [
   {
     id: "s1",
@@ -127,6 +131,7 @@ export const MOCK_SEASONS: Season[] = [
     palette: paletteForSeed(3),
     keywords: keywordsForSeed(3),
     garmentIds: ["g1", "g2", "g3"],
+    moodboardImages: placeholderMoodboard(),
   },
   {
     id: "s2",
@@ -136,5 +141,6 @@ export const MOCK_SEASONS: Season[] = [
     palette: paletteForSeed(9),
     keywords: keywordsForSeed(9),
     garmentIds: ["g4"],
+    moodboardImages: placeholderMoodboard(),
   },
 ];

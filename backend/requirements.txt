@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+beanie
+motor
+pymongo
+typing_extensions
+pydantic-settings
+python-dotenv
+imagekitio
+python-jose[cryptography]
+passlib[bcrypt]

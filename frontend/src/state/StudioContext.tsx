@@ -16,6 +16,7 @@ interface StudioContextValue {
   getGarment: (id: string) => Garment | undefined;
   createSeason: (name: string) => Season;
   createGarment: (seasonId: string, name: string) => Garment;
+  setMoodboardImages: (seasonId: string, images: string[]) => void;
 }
 
 const StudioContext = createContext<StudioContextValue | null>(null);
@@ -46,9 +47,15 @@ export function StudioProvider({ children }: { children: ReactNode }) {
           palette: paletteForSeed(seed),
           keywords: keywordsForSeed(seed),
           garmentIds: [],
+          moodboardImages: [],
         };
         setSeasons((prev) => [season, ...prev]);
         return season;
+      },
+      setMoodboardImages: (seasonId, images) => {
+        setSeasons((prev) =>
+          prev.map((s) => (s.id === seasonId ? { ...s, moodboardImages: images } : s)),
+        );
       },
       createGarment: (seasonId, name) => {
         const seed = Math.floor(garments.length * 4 + name.length + 3);
