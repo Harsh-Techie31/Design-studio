@@ -1,6 +1,7 @@
-import type { NodeDef, NodeStatus } from "../types";
+import type { NodeDef } from "../types";
+import { nodeStatusFromSummary, type NodeSummary } from "../types";
 
-const STATUS_META: Record<NodeStatus, { label: string; className: string }> = {
+const STATUS_META: Record<string, { label: string; className: string }> = {
   empty: { label: "Not started", className: "bg-line-soft text-muted" },
   active: { label: "In progress", className: "bg-brass/15 text-brass" },
   done: { label: "Done", className: "bg-brass text-ink" },
@@ -8,11 +9,12 @@ const STATUS_META: Record<NodeStatus, { label: string; className: string }> = {
 
 interface NodeCardProps {
   def: NodeDef;
-  status: NodeStatus;
+  summary: NodeSummary | undefined;
   onOpen: () => void;
 }
 
-export function NodeCard({ def, status, onOpen }: NodeCardProps) {
+export function NodeCard({ def, summary, onOpen }: NodeCardProps) {
+  const status = nodeStatusFromSummary(summary);
   const meta = STATUS_META[status];
   return (
     <button

@@ -8,6 +8,7 @@ import { GarmentCard } from "../components/GarmentCard";
 import { Modal } from "../components/Modal";
 import { StartMoodboardModal } from "../components/StartMoodboardModal";
 import { useStudio } from "../state/StudioContext";
+import { seedFromId } from "../types";
 
 export function SeasonDetailPage() {
   const { seasonId } = useParams<{ seasonId: string }>();
@@ -33,14 +34,18 @@ export function SeasonDetailPage() {
     );
   }
 
-  const garments = getGarmentsForSeason(season.id);
+  const garments = getGarmentsForSeason(season!.id);
+  const seed = seedFromId(season!.id);
+  const moodboardImages = season!.moodboard.images;
+  const palette = season!.moodboard.analysis.palette;
+  const keywords = season!.moodboard.analysis.keywords;
 
   function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    const garment = createGarment(season.id, name);
+    const garment = createGarment(season!.id, name);
     setName("");
     setOpen(false);
-    navigate(`/seasons/${season.id}/garments/${garment.id}`);
+    navigate(`/seasons/${season!.id}/garments/${garment.id}`);
   }
 
   return (
@@ -50,21 +55,21 @@ export function SeasonDetailPage() {
       <main className="mx-auto max-w-6xl px-6 py-14">
         <div className="mb-2 flex items-center justify-between">
           <h1 className="font-display text-4xl text-bone">{season.name}</h1>
-          <span className="text-sm text-muted">Created {season.createdAt}</span>
+          <span className="text-sm text-muted">Created {season.created_at.slice(0, 10)}</span>
         </div>
 
         {/* Moodboard */}
         <section className="mt-10">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-display text-xl text-bone-dim">Moodboard</h2>
-            {season.moodboardImages.length > 0 && (
+            {moodboardImages.length > 0 && (
               <span className="text-xs uppercase tracking-wide text-muted">
-                {season.moodboardImages.length} images
+                {moodboardImages.length} images
               </span>
             )}
           </div>
 
-          {season.moodboardImages.length === 0 ? (
+          {moodboardImages.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-line py-20 text-center">
               <p className="text-sm text-bone-dim">
                 No moodboard yet — import up to 12 images to set the mood for this season.
@@ -79,11 +84,11 @@ export function SeasonDetailPage() {
           ) : (
             <>
               <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6">
-                {season.moodboardImages.map((src, i) => (
+                {moodboardImages.map((img, i) => (
                   <MoodboardTile
                     key={i}
-                    src={src}
-                    seed={season.seed}
+                    src={img.url}
+                    seed={seed}
                     index={i}
                     className="aspect-square rounded-md"
                   />
@@ -93,11 +98,11 @@ export function SeasonDetailPage() {
               <div className="mt-6 flex flex-col gap-5 rounded-xl border border-line bg-surface p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="mb-2 text-xs uppercase tracking-wide text-muted">Palette</p>
-                  <PaletteSwatches colors={season.palette} />
+                  <PaletteSwatches colors={palette} />
                 </div>
                 <div>
                   <p className="mb-2 text-xs uppercase tracking-wide text-muted">Mood</p>
-                  <KeywordChips keywords={season.keywords} />
+                  <KeywordChips keywords={keywords} />
                 </div>
               </div>
             </>

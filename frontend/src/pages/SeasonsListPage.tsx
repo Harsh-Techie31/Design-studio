@@ -51,7 +51,7 @@ export function SeasonsListPage() {
               <SeasonCard
                 key={season.id}
                 season={season}
-                garmentCount={garments.filter((g) => g.seasonId === season.id).length}
+                garmentCount={garments.filter((g) => g.season_id === season.id).length}
               />
             ))}
           </div>

@@ -7,6 +7,7 @@ import { Modal } from "../components/Modal";
 import { PlaceholderTile } from "../components/PlaceholderTile";
 import { useStudio } from "../state/StudioContext";
 import { NODE_DEFS } from "../data/mockData";
+import { seedFromId } from "../types";
 import type { NodeDef } from "../types";
 
 export function GarmentDetailPage() {
@@ -31,6 +32,9 @@ export function GarmentDetailPage() {
     );
   }
 
+  const seed = seedFromId(garment.id);
+  const palette = season.moodboard.analysis.palette;
+
   return (
     <div className="min-h-screen bg-ink text-bone">
       <NavBar
@@ -44,7 +48,7 @@ export function GarmentDetailPage() {
       <main className="mx-auto max-w-6xl px-6 py-14">
         <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-5">
-            <PlaceholderTile seed={garment.seed} className="h-20 w-20 rounded-xl" />
+            <PlaceholderTile seed={seed} className="h-20 w-20 rounded-xl" />
             <div>
               <h1 className="font-display text-4xl text-bone">{garment.name}</h1>
               <p className="mt-1 text-sm text-bone-dim">
@@ -52,7 +56,7 @@ export function GarmentDetailPage() {
               </p>
             </div>
           </div>
-          <PaletteSwatches colors={season.palette} size="sm" />
+          <PaletteSwatches colors={palette} size="sm" />
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -60,7 +64,7 @@ export function GarmentDetailPage() {
             <NodeCard
               key={def.key}
               def={def}
-              status={garment.nodeStatus[def.key]}
+              summary={garment.node_summary[def.key]}
               onOpen={() => setActiveNode(def)}
             />
           ))}

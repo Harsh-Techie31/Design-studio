@@ -1,4 +1,4 @@
-import type { Garment, NodeDef, NodeKey, NodeStatus, Season } from "../types";
+import type { Garment, MoodboardImage, NodeDef, NodeKey, NodeSummary, Season } from "../types";
 
 export const NODE_DEFS: NodeDef[] = [
   { key: "research", number: 1, label: "Research", hint: "Trend & inspiration brief" },
@@ -62,85 +62,101 @@ export function keywordsForSeed(seed: number): string[] {
   return pick(KEYWORD_POOL, 4, seed);
 }
 
-const STATUS_CYCLE: NodeStatus[] = ["done", "done", "active", "empty", "empty", "empty", "empty", "empty"];
-
-function nodeStatusForSeed(seed: number): Record<NodeKey, NodeStatus> {
-  const rotated = STATUS_CYCLE.slice(seed % STATUS_CYCLE.length).concat(
-    STATUS_CYCLE.slice(0, seed % STATUS_CYCLE.length),
-  );
-  const record = {} as Record<NodeKey, NodeStatus>;
+function nodeSummaryForSeed(seed: number): Partial<Record<NodeKey, NodeSummary>> {
+  const summary = {} as Partial<Record<NodeKey, NodeSummary>>;
+  const rotated = seed % 8;
   NODE_DEFS.forEach((def, i) => {
-    record[def.key] = rotated[i];
+    const idx = (i + rotated) % 8;
+    if (idx < 2) {
+      summary[def.key] = { run_count: 2, liked_count: 1, has_processing: false, has_failed: false, last_run_at: "2026-06-01T00:00:00Z" };
+    } else if (idx === 2) {
+      summary[def.key] = { run_count: 1, liked_count: 0, has_processing: true, has_failed: false, last_run_at: "2026-06-01T00:00:00Z" };
+    }
   });
-  return record;
+  return summary;
 }
 
-export function emptyNodeStatus(): Record<NodeKey, NodeStatus> {
-  const record = {} as Record<NodeKey, NodeStatus>;
-  NODE_DEFS.forEach((def) => {
-    record[def.key] = "empty";
-  });
-  return record;
+export function placeholderMoodboard(): MoodboardImage[] {
+  return Array.from({ length: 12 }, (_, i) => ({
+    url: `mood-placeholder:${i}`,
+    imagekit_file_id: null,
+    source: "upload" as const,
+    order: i,
+  }));
 }
 
-export const MOCK_GARMENTS: Garment[] = [
-  {
-    id: "g1",
-    seasonId: "s1",
-    name: "Frayed Silk Trench",
-    seed: 3,
-    createdAt: "2026-06-02",
-    nodeStatus: nodeStatusForSeed(3),
-  },
-  {
-    id: "g2",
-    seasonId: "s1",
-    name: "Wide-Leg Ash Trouser",
-    seed: 7,
-    createdAt: "2026-06-04",
-    nodeStatus: nodeStatusForSeed(7),
-  },
-  {
-    id: "g3",
-    seasonId: "s1",
-    name: "Bonded Shell Jacket",
-    seed: 1,
-    createdAt: "2026-06-06",
-    nodeStatus: nodeStatusForSeed(1),
-  },
-  {
-    id: "g4",
-    seasonId: "s2",
-    name: "Draped Column Dress",
-    seed: 9,
-    createdAt: "2026-05-14",
-    nodeStatus: nodeStatusForSeed(9),
-  },
-];
-
-export function placeholderMoodboard(): string[] {
-  return Array.from({ length: 12 }, (_, i) => `mood-placeholder:${i}`);
-}
+const now = "2026-06-01T00:00:00Z";
 
 export const MOCK_SEASONS: Season[] = [
   {
     id: "s1",
     name: "Ash & Ember",
-    createdAt: "2026-06-01",
-    seed: 3,
-    palette: paletteForSeed(3),
-    keywords: keywordsForSeed(3),
-    garmentIds: ["g1", "g2", "g3"],
-    moodboardImages: placeholderMoodboard(),
+    moodboard: {
+      status: "ready",
+      images: placeholderMoodboard(),
+      analysis: {
+        palette: paletteForSeed(3),
+        keywords: keywordsForSeed(3),
+        brief: null,
+        model: null,
+        analyzed_at: now,
+        error: null,
+      },
+    },
+    created_at: now,
+    updated_at: now,
   },
   {
     id: "s2",
     name: "Quiet Coastline",
-    createdAt: "2026-05-10",
-    seed: 9,
-    palette: paletteForSeed(9),
-    keywords: keywordsForSeed(9),
-    garmentIds: ["g4"],
-    moodboardImages: placeholderMoodboard(),
+    moodboard: {
+      status: "ready",
+      images: placeholderMoodboard(),
+      analysis: {
+        palette: paletteForSeed(9),
+        keywords: keywordsForSeed(9),
+        brief: null,
+        model: null,
+        analyzed_at: now,
+        error: null,
+      },
+    },
+    created_at: now,
+    updated_at: now,
+  },
+];
+
+export const MOCK_GARMENTS: Garment[] = [
+  {
+    id: "g1",
+    season_id: "s1",
+    name: "Frayed Silk Trench",
+    node_summary: nodeSummaryForSeed(3),
+    created_at: "2026-06-02T00:00:00Z",
+    updated_at: "2026-06-02T00:00:00Z",
+  },
+  {
+    id: "g2",
+    season_id: "s1",
+    name: "Wide-Leg Ash Trouser",
+    node_summary: nodeSummaryForSeed(7),
+    created_at: "2026-06-04T00:00:00Z",
+    updated_at: "2026-06-04T00:00:00Z",
+  },
+  {
+    id: "g3",
+    season_id: "s1",
+    name: "Bonded Shell Jacket",
+    node_summary: nodeSummaryForSeed(1),
+    created_at: "2026-06-06T00:00:00Z",
+    updated_at: "2026-06-06T00:00:00Z",
+  },
+  {
+    id: "g4",
+    season_id: "s2",
+    name: "Draped Column Dress",
+    node_summary: nodeSummaryForSeed(9),
+    created_at: "2026-05-14T00:00:00Z",
+    updated_at: "2026-05-14T00:00:00Z",
   },
 ];

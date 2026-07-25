@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import type { Season } from "../types";
+import { seedFromId } from "../types";
 import { PlaceholderTile } from "./PlaceholderTile";
 
 export function SeasonCard({ season, garmentCount }: { season: Season; garmentCount: number }) {
+  const seed = seedFromId(season.id);
   return (
     <Link
       to={`/seasons/${season.id}`}
@@ -10,7 +12,7 @@ export function SeasonCard({ season, garmentCount }: { season: Season; garmentCo
     >
       <div className="grid grid-cols-4 gap-px">
         {[0, 1, 2, 3].map((i) => (
-          <PlaceholderTile key={i} seed={season.seed} index={i} className="aspect-square" />
+          <PlaceholderTile key={i} seed={seed} index={i} className="aspect-square" />
         ))}
       </div>
       <div className="p-5">
@@ -18,10 +20,10 @@ export function SeasonCard({ season, garmentCount }: { season: Season; garmentCo
           {season.name}
         </h3>
         <p className="mt-1 text-sm text-muted">
-          {garmentCount} garment{garmentCount === 1 ? "" : "s"} · {season.createdAt}
+          {garmentCount} garment{garmentCount === 1 ? "" : "s"} · {season.created_at.slice(0, 10)}
         </p>
         <div className="mt-4 flex gap-1.5">
-          {season.palette.map((c, i) => (
+          {season.moodboard.analysis.palette.map((c, i) => (
             <span
               key={i}
               className="h-3 w-3 rounded-full border border-white/10"

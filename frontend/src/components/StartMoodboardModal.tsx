@@ -2,27 +2,14 @@ import { useRef, useState, type DragEvent } from "react";
 import { Modal } from "./Modal";
 import { PlaceholderTile } from "./PlaceholderTile";
 import { AVOID_MOODBOARD_SAMPLES, RECOMMENDED_MOODBOARD_SAMPLES } from "../utils/sampleImages";
+import type { MoodboardImage } from "../types";
 
 const MAX_IMAGES = 12;
 
 interface StartMoodboardModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (images: string[]) => void;
-}
-
-function filesToDataUrls(files: File[]): Promise<string[]> {
-  return Promise.all(
-    files.map(
-      (file) =>
-        new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        }),
-    ),
-  );
+  onSave: (images: MoodboardImage[]) => void;
 }
 
 function UploadIcon() {
@@ -48,7 +35,7 @@ function PinIcon() {
 }
 
 export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardModalProps) {
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<MoodboardImage[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [pinterestOpen, setPinterestOpen] = useState(false);
   const [pinterestUrl, setPinterestUrl] = useState("");
@@ -61,8 +48,26 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
       .filter((f) => f.type.startsWith("image/"))
       .slice(0, remaining);
     if (files.length === 0) return;
-    const urls = await filesToDataUrls(files);
-    setImages((prev) => [...prev, ...urls]);
+
+    const newImages: MoodboardImage[] = await Promise.all(
+      files.map(
+        (file) =>
+          new Promise<MoodboardImage>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              resolve({
+                url: reader.result as string,
+                imagekit_file_id: null,
+                source: "upload",
+                order: images.length,
+              });
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+          }),
+      ),
+    );
+    setImages((prev) => [...prev, ...newImages]);
   }
 
   function handleDrop(e: DragEvent<HTMLDivElement>) {
@@ -74,7 +79,12 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
   function handlePinterestImport() {
     if (!pinterestUrl.trim()) return;
     const count = Math.min(6, remaining);
-    const imported = Array.from({ length: count }, (_, i) => `mood-placeholder:${images.length + i}`);
+    const imported: MoodboardImage[] = Array.from({ length: count }, (_, i) => ({
+      url: `mood-placeholder:${images.length + i}`,
+      imagekit_file_id: null,
+      source: "pinterest",
+      order: images.length + i,
+    }));
     setImages((prev) => [...prev, ...imported]);
     setPinterestUrl("");
     setPinterestOpen(false);
@@ -212,12 +222,12 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
 
       {images.length > 0 && (
         <div className="mt-5 grid grid-cols-4 gap-2 sm:grid-cols-6">
-          {images.map((src, i) => (
+          {images.map((img, i) => (
             <div key={i} className="group relative aspect-square overflow-hidden rounded-lg">
-              {src.startsWith("mood-placeholder:") ? (
+              {img.url.startsWith("mood-placeholder:") ? (
                 <PlaceholderTile seed={i + 1} index={i} className="h-full w-full" />
               ) : (
-                <img src={src} alt="" className="h-full w-full object-cover" />
+                <img src={img.url} alt="" className="h-full w-full object-cover" />
               )}
               <button
                 onClick={() => removeAt(i)}

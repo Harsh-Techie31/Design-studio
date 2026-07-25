@@ -1,12 +1,6 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
-import type { Garment, Season } from "../types";
-import {
-  MOCK_GARMENTS,
-  MOCK_SEASONS,
-  emptyNodeStatus,
-  keywordsForSeed,
-  paletteForSeed,
-} from "../data/mockData";
+import type { Garment, MoodboardImage, Season } from "../types";
+import { MOCK_GARMENTS, MOCK_SEASONS, paletteForSeed, keywordsForSeed } from "../data/mockData";
 
 interface StudioContextValue {
   seasons: Season[];
@@ -16,7 +10,7 @@ interface StudioContextValue {
   getGarment: (id: string) => Garment | undefined;
   createSeason: (name: string) => Season;
   createGarment: (seasonId: string, name: string) => Garment;
-  setMoodboardImages: (seasonId: string, images: string[]) => void;
+  setMoodboardImages: (seasonId: string, images: MoodboardImage[]) => void;
 }
 
 const StudioContext = createContext<StudioContextValue | null>(null);
@@ -35,46 +29,52 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       garments,
       getSeason: (id) => seasons.find((s) => s.id === id),
       getGarmentsForSeason: (seasonId) =>
-        garments.filter((g) => g.seasonId === seasonId),
+        garments.filter((g) => g.season_id === seasonId),
       getGarment: (id) => garments.find((g) => g.id === id),
       createSeason: (name) => {
         const seed = Math.floor(seasons.length * 5 + name.length + 11);
+        const now = new Date().toISOString();
         const season: Season = {
           id: newId("s"),
           name: name.trim() || "Untitled Season",
-          createdAt: new Date().toISOString().slice(0, 10),
-          seed,
-          palette: paletteForSeed(seed),
-          keywords: keywordsForSeed(seed),
-          garmentIds: [],
-          moodboardImages: [],
+          moodboard: {
+            status: "empty",
+            images: [],
+            analysis: {
+              palette: paletteForSeed(seed),
+              keywords: keywordsForSeed(seed),
+              brief: null,
+              model: null,
+              analyzed_at: null,
+              error: null,
+            },
+          },
+          created_at: now,
+          updated_at: now,
         };
         setSeasons((prev) => [season, ...prev]);
         return season;
       },
       setMoodboardImages: (seasonId, images) => {
         setSeasons((prev) =>
-          prev.map((s) => (s.id === seasonId ? { ...s, moodboardImages: images } : s)),
-        );
-      },
-      createGarment: (seasonId, name) => {
-        const seed = Math.floor(garments.length * 4 + name.length + 3);
-        const garment: Garment = {
-          id: newId("g"),
-          seasonId,
-          name: name.trim() || "Untitled Garment",
-          seed,
-          createdAt: new Date().toISOString().slice(0, 10),
-          nodeStatus: emptyNodeStatus(),
-        };
-        setGarments((prev) => [garment, ...prev]);
-        setSeasons((prev) =>
           prev.map((s) =>
             s.id === seasonId
-              ? { ...s, garmentIds: [garment.id, ...s.garmentIds] }
+              ? { ...s, moodboard: { ...s.moodboard, images } }
               : s,
           ),
         );
+      },
+      createGarment: (seasonId, name) => {
+        const now = new Date().toISOString();
+        const garment: Garment = {
+          id: newId("g"),
+          season_id: seasonId,
+          name: name.trim() || "Untitled Garment",
+          node_summary: {},
+          created_at: now,
+          updated_at: now,
+        };
+        setGarments((prev) => [garment, ...prev]);
         return garment;
       },
     }),

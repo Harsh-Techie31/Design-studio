@@ -1,16 +1,20 @@
 import { Link } from "react-router-dom";
 import type { Garment } from "../types";
+import { nodeStatusFromSummary, seedFromId } from "../types";
 import { PlaceholderTile } from "./PlaceholderTile";
 import { NODE_DEFS } from "../data/mockData";
 
 export function GarmentCard({ garment }: { garment: Garment }) {
-  const doneCount = NODE_DEFS.filter((d) => garment.nodeStatus[d.key] === "done").length;
+  const doneCount = NODE_DEFS.filter(
+    (d) => nodeStatusFromSummary(garment.node_summary[d.key]) === "done",
+  ).length;
+  const seed = seedFromId(garment.id);
   return (
     <Link
-      to={`/seasons/${garment.seasonId}/garments/${garment.id}`}
+      to={`/seasons/${garment.season_id}/garments/${garment.id}`}
       className="group block overflow-hidden rounded-xl border border-line bg-surface transition-all hover:-translate-y-0.5 hover:border-brass/50"
     >
-      <PlaceholderTile seed={garment.seed} className="aspect-[4/3]" />
+      <PlaceholderTile seed={seed} className="aspect-[4/3]" />
       <div className="p-4">
         <h3 className="font-display text-xl text-bone transition-colors group-hover:text-brass">
           {garment.name}
