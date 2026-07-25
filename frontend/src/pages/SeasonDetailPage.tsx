@@ -184,10 +184,7 @@ export function SeasonDetailPage() {
               {/* Analysis Status */}
               {status === "analyzing" && (
                 <div className="mt-4 flex items-center gap-3 rounded-xl border border-brass/20 bg-brass/[0.03] px-5 py-4">
-                  <svg className="h-5 w-5 animate-spin text-brass" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
+                  <i className="ti ti-loader-2 animate-spin text-lg text-brass" />
                   <span className="text-sm text-bone-dim">Analyzing your mood…</span>
                 </div>
               )}
@@ -230,15 +227,9 @@ export function SeasonDetailPage() {
                         onClick={() => setBriefExpanded(!briefExpanded)}
                         className="flex items-center gap-1.5 text-xs uppercase tracking-wide text-muted hover:text-bone-dim transition-colors"
                       >
-                        <svg
-                          className={`h-3 w-3 transition-transform ${briefExpanded ? "rotate-90" : ""}`}
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path d="M9 18l6-6-6-6" />
-                        </svg>
+                        <i
+                          className={`ti ti-chevron-right transition-transform ${briefExpanded ? "rotate-90" : ""}`}
+                        />
                         Creative Brief
                       </button>
                       {briefExpanded && (

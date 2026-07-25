@@ -12,37 +12,6 @@ interface StartMoodboardModalProps {
   onSave: (images: MoodboardImage[], name: string) => Promise<void>;
 }
 
-function Spinner() {
-  return (
-    <svg className="h-4 w-4 animate-spin text-ink" viewBox="0 0 24 24" fill="none">
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-    </svg>
-  );
-}
-
-function UploadIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-      <path d="M12 16V4M12 4L7 9M12 4l5 5" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function PinIcon() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-      <path
-        d="M12 21s-6.5-5.8-6.5-11A6.5 6.5 0 0 1 18.5 10c0 5.2-6.5 11-6.5 11Z"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="12" cy="10" r="2.2" />
-    </svg>
-  );
-}
-
 export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardModalProps) {
   const [name, setName] = useState("");
   const [images, setImages] = useState<MoodboardImage[]>([]);
@@ -169,8 +138,8 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
             remaining > 0 && !saving ? "cursor-pointer" : "cursor-default opacity-50"
           } ${isDragging ? "border-brass bg-brass/5" : "border-line bg-surface hover:border-brass/50"}`}
         >
-          <span className="text-muted">
-            <UploadIcon />
+          <span className="text-2xl text-muted">
+            <i className="ti ti-upload" />
           </span>
           <p className="text-sm text-bone">Upload images</p>
           <input
@@ -192,8 +161,8 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
             remaining > 0 && !saving ? "cursor-pointer" : "cursor-default opacity-50"
           } ${pinterestOpen ? "border-brass bg-brass/5" : "border-line bg-surface hover:border-brass/50"}`}
         >
-          <span className="text-muted">
-            <PinIcon />
+          <span className="text-2xl text-muted">
+            <i className="ti ti-map-pin" />
           </span>
           <p className="text-sm text-bone">Import from Pinterest</p>
         </div>
@@ -228,7 +197,7 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
       <div className="mt-5 flex flex-col gap-3 border-t border-line pt-5">
         <div className="flex items-center gap-3">
           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
-            ✓
+            <i className="ti ti-check text-xs" />
           </span>
           <div className="min-w-[170px]">
             <p className="text-sm font-medium text-bone">Recommended</p>
@@ -244,7 +213,7 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
         </div>
         <div className="flex items-center gap-3">
           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500/15 text-red-400">
-            ✕
+            <i className="ti ti-x text-xs" />
           </span>
           <div className="min-w-[170px]">
             <p className="text-sm font-medium text-bone">Avoid</p>
@@ -278,7 +247,7 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
                   aria-label="Remove image"
                   className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-xs text-bone opacity-0 transition-opacity group-hover:opacity-100"
                 >
-                  ✕
+                  <i className="ti ti-x" />
                 </button>
               )}
             </div>
@@ -293,7 +262,7 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
       >
         {saving ? (
           <>
-            <Spinner />
+            <i className="ti ti-loader-2 animate-spin" />
             Uploading {images.filter((img) => !img.url.startsWith("mood-placeholder:")).length} images…
           </>
         ) : (
