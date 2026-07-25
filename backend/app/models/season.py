@@ -35,7 +35,7 @@ class MoodboardData(BaseModel):
 
 
 class Season(Document):
-    code: str
+    code: Optional[str] = None
     moodboard: MoodboardData = Field(default_factory=MoodboardData)
     created_at: datetime = Field(default_factory=utcnow)
     updated_at: datetime = Field(default_factory=utcnow)

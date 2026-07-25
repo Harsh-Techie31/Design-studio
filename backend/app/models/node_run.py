@@ -41,7 +41,7 @@ class NodeRun(Document):
     node_key: Annotated[NodeKey, Indexed()]
     iteration: int
     version: int = 1
-    code: str
+    code: Optional[str] = None
 
     status: RunStatus = RunStatus.PENDING
     liked: bool = False

@@ -25,8 +25,8 @@ class NodeSummary(BaseModel):
 class Garment(Document):
     season_id: Annotated[str, Indexed()]
     name: str
-    category: GarmentCategory
-    style_number: int
+    category: Optional[GarmentCategory] = None
+    style_number: int = 1
     current_version: int = 1
     node_summary: dict[NodeKey, NodeSummary] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=utcnow)

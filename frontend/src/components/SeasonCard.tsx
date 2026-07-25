@@ -17,7 +17,7 @@ export function SeasonCard({ season, garmentCount }: { season: Season; garmentCo
       </div>
       <div className="p-5">
         <h3 className="font-display text-2xl text-bone transition-colors group-hover:text-brass">
-          {season.code}
+          {season.code ?? "Untitled"}
         </h3>
         {season.moodboard.name && (
           <p className="text-xs text-brass">Moodboard - {season.moodboard.name}</p>

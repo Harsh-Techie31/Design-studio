@@ -113,11 +113,11 @@ export function SeasonDetailPage() {
 
   return (
     <div className="min-h-screen bg-ink text-bone">
-      <NavBar crumbs={[{ label: "Seasons", to: "/seasons" }, { label: season.code }]} />
+      <NavBar crumbs={[{ label: "Seasons", to: "/seasons" }, { label: season.code ?? "Untitled" }]} />
 
       <main className="mx-auto max-w-6xl px-6 py-10">
         <div className="mb-6 flex items-center justify-between px-0">
-          <h1 className="font-display text-4xl text-bone">{season.code}</h1>
+          <h1 className="font-display text-4xl text-bone">{season.code ?? "Untitled"}</h1>
           <span className="text-sm text-muted">Created {season.created_at.slice(0, 10)}</span>
         </div>
 

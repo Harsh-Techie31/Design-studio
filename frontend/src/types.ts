@@ -100,7 +100,7 @@ export interface NodeOutput {
 
 export interface Season {
   id: string;
-  code: string;
+  code: string | null;
   moodboard: MoodboardData;
   created_at: string;
   updated_at: string;
@@ -110,7 +110,7 @@ export interface Garment {
   id: string;
   season_id: string;
   name: string;
-  category: GarmentCategory;
+  category: GarmentCategory | null;
   style_number: number;
   current_version: number;
   node_summary: Partial<Record<NodeKey, NodeSummary>>;

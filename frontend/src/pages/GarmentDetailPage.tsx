@@ -40,7 +40,7 @@ export function GarmentDetailPage() {
       <NavBar
         crumbs={[
           { label: "Seasons", to: "/seasons" },
-          { label: season.code, to: `/seasons/${season.id}` },
+          { label: season.code ?? "Untitled", to: `/seasons/${season.id}` },
           { label: garment.name },
         ]}
       />
