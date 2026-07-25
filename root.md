@@ -1,6 +1,35 @@
 # Design Studio — Project Analysis
 
-An AI-assisted fashion design tool where designers build **Seasons** (12-image moodboards) and create **Garments** inside them, each moving through an 8-node fashion pipeline from research to final model shoot.
+An AI-assisted fashion design tool where designers build **Seasons** (12-image moodboards with AI-extracted style profiles) and create **Garments** inside them, each moving through an 8-node fashion pipeline from research to final model shoot.
+
+---
+
+## Quick Start
+
+### Backend
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env               # fill in real credentials
+uvicorn app.main:app --reload --port 8000
+```
+
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev                        # http://localhost:5173
+```
+
+Vite proxies `/api/*` → `http://localhost:8000`.
+
+### Seed Database (optional)
+```bash
+cd backend
+python scripts/seed_db.py
+```
 
 ---
 
@@ -9,10 +38,10 @@ An AI-assisted fashion design tool where designers build **Seasons** (12-image m
 | Layer | Technology |
 |-------|------------|
 | Frontend | React 19, TypeScript 6, Vite 8, Tailwind CSS v4 |
-| Backend | Python, FastAPI, Uvicorn |
-| Database | MongoDB Atlas (via Motor + Beanie ODM) |
-| Image Storage | ImageKit CDN |
-| AI | Google Gemini (planned, not wired) |
+| Backend | Python 3.11+, FastAPI, Uvicorn |
+| Database | MongoDB Atlas (Motor 3.6 + Beanie 1.28 ODM) |
+| Image Storage | ImageKit CDN (`imagekitio` SDK) |
+| AI | Google Gemini (`gemini-3-pro-image`) via REST API |
 | Linting | oxlint (Rust-based) |
 
 ---
@@ -21,200 +50,465 @@ An AI-assisted fashion design tool where designers build **Seasons** (12-image m
 
 ```
 designStudio/
-├── frontend/          # React SPA (Vite + Tailwind v4)
+├── frontend/                          # React SPA
 │   ├── src/
-│   │   ├── main.tsx
-│   │   ├── App.tsx            # Router + StudioProvider
-│   │   ├── index.css          # Tailwind @theme tokens
-│   │   ├── types.ts           # Core TS interfaces
-│   │   ├── components/        # 10 reusable components
-│   │   ├── pages/             # 4 route pages
-│   │   ├── state/             # StudioContext (React Context)
-│   │   ├── data/              # Mock data + generators
-│   │   └── utils/             # Sample image URLs
-│   ├── public/                # favicon.svg, icons.svg
+│   │   ├── main.tsx                   # ReactDOM entry
+│   │   ├── App.tsx                    # Router + StudioProvider wrapper
+│   │   ├── index.css                  # Tailwind v4 @theme tokens (dark palette)
+│   │   ├── types.ts                   # All TS interfaces + utility fns
+│   │   ├── api/
+│   │   │   ├── client.ts             # Base fetch wrapper (/api prefix)
+│   │   │   ├── seasons.ts            # Seasons CRUD + analyzeMoodboard
+│   │   │   ├── garments.ts           # Garments CRUD
+│   │   │   ├── nodeRuns.ts           # Node runs CRUD + like toggle
+│   │   │   └── uploads.ts            # Multipart image upload/delete
+│   │   ├── components/
+│   │   │   ├── NavBar.tsx            # Sticky header with breadcrumbs
+│   │   │   ├── Modal.tsx             # Generic overlay dialog
+│   │   │   ├── SeasonCard.tsx        # Season card with palette dots
+│   │   │   ├── GarmentCard.tsx       # Garment card with progress bar
+│   │   │   ├── NodeCard.tsx          # Pipeline node button (3 states)
+│   │   │   ├── PaletteSwatches.tsx   # Circular color swatch row
+│   │   │   ├── KeywordChips.tsx      # Uppercase pill labels
+│   │   │   ├── MoodboardTile.tsx     # Smart img/placeholder wrapper
+│   │   │   ├── PlaceholderTile.tsx   # Seed-based procedural gradient art
+│   │   │   └── StartMoodboardModal.tsx  # Upload flow with async save
+│   │   ├── pages/
+│   │   │   ├── LandingPage.tsx       # Marketing hero page
+│   │   │   ├── SeasonsListPage.tsx   # Season grid + create modal
+│   │   │   ├── SeasonDetailPage.tsx  # Moodboard + analysis + garments
+│   │   │   └── GarmentDetailPage.tsx # 8-node pipeline grid
+│   │   ├── state/
+│   │   │   └── StudioContext.tsx      # Global state (real API calls)
+│   │   ├── data/
+│   │   │   └── mockData.ts           # Legacy mock data (mostly unused)
+│   │   └── utils/
+│   │       └── sampleImages.ts       # Sample moodboard image URLs
+│   ├── public/
+│   │   ├── favicon.svg
+│   │   └── icons.svg
+│   ├── vite.config.ts                # Proxy /api → localhost:8000
 │   ├── package.json
-│   └── vite.config.ts
+│   └── tsconfig*.json
 ├── backend/
 │   ├── app/
-│   │   ├── main.py            # FastAPI entry + /health
-│   │   ├── config.py          # pydantic-settings config
-│   │   ├── db.py              # Motor/Beanie init
-│   │   └── models/
-│   │       ├── enums.py       # NodeKey, RunStatus, etc.
-│   │       ├── season.py      # Season document model
-│   │       ├── garment.py     # Garment document model
-│   │       └── node_run.py    # NodeRun document model
+│   │   ├── main.py                   # FastAPI entry, CORS, routers, logging
+│   │   ├── config.py                 # pydantic-settings (reads .env)
+│   │   ├── db.py                     # Motor + Beanie init
+│   │   ├── models/
+│   │   │   ├── enums.py              # NodeKey, RunStatus, MoodboardStatus, ImageSource
+│   │   │   ├── season.py             # Season + MoodboardData + MoodboardAnalysis
+│   │   │   ├── garment.py            # Garment + NodeSummary
+│   │   │   └── node_run.py           # NodeRun (append-only versioning)
+│   │   ├── routes/
+│   │   │   ├── seasons.py            # CRUD + cascade delete
+│   │   │   ├── garments.py           # CRUD + _update_node_summary()
+│   │   │   ├── moodboard.py          # Upload/delete images + analyze endpoint
+│   │   │   └── node_runs.py          # CRUD + like toggle + stub outputs
+│   │   ├── schemas/
+│   │   │   ├── season.py             # SeasonCreate/Update/Response
+│   │   │   ├── garment.py            # GarmentCreate/Update/Response
+│   │   │   ├── node_run.py           # NodeRunCreate/Response/LikeToggle
+│   │   │   └── moodboard.py          # MoodboardImageResponse
+│   │   └── services/
+│   │       ├── imagekit.py           # ImageKit upload/delete (sync SDK)
+│   │       └── gemini.py             # Gemini Vision API (URL-based, max 5 images)
 │   ├── scripts/
-│   │   └── verify_connections.py
-│   ├── requirements.txt
-│   ├── SCHEMA.md
-│   └── .env / .env.example
-└── root.md                    # This file
+│   │   ├── seed_db.py                # Seeds 2 seasons + 4 garments
+│   │   └── verify_connections.py     # Tests MongoDB + ImageKit connections
+│   ├── requirements.txt              # Pinned deps (beanie 1.28, motor 3.6)
+│   ├── SCHEMA.md                     # Database schema documentation
+│   ├── .env                          # Live credentials (not committed)
+│   └── .env.example                  # Template
+└── root.md                           # This file
 ```
 
 ---
 
-## Frontend Analysis
+## Frontend Details
 
 ### Routing
 
 | Path | Page | Description |
 |------|------|-------------|
-| `/` | LandingPage | Marketing hero page |
-| `/seasons` | SeasonsListPage | Grid of all seasons |
-| `/seasons/:seasonId` | SeasonDetailPage | Moodboard + garments |
-| `/seasons/:seasonId/garments/:garmentId` | GarmentDetailPage | 8-node pipeline grid |
+| `/` | LandingPage | Marketing hero, feature cards, CTA |
+| `/seasons` | SeasonsListPage | Grid of SeasonCards, "+ New Season" button |
+| `/seasons/:seasonId` | SeasonDetailPage | Moodboard grid, analysis status, palette/keywords/brief, garments list |
+| `/seasons/:seasonId/garments/:garmentId` | GarmentDetailPage | 4×2 grid of 8 NodeCards |
 
-### Components (10 total)
+### Components (10)
 
 | Component | Purpose |
 |-----------|---------|
-| `NavBar` | Sticky header with breadcrumbs + optional action |
-| `Modal` | Generic overlay dialog with backdrop blur |
-| `SeasonCard` | Season thumbnail card with palette dots |
-| `GarmentCard` | Garment card with progress bar |
-| `NodeCard` | Single pipeline node button (empty/active/done states) |
-| `PaletteSwatches` | Row of circular color swatches |
-| `KeywordChips` | Uppercase pill-shaped keyword labels |
-| `MoodboardTile` | Smart image/placeholder wrapper |
-| `PlaceholderTile` | Seed-based procedural gradient art |
-| `StartMoodboardModal` | Drag-drop upload + Pinterest import flow |
+| `NavBar` | Sticky header with breadcrumbs + optional right-side action slot |
+| `Modal` | Generic overlay dialog — backdrop blur, close-on-outside-click, configurable max-width |
+| `SeasonCard` | Card link to season: 2×2 placeholder grid, name, garment count, palette dots |
+| `GarmentCard` | Card link to garment: placeholder tile, name, progress bar (done/8 nodes) |
+| `NodeCard` | Pipeline node button: number label, status badge (Not started/In progress/Done), hint |
+| `PaletteSwatches` | Row of circular color swatches with tooltips, `sm`/`md` sizes |
+| `KeywordChips` | Flex-wrap row of uppercase pill-shaped keyword labels |
+| `MoodboardTile` | Smart wrapper: `<img>` for real URLs, `PlaceholderTile` for `mood-placeholder:*` URIs |
+| `PlaceholderTile` | Seed-based procedural gradient art (radial + linear gradient + hatched overlay) |
+| `StartMoodboardModal` | Full upload flow: drag-drop zone, Pinterest import (simulated), recommended/avoid examples, async save with spinner |
 
-### State Management
+### State Management — `StudioContext.tsx`
 
-- **React Context** (`StudioContext`) — no external state library
-- All data is **client-side mock data** (2 seasons, 4 garments)
-- Seed-based deterministic generators for palettes, keywords, placeholder art
-- ID generation: `crypto.randomUUID().slice(0,8)` with `s_`/`g_` prefixes
-- Context memoized with `useMemo`
+React Context with real API calls. No external state library.
+
+**State:** `seasons: Season[]`, `garments: Garment[]`, `loading: boolean`, `error: string | null`
+
+**Exposed methods:**
+
+| Method | Description |
+|--------|-------------|
+| `getSeason(id)` | Find season by ID from local state |
+| `getGarmentsForSeason(seasonId)` | Filter garments by season_id |
+| `getGarment(id)` | Find garment by ID |
+| `createSeason(name)` | POST to API, prepend to state |
+| `createGarment(seasonId, name)` | POST to API, prepend to state |
+| `setMoodboardImages(seasonId, images)` | Converts data-URLs to Files, uploads via multipart POST, merges server response |
+| `analyzeMoodboard(seasonId)` | POST to analyze endpoint, updates moodboard data |
+| `refreshSeasons()` | Re-fetch all seasons |
+
+**Initialization:** On mount, fetches all seasons, then iterates to fetch all garments.
+
+### API Layer (`src/api/`)
+
+| Module | Functions |
+|--------|-----------|
+| `client.ts` | `request<T>(path, options)` — generic fetcher with `/api` prefix, `ApiError` class |
+| `seasons.ts` | `listSeasons`, `getSeason`, `createSeason`, `updateSeason`, `deleteSeason`, `analyzeMoodboard` |
+| `garments.ts` | `listGarments`, `getGarment`, `createGarment`, `updateGarment`, `deleteGarment` |
+| `nodeRuns.ts` | `listRuns`, `createRun`, `toggleLike` |
+| `uploads.ts` | `uploadMoodboardImages` (multipart), `deleteMoodboardImage` |
 
 ### Design System
 
-- **Theme:** Dark studio aesthetic (near-black `#0a0a0b` surfaces, brass `#c9a24d` accent, warm bone `#f3efe7` text)
+- **Theme:** Dark studio aesthetic — near-black `#0a0a0b` surfaces, brass `#c9a24d` accent, warm bone `#f3efe7` text
 - **Fonts:** Cormorant Garamond (serif display) + Inter (sans body)
-- **Tailwind v4:** CSS-native `@theme` config in `index.css`, no JS config file
+- **Tailwind v4:** CSS-native `@theme` block in `index.css`, no JS config file
 - **Global:** `color-scheme: dark`, brass selection color, box-sizing border-box
 
-### What's Not Implemented
+### Type System (`types.ts`)
 
-- No backend API calls — everything is mocked
-- Node tools are all stubs (modal shows placeholder message)
-- Pinterest import is simulated (generates placeholder tiles)
-- Image uploads stored as data URLs, not sent to server
-- `icons.svg` sprite is unused (leftover from Vite template)
+Frontend types match backend models 1:1 — no translation layer. API responses map directly to frontend state.
+
+**Key types:** `Season`, `Garment`, `NodeRun`, `MoodboardImage`, `MoodboardAnalysis`, `MoodboardData`, `NodeSummary`, `NodeDef`
+
+**Utility functions:**
+- `nodeStatusFromSummary(summary)` → `"empty" | "active" | "done"`
+- `seedFromId(id)` → deterministic hash for procedural placeholder generation
 
 ---
 
-## Backend Analysis
+## Backend Details
 
-### API Endpoints
+### API Endpoints (16 total)
 
-| Method | Path | Status |
-|--------|------|--------|
-| `GET` | `/health` | Implemented — returns `{"status": "ok"}` |
+#### Health
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/health` | Returns `{"status": "ok"}` |
 
-**No CRUD routes, no service layer, no auth middleware exist yet.**
+#### Seasons (`/api/seasons`)
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/seasons` | List all seasons (sorted by created_at desc) |
+| `POST` | `/api/seasons` | Create season (body: `{name}`) |
+| `GET` | `/api/seasons/{id}` | Get single season with full moodboard |
+| `PATCH` | `/api/seasons/{id}` | Update season name |
+| `DELETE` | `/api/seasons/{id}` | Hard-delete + cascade to garments + node_runs |
 
-### Database Models (3 collections)
+#### Garments
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/seasons/{id}/garments` | List garments for a season |
+| `POST` | `/api/seasons/{id}/garments` | Create garment (body: `{name}`) |
+| `GET` | `/api/garments/{id}` | Get single garment |
+| `PATCH` | `/api/garments/{id}` | Update garment name |
+| `DELETE` | `/api/garments/{id}` | Hard-delete + cascade to node_runs |
 
-#### `seasons` — Root entity (one per moodboard)
-- `name`, `created_at`, `updated_at`
-- `moodboard.status` — tracks AI analysis lifecycle (`empty` → `uploading` → `analyzing` → `ready` / `failed`)
-- `moodboard.images[]` — each has `url`, `imagekit_file_id`, `source` (upload/pinterest), `order`
-- `moodboard.analysis` — `palette[]`, `keywords[]`, `brief`, `model`, `analyzed_at`, `error`
+#### Moodboard (nested under seasons)
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/seasons/{id}/moodboard/images` | Upload images (multipart, max 12 total) |
+| `DELETE` | `/api/seasons/{id}/moodboard/images/{index}` | Delete image by index |
+| `POST` | `/api/seasons/{id}/moodboard/analyze` | Trigger Gemini AI analysis |
 
-#### `garments` — One per design within a season
-- `season_id` (indexed FK), `name`, `created_at`, `updated_at`
-- `node_summary` — denormalized read cache per node (run_count, liked_count, has_processing, has_failed, last_run_at)
+#### Node Runs
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/garments/{id}/nodes/{node_key}/runs` | List runs for garment+node |
+| `POST` | `/api/garments/{id}/nodes/{node_key}/runs` | Create run (auto-increments iteration) |
+| `PATCH` | `/api/node-runs/{run_id}/like` | Toggle liked flag |
 
-#### `node_runs` — Versioning core (append-only)
-- `season_id`, `garment_id` (indexed), `node_key` (indexed), `iteration`
-- `status` — `pending` → `processing` → `complete` / `failed`
-- `liked` — "keep this one" flag
-- `inputs[]` — provenance links to upstream runs
-- `output` — `images[]`, `text`, `extra` (flexible dict)
-- `ai` — `model`, `prompt`, `started_at`, `completed_at`, `error`, `retry_count`
-- **Indexes:** unique compound `(garment_id, node_key, iteration)`, compound `(garment_id, node_key, liked)`
+### Database Schema
 
-### Enums (4)
+**MongoDB Atlas** with **Beanie ODM** (async, Pydantic v2).
+
+```
+seasons ──1:N── garments ──1:N── node_runs
+```
+
+#### `seasons` collection
+| Field | Type | Notes |
+|-------|------|-------|
+| `_id` | ObjectId | |
+| `name` | str | |
+| `moodboard.status` | enum | `empty` → `uploading` → `analyzing` → `ready` / `failed` |
+| `moodboard.images[]` | array | `{url, imagekit_file_id, source, order}` |
+| `moodboard.analysis.palette` | list[str] | 5 hex colors from Gemini |
+| `moodboard.analysis.keywords` | list[str] | 10 lowercase mood keywords |
+| `moodboard.analysis.brief` | str \| null | 30-40 word creative direction |
+| `moodboard.analysis.model` | str \| null | AI model used |
+| `moodboard.analysis.analyzed_at` | datetime \| null | |
+| `moodboard.analysis.error` | str \| null | |
+| `created_at` / `updated_at` | datetime | |
+
+#### `garments` collection
+| Field | Type | Notes |
+|-------|------|-------|
+| `_id` | ObjectId | |
+| `season_id` | str | Indexed FK |
+| `name` | str | |
+| `node_summary` | dict | Denormalized cache per NodeKey |
+| `created_at` / `updated_at` | datetime | |
+
+**NodeSummary:** `{run_count, liked_count, has_processing, has_failed, last_run_at}`
+
+#### `node_runs` collection
+| Field | Type | Notes |
+|-------|------|-------|
+| `_id` | ObjectId | |
+| `season_id` | str | Denormalized for query efficiency |
+| `garment_id` | str | Indexed FK |
+| `node_key` | enum | Indexed |
+| `iteration` | int | Per (garment_id, node_key) |
+| `status` | enum | `pending` → `processing` → `complete` / `failed` |
+| `liked` | bool | "Keep this one" flag |
+| `inputs[]` | list | `{run_id, node_key}` provenance links |
+| `output.images` | list[str] | ImageKit URLs |
+| `output.text` | str \| null | |
+| `output.extra` | dict | Flexible per-tool payload |
+| `ai` | obj | `model, prompt, started_at, completed_at, error, retry_count` |
+| `created_at` / `updated_at` | datetime | |
+
+**Indexes:** unique compound `(garment_id, node_key, iteration)`, compound `(garment_id, node_key, liked)`
+
+### Enums
 
 | Enum | Values |
 |------|--------|
-| `NodeKey` | research, sketch, fabric, colorTrim, pattern, mockup, fitCheck, modelShoot |
-| `RunStatus` | pending, processing, complete, failed |
-| `MoodboardStatus` | empty, uploading, analyzing, ready, failed |
-| `ImageSource` | upload, pinterest |
+| `NodeKey` | `research`, `sketch`, `fabric`, `colorTrim`, `pattern`, `mockup`, `fitCheck`, `modelShoot` |
+| `RunStatus` | `pending`, `processing`, `complete`, `failed` |
+| `MoodboardStatus` | `empty`, `uploading`, `analyzing`, `ready`, `failed` |
+| `ImageSource` | `upload`, `pinterest` |
+
+### Services
+
+#### ImageKit (`services/imagekit.py`)
+- `upload_image(file_bytes, file_name)` → URL string
+- `delete_image(file_id)` → None
+- Uses synchronous `imagekitio` SDK (v5.8.0) — NOT async
+- Configured via `IMAGEKIT_PUBLIC_KEY`, `IMAGEKIT_PRIVATE_KEY`, `IMAGEKIT_URL_ENDPOINT`
+
+#### Gemini AI (`services/gemini.py`)
+- `analyze_moodboard(image_urls)` → `{palette, keywords, brief, model}`
+- Passes image URLs directly via `fileData.fileUri` (no base64 download)
+- Max 5 images (capped server-side)
+- Model: `gemini-3-pro-image`
+- API: `https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}`
+- Configured via `AI_KEY` env var
 
 ### Dependencies (requirements.txt)
 
 ```
-fastapi, uvicorn[standard], motor, beanie, pymongo, pydantic-settings, python-dotenv, python-jose[cryptography], passlib[bcrypt], imagekitio, typing_extensions
+fastapi, uvicorn[standard], beanie==1.28.0, motor==3.6.1, pymongo==4.9.2,
+pydantic-settings, python-dotenv, imagekitio, python-jose[cryptography],
+passlib[bcrypt], python-multipart, httpx, typing_extensions
 ```
 
-### What's Not Implemented
-
-- No API routes beyond `/health`
-- No service/business logic layer
-- No AI integration code (Gemini calls)
-- No image upload handlers
-- No moodboard analysis pipeline
-- No node execution engine
-- Auth system configured (JWT, bcrypt) but not wired — no login endpoint, no middleware
+**Critical pinning:** Beanie 1.28 + Motor 3.6 + PyMongo 4.9 (Beanie 2.x breaks with Motor 3.7+)
 
 ---
 
-## Data Model Design Decisions
+## Environment Variables
 
-1. **Reference, not embed** — Collections linked by string `_id`, not embedded documents
-2. **No `users` collection** — Single fixed auth gate, no multi-tenancy
-3. **Hard delete** — Deletions cascade immediately, no soft-delete
-4. **Append-only versioning** — NodeRuns never mutated; new documents per iteration
-5. **Denormalized caches** — `node_summary` on Garment is a read-only cache; source of truth is `node_runs`
-6. **Polymorphic collection** — `node_runs` uses `node_key` discriminator + flexible `output.extra`
+| Variable | Purpose | Example |
+|----------|---------|---------|
+| `MONGODB_URI` | MongoDB Atlas connection string | `mongodb+srv://...` |
+| `MONGODB_DB_NAME` | Database name | `design_studio` |
+| `IMAGEKIT_PUBLIC_KEY` | ImageKit public API key | |
+| `IMAGEKIT_PRIVATE_KEY` | ImageKit private API key | |
+| `IMAGEKIT_URL_ENDPOINT` | ImageKit CDN URL | `https://ik.imagekit.io/...` |
+| `AUTH_EMAIL` | Fixed auth email | |
+| `AUTH_PASSWORD` | Fixed auth password | |
+| `JWT_SECRET` | JWT signing secret | |
+| `AI_KEY` | Google Gemini API key | `AIzaSy...` |
+
+---
+
+## Data Flow: Moodboard Creation
+
+```
+User clicks "Save Moodboard" in StartMoodboardModal
+  │
+  ├─ Modal button shows spinner + "Uploading N images…"
+  │  (modal locked, can't close or edit)
+  │
+  ├─ handleMoodboardSave() in SeasonDetailPage
+  │  ├─ setMoodboardImages(seasonId, images)
+  │  │  ├─ Filters data-URL images → converts to File objects
+  │  │  ├─ POST /api/seasons/{id}/moodboard/images (multipart)
+  │  │  │  └─ Backend uploads each to ImageKit, saves URLs in MongoDB
+  │  │  └─ Merges server response into local state
+  │  │
+  │  └─ analyzeMoodboard(seasonId)  [fire-and-forget]
+  │     ├─ POST /api/seasons/{id}/moodboard/analyze
+  │     │  ├─ Backend sets status → "analyzing"
+  │     │  ├─ Calls Gemini API with up to 5 ImageKit URLs
+  │     │  │  (via fileData.fileUri — no base64 download)
+  │     │  ├─ Parses JSON response → palette, keywords, brief
+  │     │  └─ Saves to MongoDB, sets status → "ready"
+  │     │
+  │     └─ Frontend polls/updates → shows results
+  │
+  ├─ Modal closes (upload done)
+  │
+  └─ "Analyzing your mood…" spinner shows below images
+     └─ When analysis completes → palette/keywords/brief appear
+```
+
+---
+
+## Data Flow: Node Pipeline (Stub)
+
+```
+GarmentDetailPage → clicks NodeCard → shows modal (placeholder)
+  │
+  └─ POST /api/garments/{id}/nodes/{node_key}/runs
+     ├─ Auto-increments iteration number
+     ├─ Returns stub output (placehold.co URLs, hardcoded text)
+     ├─ Updates node_summary on Garment (denormalized cache)
+     └─ Frontend shows placeholder output
+```
 
 ---
 
 ## Current State Summary
 
-| Area | Status |
-|------|--------|
-| Frontend UI/UX | Complete — all 4 pages, 10 components, dark theme |
-| Frontend data | Mock only — no backend integration |
-| Backend schema | Complete — 3 models, 4 enums, indexes defined |
-| Backend API | Scaffold only — health check only |
-| AI integration | Not started — models designed for it, no code |
-| Auth | Configured, not implemented |
-| Image upload | Frontend: data URLs. Backend: ImageKit SDK configured |
+| Area | Status | Notes |
+|------|--------|-------|
+| Frontend UI/UX | ✅ Complete | 4 pages, 10 components, dark theme |
+| Frontend ↔ Backend | ✅ Wired | Real API calls via StudioContext |
+| Backend CRUD API | ✅ Complete | 16 endpoints, all tested |
+| MongoDB + Beanie | ✅ Working | Atlas, seeded with mock data |
+| ImageKit Uploads | ✅ Working | Real uploads to CDN |
+| Gemini AI Analysis | ✅ Working | Extracts palette/keywords/brief |
+| StartMoodboardModal | ✅ Complete | Async save with loading states |
+| SeasonDetailPage | ✅ Complete | Analysis spinner, expandable brief |
+| Node Pipeline | ⚠️ Stub only | Backend returns placeholder data, frontend shows "not wired" |
+| Auth System | ⚠️ Configured | JWT + bcrypt in deps, no login endpoint or middleware |
+| Pinterest Import | ⚠️ Simulated | Creates placeholder tiles, not real import |
+| Node Tools | ⚠️ Not wired | 8 tools (research, sketch, fabric, etc.) need AI backends |
 
 ---
 
 ## Architecture Diagram
 
 ```
-┌─────────────────────────────────────┐
-│           Frontend (React)          │
-│  ┌──────────┐  ┌────────────────┐   │
-│  │  Pages    │  │  Components    │   │
-│  │  (4)     │──│  (10)          │   │
-│  └──────────┘  └────────────────┘   │
-│       │              │              │
-│  ┌────┴──────────────┴────┐        │
-│  │   StudioContext         │        │
-│  │   (React Context +     │        │
-│  │    Mock Data)           │        │
-│  └────────────────────────┘        │
-└──────────────┬──────────────────────┘
-               │ (not connected)
-┌──────────────┴──────────────────────┐
-│           Backend (FastAPI)          │
-│  ┌──────────┐  ┌────────────────┐   │
-│  │  /health │  │  Models (3)    │   │
-│  └──────────┘  └────────────────┘   │
-│                     │              │
-│  ┌──────────────────┴────┐         │
-│  │   MongoDB Atlas        │         │
-│  │   + ImageKit CDN       │         │
-│  └───────────────────────┘         │
-└─────────────────────────────────────┘
+┌──────────────────────────────────────────────────┐
+│              Frontend (React 19)                  │
+│                                                  │
+│  Pages (4)              Components (10)          │
+│  ┌──────────────┐       ┌──────────────────┐     │
+│  │ Landing      │       │ NavBar, Modal    │     │
+│  │ SeasonsList  │───────│ SeasonCard       │     │
+│  │ SeasonDetail │       │ GarmentCard      │     │
+│  │ GarmentDetail│       │ NodeCard         │     │
+│  └──────────────┘       │ PaletteSwatches  │     │
+│         │               │ KeywordChips     │     │
+│         │               │ MoodboardTile    │     │
+│         │               │ PlaceholderTile  │     │
+│         │               │ StartMoodboard   │     │
+│         │               └──────────────────┘     │
+│         │                                        │
+│  ┌──────┴─────────────────────────────┐          │
+│  │   StudioContext (React Context)     │          │
+│  │   - Real API calls (no mock data)   │          │
+│  │   - seasons[], garments[]           │          │
+│  │   - setMoodboardImages()            │          │
+│  │   - analyzeMoodboard()              │          │
+│  └──────────────┬─────────────────────┘          │
+│                 │ /api proxy (→ :8000)            │
+└─────────────────┼────────────────────────────────┘
+                  │
+┌─────────────────┼────────────────────────────────┐
+│            Backend (FastAPI)                      │
+│                 │                                │
+│  Routes (16)    │    Services                    │
+│  ┌──────────────┴──────────────┐                 │
+│  │ GET/POST/PATCH/DELETE       │                 │
+│  │   /api/seasons              │    ┌──────────┐ │
+│  │   /api/seasons/{id}/...     │────│ ImageKit │ │
+│  │   /api/garments/{id}/...    │    │ (upload) │ │
+│  │   /api/node-runs/{id}/...   │    └──────────┘ │
+│  └──────────────┬──────────────┘                 │
+│                 │                 ┌──────────┐   │
+│  Models (3)     │                 │  Gemini  │   │
+│  ┌──────────────┤                 │  (AI)    │   │
+│  │ seasons      │                 └──────────┘   │
+│  │ garments     │                                │
+│  │ node_runs    │                                │
+│  └──────────────┤                                │
+│                 │                                │
+│  ┌──────────────┴──────────────┐                 │
+│  │     MongoDB Atlas            │                 │
+│  │     (3 collections)          │                 │
+│  └─────────────────────────────┘                 │
+└──────────────────────────────────────────────────┘
 ```
+
+---
+
+## Key Decisions
+
+1. **Types match 1:1** — Frontend TS interfaces mirror backend Pydantic models exactly. No translation layer.
+2. **No `seed` field in DB** — Frontend derives placeholder seed from document ID via `seedFromId()`.
+3. **Append-only versioning** — NodeRuns are never mutated; new documents per iteration.
+4. **Denormalized caches** — `node_summary` on Garment is a read-only cache; source of truth is `node_runs`.
+5. **ImageKit sync SDK** — `imagekitio` v5.8 is synchronous, not async. Upload/delete are blocking calls.
+6. **Gemini via REST** — Raw `httpx` POST instead of `google-genai` SDK. URLs passed directly (no base64 download).
+7. **Max 5 images for AI** — Capped server-side regardless of how many user uploaded.
+8. **Auth not wired** — JWT/bcrypt in deps but no login endpoint or middleware. Single fixed user.
+9. **Pinterest import simulated** — Creates `mood-placeholder:*` URIs, not real Pinterest API.
+10. **Node tools are stubs** — Backend returns placeholder data; 8 AI tools need backends.
+
+---
+
+## The 8-Node Pipeline
+
+Each garment moves through these nodes sequentially:
+
+| # | NodeKey | Label | Hint | Status |
+|---|---------|-------|------|--------|
+| 1 | `research` | Research | Moodboard, refs, direction | Stub |
+| 2 | `sketch` | Sketch | Initial concept sketches | Stub |
+| 3 | `fabric` | Fabric | Material selection | Stub |
+| 4 | `colorTrim` | Color & Trim | Palette, buttons, details | Stub |
+| 5 | `pattern` | Pattern | Pattern making | Stub |
+| 6 | `mockup` | Mockup | Digital mockup render | Stub |
+| 7 | `fitCheck` | Fit Check | Fit analysis | Stub |
+| 8 | `modelShoot` | Model Shoot | Final photoshoot | Stub |
+
+---
+
+## Things to Know
+
+- **`mockData.ts` is legacy** — App fetches real data from backend. Constants like `MOCK_SEASONS` are unused.
+- **`icons.svg` sprite is unused** — Leftover from Vite template.
+- **Backend logging** — `logging.basicConfig()` in `main.py`, routes log with `logging.getLogger("moodboard")`, `logging.getLogger("gemini")`.
+- **`imagekitio` init** — v5.8 takes only `private_key`, NOT `public_key` ( broke in earlier versions).
+- **Beanie version pinning** — Must use `beanie==1.28.0`, `motor==3.6.1`, `pymongo==4.9.2`. Beanbie 2.x breaks.
+- **The `ai_key` config field** — Added separately to `config.py`, not in `.env.example`.
+- **Frontend build** — `npm run build` runs `tsc -b && vite build`. Must pass before deploying.
