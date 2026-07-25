@@ -20,8 +20,9 @@ def _now() -> datetime:
 def _serialize_season(s: Season) -> dict:
     return {
         "id": str(s.id),
-        "name": s.name,
+        "code": s.code,
         "moodboard": {
+            "name": s.moodboard.name,
             "status": s.moodboard.status.value,
             "images": [
                 {
@@ -56,7 +57,7 @@ async def list_seasons():
 async def create_season(body: SeasonCreate):
     now = _now()
     season = Season(
-        name=body.name.strip() or "Untitled Season",
+        code=body.code,
         created_at=now,
         updated_at=now,
     )
@@ -77,8 +78,8 @@ async def update_season(season_id: str, body: SeasonUpdate):
     season = await Season.get(season_id)
     if not season:
         raise HTTPException(status_code=404, detail="Season not found")
-    if body.name is not None:
-        season.name = body.name.strip() or season.name
+    if body.code is not None:
+        season.code = body.code
     season.updated_at = _now()
     await season.save()
     return _serialize_season(season)

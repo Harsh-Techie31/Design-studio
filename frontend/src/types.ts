@@ -62,6 +62,7 @@ export interface MoodboardAnalysis {
 }
 
 export interface MoodboardData {
+  name: string | null;
   status: MoodboardStatus;
   images: MoodboardImage[];
   analysis: MoodboardAnalysis;
@@ -99,7 +100,7 @@ export interface NodeOutput {
 
 export interface Season {
   id: string;
-  name: string;
+  code: string;
   moodboard: MoodboardData;
   created_at: string;
   updated_at: string;

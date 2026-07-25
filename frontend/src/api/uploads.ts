@@ -3,6 +3,7 @@ import type { MoodboardImage } from "../types";
 interface UploadResponse {
   images: MoodboardImage[];
   moodboard: {
+    name: string | null;
     status: string;
     images: MoodboardImage[];
     analysis: {
@@ -19,10 +20,14 @@ interface UploadResponse {
 export async function uploadMoodboardImages(
   seasonId: string,
   files: File[],
+  name?: string,
 ): Promise<UploadResponse> {
   const formData = new FormData();
   for (const file of files) {
     formData.append("files", file);
+  }
+  if (name) {
+    formData.append("name", name);
   }
 
   const res = await fetch(`/api/seasons/${seasonId}/moodboard/images`, {

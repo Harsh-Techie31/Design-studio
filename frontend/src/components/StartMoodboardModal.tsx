@@ -9,7 +9,7 @@ const MAX_IMAGES = 12;
 interface StartMoodboardModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (images: MoodboardImage[]) => Promise<void>;
+  onSave: (images: MoodboardImage[], name: string) => Promise<void>;
 }
 
 function Spinner() {
@@ -44,6 +44,7 @@ function PinIcon() {
 }
 
 export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardModalProps) {
+  const [name, setName] = useState("");
   const [images, setImages] = useState<MoodboardImage[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [pinterestOpen, setPinterestOpen] = useState(false);
@@ -105,6 +106,7 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
   }
 
   function resetState() {
+    setName("");
     setImages([]);
     setPinterestOpen(false);
     setPinterestUrl("");
@@ -114,7 +116,7 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
   async function handleSave() {
     setSaving(true);
     try {
-      await onSave(images);
+      await onSave(images, name.trim());
     } catch {
       // parent handles errors
     } finally {
@@ -140,6 +142,19 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
         Import up to 12 images that set the mood for this season — the palette and themes
         driving every garment inside it.
       </p>
+
+      <div className="mb-4">
+        <label className="mb-1.5 block text-xs uppercase tracking-wide text-muted">
+          Moodboard Name
+        </label>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="e.g. Ash and Ember"
+          disabled={saving}
+          className="w-full rounded-lg border border-line bg-ink-soft px-3.5 py-2.5 text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none disabled:opacity-50"
+        />
+      </div>
 
       <div className="grid grid-cols-2 gap-3">
         <div
@@ -273,7 +288,7 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
 
       <button
         onClick={handleSave}
-        disabled={images.length === 0 || saving}
+        disabled={images.length === 0 || !name.trim() || saving}
         className="mt-6 flex w-full items-center justify-center gap-2.5 rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-brass-soft disabled:cursor-not-allowed disabled:opacity-40"
       >
         {saving ? (

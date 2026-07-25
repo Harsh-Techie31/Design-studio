@@ -89,8 +89,9 @@ const now = "2026-06-01T00:00:00Z";
 export const MOCK_SEASONS: Season[] = [
   {
     id: "s1",
-    name: "Ash & Ember",
+    code: "SS27",
     moodboard: {
+      name: "Ash & Ember",
       status: "ready",
       images: placeholderMoodboard(),
       analysis: {
@@ -107,8 +108,9 @@ export const MOCK_SEASONS: Season[] = [
   },
   {
     id: "s2",
-    name: "Quiet Coastline",
+    code: "AW26",
     moodboard: {
+      name: "Quiet Coastline",
       status: "ready",
       images: placeholderMoodboard(),
       analysis: {

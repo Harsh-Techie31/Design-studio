@@ -28,13 +28,14 @@ class MoodboardAnalysis(BaseModel):
 
 
 class MoodboardData(BaseModel):
+    name: Optional[str] = None
     status: MoodboardStatus = MoodboardStatus.EMPTY
     images: list[MoodboardImage] = Field(default_factory=list)
     analysis: MoodboardAnalysis = Field(default_factory=MoodboardAnalysis)
 
 
 class Season(Document):
-    name: str
+    code: str
     moodboard: MoodboardData = Field(default_factory=MoodboardData)
     created_at: datetime = Field(default_factory=utcnow)
     updated_at: datetime = Field(default_factory=utcnow)

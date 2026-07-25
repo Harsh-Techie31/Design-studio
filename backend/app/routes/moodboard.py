@@ -2,7 +2,7 @@ import logging
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 
 from app.models.season import Season, MoodboardImage
 from app.models.enums import ImageSource, MoodboardStatus
@@ -20,6 +20,7 @@ def _now() -> datetime:
 
 def _serialize_moodboard(season: Season) -> dict:
     return {
+        "name": season.moodboard.name,
         "status": season.moodboard.status.value,
         "images": [
             {
@@ -42,12 +43,19 @@ def _serialize_moodboard(season: Season) -> dict:
 
 
 @router.post("/{season_id}/moodboard/images")
-async def upload_moodboard_images(season_id: str, files: list[UploadFile] = File(...)):
+async def upload_moodboard_images(
+    season_id: str,
+    files: list[UploadFile] = File(...),
+    name: str | None = Form(None),
+):
     logger.info(f"POST /api/seasons/{season_id}/moodboard/images — {len(files)} file(s)")
     season = await Season.get(season_id)
     if not season:
         logger.error(f"Season {season_id} not found")
         raise HTTPException(status_code=404, detail="Season not found")
+
+    if name is not None and name.strip():
+        season.moodboard.name = name.strip()
 
     if len(season.moodboard.images) + len(files) > 12:
         logger.error(f"Too many images: {len(season.moodboard.images)} existing + {len(files)} new")

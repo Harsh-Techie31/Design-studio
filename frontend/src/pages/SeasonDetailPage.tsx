@@ -60,8 +60,8 @@ export function SeasonDetailPage() {
     navigate(`/seasons/${season!.id}/garments/${garment.id}`);
   }
 
-  async function handleMoodboardSave(images: MoodboardImage[]) {
-    await setMoodboardImages(season!.id, images);
+  async function handleMoodboardSave(images: MoodboardImage[], name: string) {
+    await setMoodboardImages(season!.id, images, name);
 
     const hasRealImages = images.some((img) => !img.url.startsWith("mood-placeholder:"));
     if (hasRealImages) {
@@ -71,18 +71,23 @@ export function SeasonDetailPage() {
 
   return (
     <div className="min-h-screen bg-ink text-bone">
-      <NavBar crumbs={[{ label: "Seasons", to: "/seasons" }, { label: season.name }]} />
+      <NavBar crumbs={[{ label: "Seasons", to: "/seasons" }, { label: season.code }]} />
 
       <main className="mx-auto max-w-6xl px-6 py-14">
         <div className="mb-2 flex items-center justify-between">
-          <h1 className="font-display text-4xl text-bone">{season.name}</h1>
+          <h1 className="font-display text-4xl text-bone">{season.code}</h1>
           <span className="text-sm text-muted">Created {season.created_at.slice(0, 10)}</span>
         </div>
 
         {/* Moodboard */}
         <section className="mt-10">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-display text-xl text-bone-dim">Moodboard</h2>
+            <h2 className="font-display text-xl text-bone-dim">
+              Moodboard
+              {season.moodboard.name && (
+                <span className="font-normal italic text-brass"> - {season.moodboard.name}</span>
+              )}
+            </h2>
             {moodboardImages.length > 0 && (
               <span className="text-xs uppercase tracking-wide text-muted">
                 {moodboardImages.length} images

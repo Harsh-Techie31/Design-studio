@@ -9,16 +9,16 @@ export async function getSeason(id: string): Promise<Season> {
   return request<Season>(`/seasons/${id}`);
 }
 
-export async function createSeason(name: string): Promise<Season> {
+export async function createSeason(code: string): Promise<Season> {
   return request<Season>("/seasons", {
     method: "POST",
-    body: JSON.stringify({ name }),
+    body: JSON.stringify({ code }),
   });
 }
 
 export async function updateSeason(
   id: string,
-  data: { name?: string },
+  data: { code?: string },
 ): Promise<Season> {
   return request<Season>(`/seasons/${id}`, {
     method: "PATCH",
