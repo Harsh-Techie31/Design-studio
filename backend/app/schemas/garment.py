@@ -18,6 +18,7 @@ class GarmentResponse(BaseModel):
     season_id: str
     name: str
     category: str
+    style_number: int
     current_version: int
     node_summary: dict
     created_at: str

@@ -21,6 +21,16 @@ STAGE_ORDER = [
     NodeKey.PHOTOSHOOT,
 ]
 
+STAGE_ABBREVIATIONS = {
+    NodeKey.SKETCH: "SKTCH",
+    NodeKey.FABRIC: "FBRC",
+    NodeKey.RENDER: "RNDR",
+    NodeKey.TECH_PACK: "TECH",
+    NodeKey.PATTERN: "PTRN",
+    NodeKey.VISUALIZATION: "3D",
+    NodeKey.PHOTOSHOOT: "SHOOT",
+}
+
 
 class GarmentCategory(str, Enum):
     SHIRT = "SHIRT"

@@ -14,6 +14,7 @@ class NodeRunResponse(BaseModel):
     node_key: NodeKey
     iteration: int
     version: int
+    code: str
     status: RunStatus
     liked: bool
     inputs: list[dict]

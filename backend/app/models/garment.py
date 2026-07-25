@@ -26,6 +26,7 @@ class Garment(Document):
     season_id: Annotated[str, Indexed()]
     name: str
     category: GarmentCategory
+    style_number: int
     current_version: int = 1
     node_summary: dict[NodeKey, NodeSummary] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=utcnow)

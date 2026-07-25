@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException
 from app.models.season import Season
 from app.models.garment import Garment
 from app.models.node_run import NodeRun, NodeOutput, AIMeta, RunInputRef
-from app.models.enums import NodeKey, RunStatus, STAGE_ORDER
+from app.models.enums import NodeKey, RunStatus, STAGE_ORDER, STAGE_ABBREVIATIONS
 from app.schemas.node_run import NodeRunCreate, NodeRunResponse, NodeRunLikeToggle
 from app.routes.garments import _update_node_summary
 
@@ -24,6 +24,7 @@ def _serialize_run(r: NodeRun) -> dict:
         "node_key": r.node_key.value,
         "iteration": r.iteration,
         "version": r.version,
+        "code": r.code,
         "status": r.status.value,
         "liked": r.liked,
         "inputs": [{"run_id": inp.run_id, "node_key": inp.node_key.value} for inp in r.inputs],
@@ -99,6 +100,11 @@ async def create_run(garment_id: str, node_key: NodeKey, body: NodeRunCreate | N
     if body and body.inputs:
         inputs = [RunInputRef(run_id=inp["run_id"], node_key=NodeKey(inp["node_key"])) for inp in body.inputs]
 
+    code = (
+        f"{season.code}_{garment.category.value}_{garment.style_number:03d}"
+        f"_v{version}_{STAGE_ABBREVIATIONS[node_key]}_R{iteration:02d}"
+    )
+
     now = _now()
     run = NodeRun(
         season_id=garment.season_id,
@@ -106,6 +112,7 @@ async def create_run(garment_id: str, node_key: NodeKey, body: NodeRunCreate | N
         node_key=node_key,
         iteration=iteration,
         version=version,
+        code=code,
         status=RunStatus.PENDING,
         inputs=inputs,
         output=NodeOutput(),

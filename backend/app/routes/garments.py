@@ -20,6 +20,7 @@ def _serialize_garment(g: Garment) -> dict:
         "season_id": g.season_id,
         "name": g.name,
         "category": g.category.value,
+        "style_number": g.style_number,
         "current_version": g.current_version,
         "node_summary": {
             k.value: {
@@ -76,11 +77,13 @@ async def create_garment(season_id: str, body: GarmentCreate):
     season = await Season.get(season_id)
     if not season:
         raise HTTPException(status_code=404, detail="Season not found")
+    existing_count = await Garment.find(Garment.season_id == season_id).count()
     now = _now()
     garment = Garment(
         season_id=season_id,
         name=body.name.strip() or "Untitled Garment",
         category=body.category,
+        style_number=existing_count + 1,
         created_at=now,
         updated_at=now,
     )
