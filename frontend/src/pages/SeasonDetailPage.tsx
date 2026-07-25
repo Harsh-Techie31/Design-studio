@@ -10,6 +10,16 @@ import { StartMoodboardModal } from "../components/StartMoodboardModal";
 import { useStudio } from "../state/StudioContext";
 import { CATEGORY_DEFS, seedFromId, type GarmentCategory, type MoodboardImage } from "../types";
 
+type SeasonTab = "overview" | "fabrics" | "prints" | "sketches" | "garments";
+
+const SEASON_TABS: { key: SeasonTab; label: string }[] = [
+  { key: "overview", label: "Overview" },
+  { key: "fabrics", label: "Fabrics" },
+  { key: "prints", label: "Prints" },
+  { key: "sketches", label: "Sketches" },
+  { key: "garments", label: "Garments" },
+];
+
 export function SeasonDetailPage() {
   const { seasonId } = useParams<{ seasonId: string }>();
   const {
@@ -25,6 +35,7 @@ export function SeasonDetailPage() {
   const [category, setCategory] = useState<GarmentCategory | null>(null);
   const [moodboardOpen, setMoodboardOpen] = useState(false);
   const [briefExpanded, setBriefExpanded] = useState(false);
+  const [tab, setTab] = useState<SeasonTab>("overview");
 
   const season = getSeason(seasonId ?? "");
 
@@ -69,18 +80,67 @@ export function SeasonDetailPage() {
     }
   }
 
+  const garmentsSection = (
+    <section className="mt-16 first:mt-0">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h2 className="font-display text-2xl text-bone">Garments</h2>
+          <p className="mt-1 text-sm text-bone-dim">
+            Everything you build here draws on this season's mood.
+          </p>
+        </div>
+        <button
+          onClick={() => setOpen(true)}
+          className="rounded-full bg-brass px-5 py-2 text-sm font-medium text-ink transition-colors hover:bg-brass-soft"
+        >
+          + New Garment
+        </button>
+      </div>
+
+      {garments.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-line py-20 text-center text-bone-dim">
+          No garments yet in this season.
+        </div>
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {garments.map((garment) => (
+            <GarmentCard key={garment.id} garment={garment} />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+
   return (
     <div className="min-h-screen bg-ink text-bone">
       <NavBar crumbs={[{ label: "Seasons", to: "/seasons" }, { label: season.code }]} />
 
-      <main className="mx-auto max-w-6xl px-6 py-14">
-        <div className="mb-2 flex items-center justify-between">
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        <div className="mb-6 flex items-center justify-between px-0">
           <h1 className="font-display text-4xl text-bone">{season.code}</h1>
           <span className="text-sm text-muted">Created {season.created_at.slice(0, 10)}</span>
         </div>
 
+        <div className="mb-10 flex gap-1 border-b border-line">
+          {SEASON_TABS.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`-mb-px border-b-2 px-4 py-3 text-sm transition-colors ${
+                tab === t.key
+                  ? "border-brass text-bone"
+                  : "border-transparent text-muted hover:text-bone-dim"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {tab === "overview" && (
+        <>
         {/* Moodboard */}
-        <section className="mt-10">
+        <section>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="font-display text-xl text-bone-dim">
               Moodboard
@@ -192,35 +252,29 @@ export function SeasonDetailPage() {
           )}
         </section>
 
-        {/* Garments */}
-        <section className="mt-16">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h2 className="font-display text-2xl text-bone">Garments</h2>
-              <p className="mt-1 text-sm text-bone-dim">
-                Everything you build here draws on this season's mood.
-              </p>
-            </div>
-            <button
-              onClick={() => setOpen(true)}
-              className="rounded-full bg-brass px-5 py-2 text-sm font-medium text-ink transition-colors hover:bg-brass-soft"
-            >
-              + New Garment
-            </button>
-          </div>
+        <div className="mt-16">{garmentsSection}</div>
+        </>
+        )}
 
-          {garments.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-line py-20 text-center text-bone-dim">
-              No garments yet in this season.
-            </div>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {garments.map((garment) => (
-                <GarmentCard key={garment.id} garment={garment} />
-              ))}
-            </div>
-          )}
-        </section>
+        {tab === "fabrics" && (
+          <div className="py-16 text-center text-sm text-bone-dim">
+            Fabric library for this season. Add fabrics you want available across all garments.
+          </div>
+        )}
+
+        {tab === "prints" && (
+          <div className="py-16 text-center text-sm text-bone-dim">
+            Print library for this season.
+          </div>
+        )}
+
+        {tab === "sketches" && (
+          <div className="py-16 text-center text-sm text-bone-dim">
+            Reference sketches you have uploaded manually for this season.
+          </div>
+        )}
+
+        {tab === "garments" && garmentsSection}
       </main>
 
       <Modal
