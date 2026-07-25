@@ -20,6 +20,7 @@ def _serialize_garment(g: Garment) -> dict:
         "season_id": g.season_id,
         "name": g.name,
         "category": g.category.value,
+        "current_version": g.current_version,
         "node_summary": {
             k.value: {
                 "run_count": v.run_count,

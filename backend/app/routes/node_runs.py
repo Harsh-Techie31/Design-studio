@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException
 from app.models.season import Season
 from app.models.garment import Garment
 from app.models.node_run import NodeRun, NodeOutput, AIMeta, RunInputRef
-from app.models.enums import NodeKey, RunStatus
+from app.models.enums import NodeKey, RunStatus, STAGE_ORDER
 from app.schemas.node_run import NodeRunCreate, NodeRunResponse, NodeRunLikeToggle
 from app.routes.garments import _update_node_summary
 
@@ -23,6 +23,7 @@ def _serialize_run(r: NodeRun) -> dict:
         "garment_id": r.garment_id,
         "node_key": r.node_key.value,
         "iteration": r.iteration,
+        "version": r.version,
         "status": r.status.value,
         "liked": r.liked,
         "inputs": [{"run_id": inp.run_id, "node_key": inp.node_key.value} for inp in r.inputs],
@@ -45,15 +46,16 @@ def _serialize_run(r: NodeRun) -> dict:
 
 
 @router.get("/api/garments/{garment_id}/nodes/{node_key}/runs", response_model=list[NodeRunResponse])
-async def list_runs(garment_id: str, node_key: NodeKey):
+async def list_runs(garment_id: str, node_key: NodeKey, version: int | None = None):
     garment = await Garment.get(garment_id)
     if not garment:
         raise HTTPException(status_code=404, detail="Garment not found")
 
-    runs = await NodeRun.find(
-        NodeRun.garment_id == garment_id,
-        NodeRun.node_key == node_key,
-    ).sort([("iteration", -1)]).to_list()
+    query = [NodeRun.garment_id == garment_id, NodeRun.node_key == node_key]
+    if version is not None:
+        query.append(NodeRun.version == version)
+
+    runs = await NodeRun.find(*query).sort([("iteration", -1)]).to_list()
 
     return [_serialize_run(r) for r in runs]
 
@@ -74,6 +76,25 @@ async def create_run(garment_id: str, node_key: NodeKey, body: NodeRunCreate | N
     ).to_list()
     iteration = len(existing) + 1
 
+    # Versioning: if downstream stages already have runs in the current version,
+    # creating a new run at this (earlier) stage means the user is going back and
+    # editing after having moved forward — that starts a new version. Runs already
+    # made stay attached to their original version.
+    stage_index = STAGE_ORDER.index(node_key)
+    downstream_keys = STAGE_ORDER[stage_index + 1 :]
+    version = garment.current_version
+    if downstream_keys:
+        has_downstream = await NodeRun.find(
+            NodeRun.garment_id == garment_id,
+            NodeRun.version == garment.current_version,
+            {"node_key": {"$in": [k.value for k in downstream_keys]}},
+        ).exists()
+        if has_downstream:
+            version = garment.current_version + 1
+            garment.current_version = version
+            garment.updated_at = _now()
+            await garment.save()
+
     inputs = []
     if body and body.inputs:
         inputs = [RunInputRef(run_id=inp["run_id"], node_key=NodeKey(inp["node_key"])) for inp in body.inputs]
@@ -84,6 +105,7 @@ async def create_run(garment_id: str, node_key: NodeKey, body: NodeRunCreate | N
         garment_id=garment_id,
         node_key=node_key,
         iteration=iteration,
+        version=version,
         status=RunStatus.PENDING,
         inputs=inputs,
         output=NodeOutput(),

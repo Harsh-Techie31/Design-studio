@@ -13,6 +13,7 @@ class NodeRunResponse(BaseModel):
     garment_id: str
     node_key: NodeKey
     iteration: int
+    version: int
     status: RunStatus
     liked: bool
     inputs: list[dict]

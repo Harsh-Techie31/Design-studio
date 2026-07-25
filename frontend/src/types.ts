@@ -111,6 +111,7 @@ export interface Garment {
   season_id: string;
   name: string;
   category: GarmentCategory;
+  current_version: number;
   node_summary: Partial<Record<NodeKey, NodeSummary>>;
   created_at: string;
   updated_at: string;
@@ -122,6 +123,7 @@ export interface NodeRun {
   garment_id: string;
   node_key: NodeKey;
   iteration: number;
+  version: number;
   status: RunStatus;
   liked: boolean;
   inputs: RunInputRef[];

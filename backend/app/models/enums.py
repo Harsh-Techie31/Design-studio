@@ -11,6 +11,17 @@ class NodeKey(str, Enum):
     PHOTOSHOOT = "photoshoot"
 
 
+STAGE_ORDER = [
+    NodeKey.SKETCH,
+    NodeKey.FABRIC,
+    NodeKey.RENDER,
+    NodeKey.TECH_PACK,
+    NodeKey.PATTERN,
+    NodeKey.VISUALIZATION,
+    NodeKey.PHOTOSHOOT,
+]
+
+
 class GarmentCategory(str, Enum):
     SHIRT = "SHIRT"
     TEE = "TEE"

@@ -40,6 +40,7 @@ class NodeRun(Document):
     garment_id: Annotated[str, Indexed()]
     node_key: Annotated[NodeKey, Indexed()]
     iteration: int
+    version: int = 1
 
     status: RunStatus = RunStatus.PENDING
     liked: bool = False
