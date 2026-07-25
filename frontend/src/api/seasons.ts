@@ -29,3 +29,12 @@ export async function updateSeason(
 export async function deleteSeason(id: string): Promise<void> {
   return request<void>(`/seasons/${id}`, { method: "DELETE" });
 }
+
+export async function analyzeMoodboard(
+  seasonId: string,
+): Promise<{ moodboard: Season["moodboard"] }> {
+  return request<{ moodboard: Season["moodboard"] }>(
+    `/seasons/${seasonId}/moodboard/analyze`,
+    { method: "POST" },
+  );
+}

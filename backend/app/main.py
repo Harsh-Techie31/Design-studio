@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -8,6 +9,11 @@ from .routes.seasons import router as seasons_router
 from .routes.garments import router as garments_router
 from .routes.moodboard import router as moodboard_router
 from .routes.node_runs import router as node_runs_router
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
+)
 
 
 @asynccontextmanager

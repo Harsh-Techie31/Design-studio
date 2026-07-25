@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     auth_password: str = ""
     jwt_secret: str = "change-me"
 
+    ai_key: str = ""
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 

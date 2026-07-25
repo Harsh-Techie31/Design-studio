@@ -9,7 +9,16 @@ const MAX_IMAGES = 12;
 interface StartMoodboardModalProps {
   open: boolean;
   onClose: () => void;
-  onSave: (images: MoodboardImage[]) => void;
+  onSave: (images: MoodboardImage[]) => Promise<void>;
+}
+
+function Spinner() {
+  return (
+    <svg className="h-4 w-4 animate-spin text-ink" viewBox="0 0 24 24" fill="none">
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+    </svg>
+  );
 }
 
 function UploadIcon() {
@@ -39,6 +48,7 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
   const [isDragging, setIsDragging] = useState(false);
   const [pinterestOpen, setPinterestOpen] = useState(false);
   const [pinterestUrl, setPinterestUrl] = useState("");
+  const [saving, setSaving] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const remaining = MAX_IMAGES - images.length;
@@ -94,20 +104,38 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
     setImages((prev) => prev.filter((_, i) => i !== index));
   }
 
-  function resetAndClose() {
+  function resetState() {
     setImages([]);
     setPinterestOpen(false);
     setPinterestUrl("");
-    onClose();
+    setSaving(false);
   }
 
-  function handleSave() {
-    onSave(images);
-    resetAndClose();
+  async function handleSave() {
+    setSaving(true);
+    try {
+      await onSave(images);
+    } catch {
+      // parent handles errors
+    } finally {
+      setSaving(false);
+      resetState();
+      onClose();
+    }
   }
 
   return (
-    <Modal open={open} onClose={resetAndClose} title="Start Moodboard" maxWidthClass="max-w-3xl">
+    <Modal
+      open={open}
+      onClose={() => {
+        if (!saving) {
+          resetState();
+          onClose();
+        }
+      }}
+      title="Start Moodboard"
+      maxWidthClass="max-w-3xl"
+    >
       <p className="mb-5 text-sm text-bone-dim">
         Import up to 12 images that set the mood for this season — the palette and themes
         driving every garment inside it.
@@ -121,9 +149,9 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
           }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
-          onClick={() => remaining > 0 && inputRef.current?.click()}
+          onClick={() => !saving && remaining > 0 && inputRef.current?.click()}
           className={`flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-8 text-center transition-colors ${
-            remaining > 0 ? "cursor-pointer" : "cursor-default opacity-50"
+            remaining > 0 && !saving ? "cursor-pointer" : "cursor-default opacity-50"
           } ${isDragging ? "border-brass bg-brass/5" : "border-line bg-surface hover:border-brass/50"}`}
         >
           <span className="text-muted">
@@ -144,9 +172,9 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
         </div>
 
         <div
-          onClick={() => remaining > 0 && setPinterestOpen((v) => !v)}
+          onClick={() => !saving && remaining > 0 && setPinterestOpen((v) => !v)}
           className={`flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-8 text-center transition-colors ${
-            remaining > 0 ? "cursor-pointer" : "cursor-default opacity-50"
+            remaining > 0 && !saving ? "cursor-pointer" : "cursor-default opacity-50"
           } ${pinterestOpen ? "border-brass bg-brass/5" : "border-line bg-surface hover:border-brass/50"}`}
         >
           <span className="text-muted">
@@ -229,13 +257,15 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
               ) : (
                 <img src={img.url} alt="" className="h-full w-full object-cover" />
               )}
-              <button
-                onClick={() => removeAt(i)}
-                aria-label="Remove image"
-                className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-xs text-bone opacity-0 transition-opacity group-hover:opacity-100"
-              >
-                ✕
-              </button>
+              {!saving && (
+                <button
+                  onClick={() => removeAt(i)}
+                  aria-label="Remove image"
+                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-xs text-bone opacity-0 transition-opacity group-hover:opacity-100"
+                >
+                  ✕
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -243,10 +273,17 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
 
       <button
         onClick={handleSave}
-        disabled={images.length === 0}
-        className="mt-6 w-full rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-brass-soft disabled:cursor-not-allowed disabled:opacity-40"
+        disabled={images.length === 0 || saving}
+        className="mt-6 flex w-full items-center justify-center gap-2.5 rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-brass-soft disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Save Moodboard ({images.length}/{MAX_IMAGES})
+        {saving ? (
+          <>
+            <Spinner />
+            Uploading {images.filter((img) => !img.url.startsWith("mood-placeholder:")).length} images…
+          </>
+        ) : (
+          `Save Moodboard (${images.length}/${MAX_IMAGES})`
+        )}
       </button>
     </Modal>
   );

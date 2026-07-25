@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import datetime, timezone
 
@@ -6,6 +7,9 @@ from fastapi import APIRouter, HTTPException, UploadFile, File
 from app.models.season import Season, MoodboardImage
 from app.models.enums import ImageSource, MoodboardStatus
 from app.services.imagekit import upload_image, delete_image
+from app.services.gemini import analyze_moodboard as gemini_analyze
+
+logger = logging.getLogger("moodboard")
 
 router = APIRouter(prefix="/api/seasons", tags=["moodboard"])
 
@@ -39,11 +43,14 @@ def _serialize_moodboard(season: Season) -> dict:
 
 @router.post("/{season_id}/moodboard/images")
 async def upload_moodboard_images(season_id: str, files: list[UploadFile] = File(...)):
+    logger.info(f"POST /api/seasons/{season_id}/moodboard/images — {len(files)} file(s)")
     season = await Season.get(season_id)
     if not season:
+        logger.error(f"Season {season_id} not found")
         raise HTTPException(status_code=404, detail="Season not found")
 
     if len(season.moodboard.images) + len(files) > 12:
+        logger.error(f"Too many images: {len(season.moodboard.images)} existing + {len(files)} new")
         raise HTTPException(status_code=400, detail="Moodboard can have at most 12 images")
 
     uploaded = []
@@ -54,7 +61,9 @@ async def upload_moodboard_images(season_id: str, files: list[UploadFile] = File
         ext = file.filename.rsplit(".", 1)[-1] if file.filename and "." in file.filename else "png"
         file_name = f"moodboard_{season_id}_{uuid.uuid4().hex[:8]}.{ext}"
 
+        logger.info(f"Uploading to ImageKit: {file_name} ({len(file_bytes)} bytes)")
         result = upload_image(file_bytes, folder="/moodboard/", file_name=file_name)
+        logger.info(f"ImageKit upload OK: {result['url'][:60]}...")
 
         img = MoodboardImage(
             url=result["url"],
@@ -75,12 +84,14 @@ async def upload_moodboard_images(season_id: str, files: list[UploadFile] = File
 
     season.updated_at = _now()
     await season.save()
+    logger.info(f"Season {season_id} now has {len(season.moodboard.images)} images, status={season.moodboard.status.value}")
 
     return {"images": uploaded, "moodboard": _serialize_moodboard(season)}
 
 
 @router.delete("/{season_id}/moodboard/images/{image_index}")
 async def delete_moodboard_image(season_id: str, image_index: int):
+    logger.info(f"DELETE /api/seasons/{season_id}/moodboard/images/{image_index}")
     season = await Season.get(season_id)
     if not season:
         raise HTTPException(status_code=404, detail="Season not found")
@@ -103,6 +114,52 @@ async def delete_moodboard_image(season_id: str, image_index: int):
 
     if len(season.moodboard.images) == 0:
         season.moodboard.status = MoodboardStatus.EMPTY
+
+    season.updated_at = _now()
+    await season.save()
+
+    return {"moodboard": _serialize_moodboard(season)}
+
+
+@router.post("/{season_id}/moodboard/analyze")
+async def analyze_moodboard(season_id: str):
+    logger.info(f"POST /api/seasons/{season_id}/moodboard/analyze — START")
+    season = await Season.get(season_id)
+    if not season:
+        logger.error(f"Season {season_id} not found")
+        raise HTTPException(status_code=404, detail="Season not found")
+
+    if len(season.moodboard.images) == 0:
+        logger.error(f"No images to analyze for season {season_id}")
+        raise HTTPException(status_code=400, detail="No images to analyze")
+
+    image_urls = [img.url for img in season.moodboard.images]
+    real_urls = [u for u in image_urls if not u.startswith("mood-placeholder:")]
+    logger.info(f"Season {season_id}: {len(image_urls)} total images, {len(real_urls)} real URLs")
+
+    season.moodboard.status = MoodboardStatus.ANALYZING
+    season.updated_at = _now()
+    await season.save()
+    logger.info(f"Status set to 'analyzing'")
+
+    try:
+        logger.info(f"Calling Gemini API with {len(real_urls)} images...")
+        result = await gemini_analyze(real_urls)
+        logger.info(f"Gemini returned: palette={result['palette']}, keywords={result['keywords'][:3]}..., brief={result['brief'][:50]}...")
+
+        season.moodboard.analysis.palette = result["palette"]
+        season.moodboard.analysis.keywords = result["keywords"]
+        season.moodboard.analysis.brief = result["brief"]
+        season.moodboard.analysis.model = result["model"]
+        season.moodboard.analysis.analyzed_at = _now()
+        season.moodboard.analysis.error = None
+        season.moodboard.status = MoodboardStatus.READY
+        logger.info(f"Analysis saved, status set to 'ready'")
+
+    except Exception as e:
+        logger.error(f"Gemini analysis failed: {type(e).__name__}: {e}")
+        season.moodboard.status = MoodboardStatus.FAILED
+        season.moodboard.analysis.error = str(e)
 
     season.updated_at = _now()
     await season.save()

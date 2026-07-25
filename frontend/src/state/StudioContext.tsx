@@ -23,6 +23,7 @@ interface StudioContextValue {
   createSeason: (name: string) => Promise<Season>;
   createGarment: (seasonId: string, name: string) => Promise<Garment>;
   setMoodboardImages: (seasonId: string, images: MoodboardImage[]) => Promise<void>;
+  analyzeMoodboard: (seasonId: string) => Promise<void>;
   refreshSeasons: () => Promise<void>;
 }
 
@@ -109,24 +110,69 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         ),
       );
 
+      const filesToUpload = images
+        .filter((img) => img.url.startsWith("data:"))
+        .map((img) => dataUrlToFile(img.url, `moodboard_${Date.now()}.png`));
+
+      if (filesToUpload.length === 0) {
+        console.log("[StudioContext] No data-url files to upload, skipping API call");
+        return;
+      }
+
+      console.log(`[StudioContext] Uploading ${filesToUpload.length} files to backend`);
       try {
-        const res = await uploadsApi.uploadMoodboardImages(
-          seasonId,
-          images
-            .filter((img) => img.url.startsWith("data:"))
-            .map((img) => dataUrlToFile(img.url, `moodboard_${Date.now()}.png`)),
-        );
+        const res = await uploadsApi.uploadMoodboardImages(seasonId, filesToUpload);
+        console.log("[StudioContext] Upload response:", res);
         if (res.moodboard) {
           setSeasons((prev) =>
             prev.map((s) =>
-              s.id === seasonId
-                ? { ...s, moodboard: res.moodboard as any }
-                : s,
+              s.id === seasonId ? { ...s, moodboard: res.moodboard as any } : s,
             ),
           );
         }
-      } catch {
-        // If upload fails, local data URLs remain as fallback
+      } catch (e) {
+        console.error("[StudioContext] Upload failed:", e);
+        throw e;
+      }
+    },
+    [],
+  );
+
+  const analyzeMoodboard = useCallback(
+    async (seasonId: string) => {
+      console.log(`[StudioContext] Starting analysis for season ${seasonId}`);
+      setSeasons((prev) =>
+        prev.map((s) =>
+          s.id === seasonId
+            ? { ...s, moodboard: { ...s.moodboard, status: "analyzing" as const } }
+            : s,
+        ),
+      );
+
+      try {
+        const res = await seasonsApi.analyzeMoodboard(seasonId);
+        console.log("[StudioContext] Analysis complete:", res);
+        setSeasons((prev) =>
+          prev.map((s) =>
+            s.id === seasonId ? { ...s, moodboard: res.moodboard } : s,
+          ),
+        );
+      } catch (e: any) {
+        console.error("[StudioContext] Analysis failed:", e);
+        setSeasons((prev) =>
+          prev.map((s) =>
+            s.id === seasonId
+              ? {
+                  ...s,
+                  moodboard: {
+                    ...s.moodboard,
+                    status: "failed" as const,
+                    analysis: { ...s.moodboard.analysis, error: e.message },
+                  },
+                }
+              : s,
+          ),
+        );
       }
     },
     [],
@@ -144,9 +190,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       createSeason,
       createGarment,
       setMoodboardImages,
+      analyzeMoodboard,
       refreshSeasons,
     }),
-    [seasons, garments, loading, error, getSeason, getGarmentsForSeason, getGarment, createSeason, createGarment, setMoodboardImages, refreshSeasons],
+    [seasons, garments, loading, error, getSeason, getGarmentsForSeason, getGarment, createSeason, createGarment, setMoodboardImages, analyzeMoodboard, refreshSeasons],
   );
 
   return <StudioContext.Provider value={value}>{children}</StudioContext.Provider>;
