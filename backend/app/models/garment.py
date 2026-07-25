@@ -5,7 +5,7 @@ from beanie import Document, Indexed
 from pydantic import BaseModel, Field
 from typing_extensions import Annotated
 
-from .enums import NodeKey
+from .enums import GarmentCategory, NodeKey
 
 
 def utcnow() -> datetime:
@@ -25,6 +25,7 @@ class NodeSummary(BaseModel):
 class Garment(Document):
     season_id: Annotated[str, Indexed()]
     name: str
+    category: GarmentCategory
     node_summary: dict[NodeKey, NodeSummary] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=utcnow)
     updated_at: datetime = Field(default_factory=utcnow)

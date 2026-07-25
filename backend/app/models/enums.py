@@ -11,6 +11,19 @@ class NodeKey(str, Enum):
     PHOTOSHOOT = "photoshoot"
 
 
+class GarmentCategory(str, Enum):
+    SHIRT = "SHIRT"
+    TEE = "TEE"
+    TOP = "TOP"
+    DRESS = "DRESS"
+    SKIRT = "SKIRT"
+    PANT = "PANT"
+    SHORT = "SHORT"
+    JACKET = "JACKET"
+    SWEATSHIRT = "SWTSHRT"
+    JUMPSUIT = "JUMP"
+
+
 class RunStatus(str, Enum):
     PENDING = "pending"
     PROCESSING = "processing"

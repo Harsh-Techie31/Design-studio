@@ -13,6 +13,36 @@ export type MoodboardStatus = "empty" | "uploading" | "analyzing" | "ready" | "f
 
 export type ImageSource = "upload" | "pinterest";
 
+export type GarmentCategory =
+  | "SHIRT"
+  | "TEE"
+  | "TOP"
+  | "DRESS"
+  | "SKIRT"
+  | "PANT"
+  | "SHORT"
+  | "JACKET"
+  | "SWTSHRT"
+  | "JUMP";
+
+export interface CategoryDef {
+  code: GarmentCategory;
+  label: string;
+}
+
+export const CATEGORY_DEFS: CategoryDef[] = [
+  { code: "SHIRT", label: "Shirt" },
+  { code: "TEE", label: "Tee" },
+  { code: "TOP", label: "Top" },
+  { code: "DRESS", label: "Dress" },
+  { code: "SKIRT", label: "Skirt" },
+  { code: "PANT", label: "Pant" },
+  { code: "SHORT", label: "Short" },
+  { code: "JACKET", label: "Jacket" },
+  { code: "SWTSHRT", label: "Sweatshirt" },
+  { code: "JUMP", label: "Jumpsuit" },
+];
+
 // ─── Sub-models (mirror backend/app/models/) ─────────────────────────────────
 
 export interface MoodboardImage {
@@ -79,6 +109,7 @@ export interface Garment {
   id: string;
   season_id: string;
   name: string;
+  category: GarmentCategory;
   node_summary: Partial<Record<NodeKey, NodeSummary>>;
   created_at: string;
   updated_at: string;

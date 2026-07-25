@@ -8,7 +8,7 @@ import { GarmentCard } from "../components/GarmentCard";
 import { Modal } from "../components/Modal";
 import { StartMoodboardModal } from "../components/StartMoodboardModal";
 import { useStudio } from "../state/StudioContext";
-import { seedFromId, type MoodboardImage } from "../types";
+import { CATEGORY_DEFS, seedFromId, type GarmentCategory, type MoodboardImage } from "../types";
 
 export function SeasonDetailPage() {
   const { seasonId } = useParams<{ seasonId: string }>();
@@ -22,6 +22,7 @@ export function SeasonDetailPage() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
+  const [category, setCategory] = useState<GarmentCategory | null>(null);
   const [moodboardOpen, setMoodboardOpen] = useState(false);
   const [briefExpanded, setBriefExpanded] = useState(false);
 
@@ -51,8 +52,10 @@ export function SeasonDetailPage() {
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    const garment = await createGarment(season!.id, name);
+    if (!category) return;
+    const garment = await createGarment(season!.id, name, category);
     setName("");
+    setCategory(null);
     setOpen(false);
     navigate(`/seasons/${season!.id}/garments/${garment.id}`);
   }
@@ -215,8 +218,36 @@ export function SeasonDetailPage() {
         </section>
       </main>
 
-      <Modal open={open} onClose={() => setOpen(false)} title="New Garment">
+      <Modal
+        open={open}
+        onClose={() => {
+          setOpen(false);
+          setCategory(null);
+        }}
+        title="New Garment"
+      >
         <form onSubmit={handleCreate} className="flex flex-col gap-4">
+          <div>
+            <label className="mb-1.5 block text-xs uppercase tracking-wide text-muted">
+              Category
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              {CATEGORY_DEFS.map((c) => (
+                <button
+                  key={c.code}
+                  type="button"
+                  onClick={() => setCategory(c.code)}
+                  className={`rounded-lg border px-4 py-2.5 text-left text-sm transition-colors ${
+                    category === c.code
+                      ? "border-brass bg-brass/10 text-brass"
+                      : "border-line bg-ink-soft text-bone-dim hover:border-brass/40"
+                  }`}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+          </div>
           <div>
             <label className="mb-1.5 block text-xs uppercase tracking-wide text-muted">
               Garment name
@@ -231,7 +262,8 @@ export function SeasonDetailPage() {
           </div>
           <button
             type="submit"
-            className="mt-1 rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-brass-soft"
+            disabled={!category}
+            className="mt-1 rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-brass-soft disabled:cursor-not-allowed disabled:opacity-40"
           >
             Create Garment
           </button>

@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { Garment, MoodboardImage, Season } from "../types";
+import type { Garment, GarmentCategory, MoodboardImage, Season } from "../types";
 import * as seasonsApi from "../api/seasons";
 import * as garmentsApi from "../api/garments";
 import * as uploadsApi from "../api/uploads";
@@ -21,7 +21,7 @@ interface StudioContextValue {
   getGarmentsForSeason: (seasonId: string) => Garment[];
   getGarment: (id: string) => Garment | undefined;
   createSeason: (name: string) => Promise<Season>;
-  createGarment: (seasonId: string, name: string) => Promise<Garment>;
+  createGarment: (seasonId: string, name: string, category: GarmentCategory) => Promise<Garment>;
   setMoodboardImages: (seasonId: string, images: MoodboardImage[]) => Promise<void>;
   analyzeMoodboard: (seasonId: string) => Promise<void>;
   refreshSeasons: () => Promise<void>;
@@ -92,8 +92,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   );
 
   const createGarment = useCallback(
-    async (seasonId: string, name: string) => {
-      const garment = await garmentsApi.createGarment(seasonId, name);
+    async (seasonId: string, name: string, category: GarmentCategory) => {
+      const garment = await garmentsApi.createGarment(seasonId, name, category);
       setGarments((prev) => [garment, ...prev]);
       return garment;
     },
