@@ -8,7 +8,7 @@ import { GarmentCard } from "../components/GarmentCard";
 import { Modal } from "../components/Modal";
 import { StartMoodboardModal } from "../components/StartMoodboardModal";
 import { useStudio } from "../state/StudioContext";
-import { listImagesForSeason, toggleLike } from "../api/designImages";
+import { listImagesForSeason, toggleLike, deleteImage } from "../api/designImages";
 import { CATEGORY_DEFS, seedFromId, type GarmentCategory, type DesignImage, type MoodboardImage } from "../types";
 
 type SeasonTab = "overview" | "prints" | "fabrics" | "sketches" | "firstRenders" | "techPacks" | "garments";
@@ -108,6 +108,15 @@ export function SeasonDetailPage() {
     }
   }
 
+  async function handleDeleteImage(imageId: string) {
+    try {
+      await deleteImage(imageId);
+      setTabImages((prev) => prev.filter((img) => img.id !== imageId));
+    } catch (e) {
+      console.error("Failed to delete image:", e);
+    }
+  }
+
   const renderImageGrid = (images: DesignImage[], emptyMessage: string) => {
     if (tabLoading) {
       return (
@@ -137,6 +146,14 @@ export function SeasonDetailPage() {
             <div className="aspect-[3/4] bg-ink-soft">
               <img src={img.url} alt={img.image_code} className="h-full w-full object-contain" loading="lazy" />
             </div>
+            {/* Delete button — top right, visible on hover */}
+            <button
+              onClick={() => handleDeleteImage(img.id)}
+              className="absolute right-1.5 top-1.5 rounded-lg bg-red-500/80 p-1.5 text-white opacity-0 transition-opacity hover:bg-red-600 group-hover:opacity-100"
+              title="Delete image"
+            >
+              <i className="ti ti-trash text-xs" />
+            </button>
             <div className="flex items-center justify-between px-2 py-1.5">
               <span className="font-mono text-[10px] text-muted">
                 {img.image_code.split("_").slice(-2).join("_")}
