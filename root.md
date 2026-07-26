@@ -41,7 +41,7 @@ python scripts/seed_db.py
 | Backend | Python 3.11+, FastAPI, Uvicorn |
 | Database | MongoDB Atlas (Motor 3.6 + Beanie 1.28 ODM) |
 | Image Storage | ImageKit CDN (`imagekitio` SDK) |
-| AI | Google Gemini (`gemini-2.5-flash`) via REST API |
+| AI | Google Gemini (`gemini-2.5-flash-image`) via REST API |
 | Linting | oxlint (Rust-based) |
 
 ---
@@ -316,7 +316,7 @@ seasons ──1:N── garments ──1:N── node_runs
 - `analyze_moodboard(image_urls)` → `{palette, keywords, brief, model}`
 - Passes image URLs directly via `fileData.fileUri` (no base64 download)
 - Max 5 images (capped server-side)
-- Model: `gemini-2.5-flash`
+- Model: `gemini-2.5-flash` (text analysis only)
 - API: `https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}`
 - Configured via `AI_KEY` env var
 

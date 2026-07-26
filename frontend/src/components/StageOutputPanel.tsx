@@ -20,15 +20,15 @@ export function StageOutputPanel({
   loading,
   onToggleLike,
   onToggleStar,
-  onUpdateNote,
-  onDelete,
+  onUpdateNote: _onUpdateNote,
+  onDelete: _onDelete,
   onNextStage,
   nextStageLabel,
   canvasPreview,
 }: StageOutputPanelProps) {
   const [filter, setFilter] = useState<FilterType>("all");
   const [lightboxImage, setLightboxImage] = useState<DesignImage | null>(null);
-  const [editingNote, setEditingNote] = useState<{ id: string; note: string } | null>(null);
+  const [_editingNote, _setEditingNote] = useState<{ id: string; note: string } | null>(null);
 
   const filtered = images.filter((img) => {
     if (filter === "liked") return img.liked;

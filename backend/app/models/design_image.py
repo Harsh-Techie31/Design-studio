@@ -51,7 +51,7 @@ class DesignImage(Document):
 
     # ─── Provenance ───
     source: str = "generated"  # "generated", "uploaded", "ai", "pil"
-    ai_model: Optional[str] = None  # "gemini-2.5-flash", "pil-v1"
+    ai_model: Optional[str] = None  # "gemini-2.5-flash-image", "pil-v1"
     ai_prompt: Optional[str] = None  # full prompt sent to AI
 
     # ─── Generation Parameters (for reproducibility) ───

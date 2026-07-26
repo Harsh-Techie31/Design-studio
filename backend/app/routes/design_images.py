@@ -1,14 +1,15 @@
 from datetime import datetime, timezone
 from typing import Optional
 import logging
+import base64
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
 
 from app.models.design_image import DesignImage, InputImageRef
 from app.models.enums import NodeKey, ImageType
 from app.models.garment import Garment
 from app.models.season import Season
-from app.services.imagekit import delete_image as imagekit_delete
+from app.services.imagekit import upload_image, delete_image as imagekit_delete
 
 router = APIRouter(prefix="/api/images", tags=["design-images"])
 
@@ -215,3 +216,88 @@ async def image_counts_for_season(season_id: str):
         "3d": counts.get("3d", {"total": 0, "liked": 0}),
         "photo": counts.get("photo", {"total": 0, "liked": 0}),
     }
+
+
+# ─── Upload endpoint ───────────────────────────────────────────────
+
+
+@router.post("/upload")
+async def upload_image_to_library(
+    file: UploadFile = File(...),
+    season_id: str = Form(...),
+    garment_id: str = Form(""),
+    image_type: str = Form("reference"),
+    note: str = Form(""),
+):
+    """
+    Upload an image to ImageKit and save to DesignImage library.
+    Used for manual uploads in Render stage (sketch picker, fabric picker).
+    """
+    season = await Season.get(season_id)
+    if not season:
+        raise HTTPException(status_code=404, detail="Season not found")
+
+    # Read file bytes
+    contents = await file.read()
+    if len(contents) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File exceeds 10MB limit")
+
+    # Determine folder based on image type
+    folder_map = {
+        "sketch": f"/design-studio/{season_id}/sketches/",
+        "fabric": f"/design-studio/{season_id}/fabrics/",
+        "print": f"/design-studio/{season_id}/prints/",
+        "render": f"/design-studio/{season_id}/renders/",
+    }
+    folder = folder_map.get(image_type, f"/design-studio/{season_id}/uploads/")
+
+    # Generate image code
+    now = _now()
+    count = await DesignImage.find(
+        DesignImage.season_id == season_id,
+        DesignImage.image_type == image_type,
+    ).count()
+    img_code = f"{season.code or 'UNK'}_{image_type.upper()}_{count + 1:04d}"
+
+    # Upload to ImageKit
+    file_name = f"{img_code}.png"
+    try:
+        ik_result = upload_image(contents, folder=folder, file_name=file_name)
+        img_url = ik_result["url"]
+        ik_file_id = ik_result["file_id"]
+    except Exception as e:
+        logger.error(f"ImageKit upload failed: {e}")
+        b64 = base64.b64encode(contents).decode()
+        img_url = f"data:image/png;base64,{b64}"
+        ik_file_id = None
+
+    # Save to DesignImage
+    design_img = DesignImage(
+        image_code=img_code,
+        index=0,
+        season_id=season_id,
+        garment_id=garment_id or "",
+        node_key=NodeKey.SKETCH if image_type == "sketch" else NodeKey.PRINT,
+        run_id="",
+        version=1,
+        image_type=image_type,
+        view="front",
+        liked=False,
+        starred=False,
+        input_images=[],
+        source="upload",
+        ai_model=None,
+        ai_prompt=None,
+        params={},
+        url=img_url,
+        imagekit_file_id=ik_file_id,
+        file_size_bytes=len(contents),
+        file_format=file.content_type or "image/png",
+        note=note,
+        created_at=now,
+        updated_at=now,
+    )
+    await design_img.insert()
+
+    logger.info(f"Uploaded {image_type} image: {img_code} -> {img_url[:60]}...")
+    return _serialize_image(design_img)

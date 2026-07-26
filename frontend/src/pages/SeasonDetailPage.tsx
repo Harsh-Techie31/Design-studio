@@ -11,12 +11,14 @@ import { useStudio } from "../state/StudioContext";
 import { listImagesForSeason, toggleLike } from "../api/designImages";
 import { CATEGORY_DEFS, seedFromId, type GarmentCategory, type DesignImage, type MoodboardImage } from "../types";
 
-type SeasonTab = "overview" | "prints" | "sketches" | "garments";
+type SeasonTab = "overview" | "prints" | "fabrics" | "sketches" | "firstRenders" | "garments";
 
 const SEASON_TABS: { key: SeasonTab; label: string }[] = [
   { key: "overview", label: "Overview" },
   { key: "prints", label: "Prints" },
+  { key: "fabrics", label: "Fabrics" },
   { key: "sketches", label: "Sketches" },
+  { key: "firstRenders", label: "First Renders" },
   { key: "garments", label: "Garments" },
 ];
 
@@ -70,7 +72,7 @@ export function SeasonDetailPage() {
       return;
     }
     setTabLoading(true);
-    const imageType = tab === "sketches" ? "sketch" : "print";
+    const imageType = tab === "sketches" ? "sketch" : tab === "fabrics" ? "fabric" : tab === "prints" ? "print" : tab === "firstRenders" ? "render" : tab;
     listImagesForSeason(seasonId, { image_type: imageType })
       .then(setTabImages)
       .catch(() => setTabImages([]))
@@ -334,6 +336,20 @@ export function SeasonDetailPage() {
           </section>
         )}
 
+        {tab === "fabrics" && (
+          <section>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-xl text-bone-dim">Fabrics</h2>
+              {tabImages.length > 0 && (
+                <span className="text-xs uppercase tracking-wide text-muted">
+                  {tabImages.length} fabrics
+                </span>
+              )}
+            </div>
+            {renderImageGrid(tabImages, "No fabrics yet. Upload fabric swatches from the Render stage.")}
+          </section>
+        )}
+
         {tab === "sketches" && (
           <section>
             <div className="mb-4 flex items-center justify-between">
@@ -345,6 +361,20 @@ export function SeasonDetailPage() {
               )}
             </div>
             {renderImageGrid(tabImages, "No sketches yet. Generate sketches from the garment workspace.")}
+          </section>
+        )}
+
+        {tab === "firstRenders" && (
+          <section>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-xl text-bone-dim">First Renders</h2>
+              {tabImages.length > 0 && (
+                <span className="text-xs uppercase tracking-wide text-muted">
+                  {tabImages.length} renders
+                </span>
+              )}
+            </div>
+            {renderImageGrid(tabImages, "No renders yet. Generate renders from the garment workspace.")}
           </section>
         )}
 

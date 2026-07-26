@@ -150,9 +150,9 @@ async def _generate_with_gemini(
             },
         }
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key={api_key}"
 
-        logger.info("Calling Gemini 3 Pro Image for pattern generation...")
+        logger.info("Calling Gemini 2.5 Flash Image for pattern generation...")
         resp = await client.post(url, json=payload)
 
         if resp.status_code != 200:
@@ -278,7 +278,7 @@ async def generate_print(
             img_bytes = await _generate_with_gemini(api_key, body.canvas_image, prompt)
             if img_bytes:
                 source = "ai"
-                run.ai.model = "gemini-2.5-flash"
+                run.ai.model = "gemini-2.5-flash-image"
                 run.ai.prompt = prompt
         except Exception as e:
             logger.error(f"Gemini generation failed: {e}")

@@ -5,6 +5,7 @@ import { StageProgressBar } from "../components/StageProgressBar";
 import { StageOutputPanel } from "../components/StageOutputPanel";
 import { SketchTool } from "../components/stages/SketchTool";
 import { PrintTool, type PrintState } from "../components/stages/PrintTool";
+import { RenderTool, type RenderState } from "../components/stages/RenderTool";
 import { useStudio } from "../state/StudioContext";
 import { listImagesForGarment, toggleLike, toggleStar } from "../api/designImages";
 import type { DesignImage, NodeKey } from "../types";
@@ -42,6 +43,14 @@ export function StageWorkspacePage() {
     fabricType: "cotton",
     bgColor: "#ffffff",
     canvasSize: 1024,
+  });
+
+  // Render state
+  const [_renderState, setRenderState] = useState<RenderState>({
+    sketchImage: null,
+    gender: "male",
+    fabrics: [{ image: null, placements: [], prompt: "", scale: 1.0 }],
+    numOutputs: 1,
   });
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -82,13 +91,17 @@ export function StageWorkspacePage() {
     }
   };
 
-  const handleGenerated = (response: any) => {
+  const handleGenerated = (_response: any) => {
     // Re-fetch images to include the new ones
     fetchImages();
   };
 
   const handlePrintStateChange = useCallback((newState: Partial<PrintState>) => {
     setPrintState((prev) => ({ ...prev, ...newState }));
+  }, []);
+
+  const handleRenderStateChange = useCallback((newState: Partial<RenderState>) => {
+    setRenderState((prev) => ({ ...prev, ...newState }));
   }, []);
 
   const handleNextStage = () => {
@@ -171,7 +184,16 @@ export function StageWorkspacePage() {
           />
         )}
 
-        {currentStage !== "sketch" && currentStage !== "print" && (
+        {currentStage === "render" && (
+          <RenderTool
+            garment={garment}
+            season={season}
+            onGenerated={handleGenerated}
+            onStateChange={handleRenderStateChange}
+          />
+        )}
+
+        {currentStage !== "sketch" && currentStage !== "print" && currentStage !== "render" && (
           <aside className="flex w-full flex-col items-center justify-center bg-surface p-8 lg:w-[350px]">
             <i className="ti ti-tools text-3xl text-muted" />
             <p className="mt-3 text-sm text-muted">

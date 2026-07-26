@@ -12,6 +12,7 @@ from .routes.node_runs import router as node_runs_router
 from .routes.design_images import router as design_images_router
 from .routes.sketch import router as sketch_router
 from .routes.print import router as print_router
+from .routes.render import router as render_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -42,6 +43,7 @@ app.include_router(node_runs_router)
 app.include_router(design_images_router)
 app.include_router(sketch_router)
 app.include_router(print_router)
+app.include_router(render_router)
 
 
 @app.get("/health")

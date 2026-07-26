@@ -53,6 +53,35 @@ export async function deleteImage(imageId: string): Promise<void> {
   await request(`/images/${imageId}`, { method: "DELETE" });
 }
 
+// ─── Upload endpoint ───────────────────────────────────────────────
+
+export async function uploadImageToLibrary(params: {
+  file: File;
+  season_id: string;
+  garment_id?: string;
+  image_type: string;
+  note?: string;
+}): Promise<DesignImage> {
+  const formData = new FormData();
+  formData.append("file", params.file);
+  formData.append("season_id", params.season_id);
+  if (params.garment_id) formData.append("garment_id", params.garment_id);
+  formData.append("image_type", params.image_type);
+  if (params.note) formData.append("note", params.note);
+
+  const res = await fetch("/api/images/upload", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Upload failed" }));
+    throw new Error(err.detail || "Image upload failed");
+  }
+
+  return res.json();
+}
+
 export async function getImageCountsForSeason(
   seasonId: string
 ): Promise<Record<string, { total: number; liked: number }>> {

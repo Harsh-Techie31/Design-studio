@@ -9,16 +9,6 @@ interface StageProgressBarProps {
   garmentSummary?: Record<string, { run_count: number; liked_count: number }>;
 }
 
-const STAGE_COLORS: Record<NodeKey, string> = {
-  sketch: "bg-brass",
-  fabric: "bg-brass",
-  render: "bg-brass",
-  techPack: "bg-brass",
-  pattern: "bg-brass",
-  visualization: "bg-brass",
-  photoshoot: "bg-brass",
-};
-
 export function StageProgressBar({
   seasonId,
   garmentId,
