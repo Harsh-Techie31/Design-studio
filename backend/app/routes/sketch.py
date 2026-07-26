@@ -530,18 +530,47 @@ async def _generate_with_gemini(
     desc_str = ", ".join(descriptors) if descriptors else "Standard design"
     images = []
 
+    # Dynamic view logic
+    if view == "Front and back":
+        layout_instructions = (
+            "Horizontal layout. Side-by-side view: Front view on the left, Back view on the right. "
+            "Explicitly write the text label 'FRONT' directly below the left garment, "
+            "and write the text label 'BACK' directly below the right garment."
+        )
+    elif view == "Back":
+        layout_instructions = (
+            "Centered Back view only. "
+            "Explicitly write the text label 'BACK' directly below the garment."
+        )
+    else:
+        layout_instructions = (
+            "Centered Front view only. "
+            "Explicitly write the text label 'FRONT' directly below the garment."
+        )
+
+    # Build user guidelines from prompt_text
+    guidelines = f" Additional notes: {prompt_text}." if prompt_text else ""
+
     async with httpx.AsyncClient(timeout=60.0) as client:
         for idx in range(num_outputs):
             prompt = (
-                f"Generate a clean 2D vector technical flat sketch line drawing of a {gender} {category}. "
-                f"Silhouette: {silhouette}. Style elements: {desc_str}. "
-                f"View: {view}. Guidelines: {prompt_text or 'Laid out flat.'} "
-                f"Output: Clean black vector outlines on solid white background. "
-                f"NO 3D shadows, NO body parts, NO mannequins. Flat layout only."
+                f"A clean, professional 2D technical flat fashion sketch of a {gender} {category}. "
+                f"Silhouette: {silhouette}. Design details: {desc_str}. "
+                f"{layout_instructions} "
+                f"Style: Black ink line drawing on a pure solid white background. "
+                f"Crisp vector lines, completely flat geometry. "
+                f"STRICT INSTRUCTIONS: No 3D forms, no shading, no colors, no gradient. "
+                f"Must be an isolated flat sketch."
+                f"{guidelines}"
+            )
+
+            negative_prompt = (
+                "3D, shadows, shading, human body, mannequin, skin, hands, realistic, photographic, "
+                "colors, gradients, messy lines, hangers, background clutter, wrinkles, folds with volume"
             )
 
             payload = {
-                "contents": [{"parts": [{"text": prompt}]}],
+                "contents": [{"parts": [{"text": prompt}, {"text": f"Avoid: {negative_prompt}"}]}],
                 "generationConfig": {"temperature": 0.5 + (0.1 * idx)},
             }
 
