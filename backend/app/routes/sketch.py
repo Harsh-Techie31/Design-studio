@@ -574,7 +574,7 @@ async def _generate_with_gemini(
                 "generationConfig": {"temperature": 0.5 + (0.1 * idx)},
             }
 
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image:generateContent?key={api_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
 
             try:
                 resp = await client.post(url, json=payload)
@@ -711,7 +711,7 @@ async def generate_sketch(
                     _, b64data = data_url.split(",", 1)
                     img_bytes = base64.b64decode(b64data)
                     generated_images.append({"bytes": img_bytes, "source": "ai"})
-            run.ai.model = "gemini-3-pro-image"
+            run.ai.model = "gemini-2.5-flash"
             run.ai.prompt = prompt_text
         except Exception as e:
             logger.error(f"Gemini generation failed, falling back to PIL: {e}")
