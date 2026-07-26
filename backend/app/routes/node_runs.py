@@ -163,7 +163,7 @@ def _stub_node_output(node_key: NodeKey, palette: list[str]) -> NodeOutput:
             ],
         )
 
-    if node_key == NodeKey.FABRIC:
+    if node_key == NodeKey.PRINT:
         return NodeOutput(
             images=[
                 "https://placehold.co/600x600/1a1a1a/c9a24d?text=Fabric+Swatch+1",

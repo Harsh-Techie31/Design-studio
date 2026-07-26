@@ -1,16 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { NavBar } from "../components/NavBar";
 import { StageProgressBar } from "../components/StageProgressBar";
 import { StageOutputPanel } from "../components/StageOutputPanel";
 import { SketchTool } from "../components/stages/SketchTool";
+import { PrintTool, type PrintState } from "../components/stages/PrintTool";
 import { useStudio } from "../state/StudioContext";
 import { listImagesForGarment, toggleLike, toggleStar } from "../api/designImages";
-import type { DesignImage, NodeKey, SketchGenerateResponse } from "../types";
+import type { DesignImage, NodeKey } from "../types";
 import { NODE_DEFS } from "../data/mockData";
 
 const STAGE_NODE_KEYS: NodeKey[] = [
-  "sketch", "fabric", "render", "techPack", "pattern", "visualization", "photoshoot",
+  "sketch", "print", "render", "techPack", "pattern", "visualization", "photoshoot",
 ];
 
 export function StageWorkspacePage() {
@@ -28,6 +29,22 @@ export function StageWorkspacePage() {
 
   const [images, setImages] = useState<DesignImage[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Print canvas state
+  const [printState, setPrintState] = useState<PrintState>({
+    motifImage: null,
+    motifFile: null,
+    scale: 1.0,
+    rotation: 0,
+    spacingX: 0,
+    spacingY: 0,
+    repeatType: "block",
+    fabricType: "cotton",
+    bgColor: "#ffffff",
+    canvasSize: 1024,
+  });
+
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // Fetch images for this garment + stage
   const fetchImages = async () => {
@@ -65,10 +82,14 @@ export function StageWorkspacePage() {
     }
   };
 
-  const handleGenerated = (response: SketchGenerateResponse) => {
+  const handleGenerated = (response: any) => {
     // Re-fetch images to include the new ones
     fetchImages();
   };
+
+  const handlePrintStateChange = useCallback((newState: Partial<PrintState>) => {
+    setPrintState((prev) => ({ ...prev, ...newState }));
+  }, []);
 
   const handleNextStage = () => {
     const currentIdx = STAGE_NODE_KEYS.indexOf(currentStage);
@@ -86,6 +107,11 @@ export function StageWorkspacePage() {
     }
     return "Final Stage";
   };
+
+  // Canvas preview for print stage
+  const printCanvasPreview = currentStage === "print" ? (
+    <PrintCanvasPreview state={printState} canvasRef={canvasRef} />
+  ) : undefined;
 
   if (!season || !garment) {
     return (
@@ -135,7 +161,17 @@ export function StageWorkspacePage() {
           />
         )}
 
-        {currentStage !== "sketch" && (
+        {currentStage === "print" && (
+          <PrintTool
+            garment={garment}
+            season={season}
+            onGenerated={handleGenerated}
+            onStateChange={handlePrintStateChange}
+            canvasRef={canvasRef}
+          />
+        )}
+
+        {currentStage !== "sketch" && currentStage !== "print" && (
           <aside className="flex w-full flex-col items-center justify-center bg-surface p-8 lg:w-[350px]">
             <i className="ti ti-tools text-3xl text-muted" />
             <p className="mt-3 text-sm text-muted">
@@ -156,9 +192,121 @@ export function StageWorkspacePage() {
             onToggleStar={handleToggleStar}
             onNextStage={handleNextStage}
             nextStageLabel={getNextStageLabel()}
+            canvasPreview={printCanvasPreview}
           />
         </div>
       </div>
     </div>
+  );
+}
+
+// ─── Print Canvas Preview ──────────────────────────────────────────
+
+function PrintCanvasPreview({
+  state,
+  canvasRef,
+}: {
+  state: PrintState;
+  canvasRef: React.RefObject<HTMLCanvasElement | null>;
+}) {
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !state.motifImage) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = new Image();
+    img.onload = () => {
+      const displaySize = 600;
+      canvas.width = displaySize;
+      canvas.height = displaySize;
+
+      // Draw background
+      if (state.bgColor.toLowerCase() !== "transparent") {
+        ctx.fillStyle = state.bgColor;
+        ctx.fillRect(0, 0, displaySize, displaySize);
+      } else {
+        ctx.clearRect(0, 0, displaySize, displaySize);
+        const checkSize = 10;
+        for (let y = 0; y < displaySize; y += checkSize) {
+          for (let x = 0; x < displaySize; x += checkSize) {
+            ctx.fillStyle =
+              (Math.floor(x / checkSize) + Math.floor(y / checkSize)) % 2 === 0
+                ? "#cccccc"
+                : "#ffffff";
+            ctx.fillRect(x, y, checkSize, checkSize);
+          }
+        }
+      }
+
+      const tileW = Math.max(10, img.width * state.scale);
+      const tileH = Math.max(10, img.height * state.scale);
+      const cellW = tileW + state.spacingX;
+      const cellH = tileH + state.spacingY;
+
+      const cols = Math.ceil(displaySize / cellW) + 2;
+      const rows = Math.ceil(displaySize / cellH) + 2;
+      const startX = -cellW;
+      const startY = -cellH;
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          let x = startX + c * cellW;
+          let y = startY + r * cellH;
+
+          if (state.repeatType === "half-drop" && c % 2 === 1) {
+            y += cellH / 2;
+          } else if (state.repeatType === "brick" && r % 2 === 1) {
+            x += cellW / 2;
+          }
+
+          ctx.save();
+          ctx.translate(x + tileW / 2, y + tileH / 2);
+
+          if (state.rotation !== 0) {
+            ctx.rotate((state.rotation * Math.PI) / 180);
+          }
+
+          let scaleX = 1;
+          let scaleY = 1;
+          if (state.repeatType === "mirror") {
+            if (c % 2 === 1) scaleX = -1;
+            if (r % 2 === 1) scaleY = -1;
+          }
+          ctx.scale(scaleX, scaleY);
+
+          ctx.drawImage(img, -tileW / 2, -tileH / 2, tileW, tileH);
+          ctx.restore();
+        }
+      }
+    };
+    img.src = state.motifImage;
+  }, [
+    state.motifImage,
+    state.scale,
+    state.rotation,
+    state.spacingX,
+    state.spacingY,
+    state.repeatType,
+    state.bgColor,
+    canvasRef,
+  ]);
+
+  if (!state.motifImage) {
+    return (
+      <div className="flex flex-col items-center gap-3 text-center">
+        <i className="ti ti-photo text-4xl text-muted" />
+        <p className="text-sm text-muted">Upload a motif to see preview</p>
+      </div>
+    );
+  }
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="max-h-full max-w-full rounded-lg border border-line"
+      style={{ objectFit: "contain" }}
+    />
   );
 }

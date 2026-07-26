@@ -11,11 +11,10 @@ import { useStudio } from "../state/StudioContext";
 import { listImagesForSeason, toggleLike } from "../api/designImages";
 import { CATEGORY_DEFS, seedFromId, type GarmentCategory, type DesignImage, type MoodboardImage } from "../types";
 
-type SeasonTab = "overview" | "fabrics" | "prints" | "sketches" | "garments";
+type SeasonTab = "overview" | "prints" | "sketches" | "garments";
 
 const SEASON_TABS: { key: SeasonTab; label: string }[] = [
   { key: "overview", label: "Overview" },
-  { key: "fabrics", label: "Fabrics" },
   { key: "prints", label: "Prints" },
   { key: "sketches", label: "Sketches" },
   { key: "garments", label: "Garments" },
@@ -71,7 +70,7 @@ export function SeasonDetailPage() {
       return;
     }
     setTabLoading(true);
-    const imageType = tab === "sketches" ? "sketch" : tab === "fabrics" ? "fabric" : "print";
+    const imageType = tab === "sketches" ? "sketch" : "print";
     listImagesForSeason(seasonId, { image_type: imageType })
       .then(setTabImages)
       .catch(() => setTabImages([]))
@@ -319,20 +318,6 @@ export function SeasonDetailPage() {
 
         <div className="mt-16">{garmentsSection}</div>
         </>
-        )}
-
-        {tab === "fabrics" && (
-          <section>
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-xl text-bone-dim">Fabrics</h2>
-              {tabImages.length > 0 && (
-                <span className="text-xs uppercase tracking-wide text-muted">
-                  {tabImages.length} fabrics
-                </span>
-              )}
-            </div>
-            {renderImageGrid(tabImages, "No fabrics yet. Generate fabrics from the garment workspace.")}
-          </section>
         )}
 
         {tab === "prints" && (

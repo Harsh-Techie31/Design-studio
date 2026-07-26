@@ -3,7 +3,7 @@ from enum import Enum
 
 class NodeKey(str, Enum):
     SKETCH = "sketch"
-    FABRIC = "fabric"
+    PRINT = "print"
     RENDER = "render"
     TECH_PACK = "techPack"
     PATTERN = "pattern"
@@ -13,7 +13,7 @@ class NodeKey(str, Enum):
 
 STAGE_ORDER = [
     NodeKey.SKETCH,
-    NodeKey.FABRIC,
+    NodeKey.PRINT,
     NodeKey.RENDER,
     NodeKey.TECH_PACK,
     NodeKey.PATTERN,
@@ -23,7 +23,7 @@ STAGE_ORDER = [
 
 STAGE_ABBREVIATIONS = {
     NodeKey.SKETCH: "SKTCH",
-    NodeKey.FABRIC: "FBRC",
+    NodeKey.PRINT: "PRNT",
     NodeKey.RENDER: "RNDR",
     NodeKey.TECH_PACK: "TECH",
     NodeKey.PATTERN: "PTRN",

@@ -2,7 +2,7 @@ import type { Garment, MoodboardImage, NodeDef, NodeKey, NodeSummary, Season } f
 
 export const NODE_DEFS: NodeDef[] = [
   { key: "sketch", number: 1, label: "Sketch", hint: "Generate flat sketch of the garment silhouette" },
-  { key: "fabric", number: 2, label: "Fabric/Print", hint: "Pick or generate fabric and print options" },
+  { key: "print", number: 2, label: "Print", hint: "Upload motif and create seamless fabric print pattern" },
   { key: "render", number: 3, label: "Render", hint: "Combine sketch + fabric into a colored flat render" },
   { key: "techPack", number: 4, label: "Tech Pack", hint: "Construction spec, measurements, BOM" },
   { key: "pattern", number: 5, label: "Pattern", hint: "Technical flat pattern" },

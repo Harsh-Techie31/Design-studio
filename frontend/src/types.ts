@@ -1,6 +1,6 @@
 export type NodeKey =
   | "sketch"
-  | "fabric"
+  | "print"
   | "render"
   | "techPack"
   | "pattern"
