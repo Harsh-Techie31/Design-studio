@@ -8,7 +8,7 @@ interface ImagePickerModalProps {
   onClose: () => void;
   onSelect: (image: DesignImage) => void;
   seasonId: string;
-  imageType: "sketch" | "fabric" | "print";
+  imageType: "sketch" | "fabric" | "print" | "render";
   title?: string;
 }
 
@@ -29,7 +29,7 @@ export function ImagePickerModal({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const modalTitle = title ?? (imageType === "sketch" ? "Choose Sketch" : "Choose Fabric");
+  const modalTitle = title ?? (imageType === "sketch" ? "Choose Sketch" : imageType === "render" ? "Choose Render" : "Choose Fabric");
 
   // Load library images when modal opens
   useEffect(() => {

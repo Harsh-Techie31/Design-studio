@@ -165,3 +165,60 @@ export async function generateSketch(
 
   return res.json();
 }
+
+// ─── Tech Pack generation ───────────────────────────────────────────
+
+export interface TechPackGenerateParams {
+  render_image_url: string;
+  gender: string;
+  construction: Record<string, string>;
+  stitch_type: string;
+  seam_type: string;
+  bom: Record<string, string>;
+  measurements: Record<string, number>;
+  construction_notes: string;
+  num_outputs: number;
+  note: string;
+}
+
+export interface TechPackGenerateResponse {
+  success: boolean;
+  run: {
+    id: string;
+    code: string;
+    iteration: number;
+    version: number;
+    status: string;
+    node_key: string;
+  };
+  image: {
+    id: string;
+    image_code: string;
+    url: string;
+    source: string;
+    ai_model: string | null;
+  };
+  style_code: string;
+}
+
+export async function generateTechPack(
+  garmentId: string,
+  params: TechPackGenerateParams,
+  geminiApiKey?: string
+): Promise<TechPackGenerateResponse> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (geminiApiKey) headers["X-Gemini-API-Key"] = geminiApiKey;
+
+  const res = await fetch(`/api/garments/${garmentId}/nodes/techPack/generate`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(params),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Generation failed" }));
+    throw new Error(err.detail || "Tech pack generation failed");
+  }
+
+  return res.json();
+}

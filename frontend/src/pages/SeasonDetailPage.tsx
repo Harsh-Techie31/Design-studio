@@ -11,7 +11,7 @@ import { useStudio } from "../state/StudioContext";
 import { listImagesForSeason, toggleLike } from "../api/designImages";
 import { CATEGORY_DEFS, seedFromId, type GarmentCategory, type DesignImage, type MoodboardImage } from "../types";
 
-type SeasonTab = "overview" | "prints" | "fabrics" | "sketches" | "firstRenders" | "garments";
+type SeasonTab = "overview" | "prints" | "fabrics" | "sketches" | "firstRenders" | "techPacks" | "garments";
 
 const SEASON_TABS: { key: SeasonTab; label: string }[] = [
   { key: "overview", label: "Overview" },
@@ -19,6 +19,7 @@ const SEASON_TABS: { key: SeasonTab; label: string }[] = [
   { key: "fabrics", label: "Fabrics" },
   { key: "sketches", label: "Sketches" },
   { key: "firstRenders", label: "First Renders" },
+  { key: "techPacks", label: "Tech Packs" },
   { key: "garments", label: "Garments" },
 ];
 
@@ -72,7 +73,7 @@ export function SeasonDetailPage() {
       return;
     }
     setTabLoading(true);
-    const imageType = tab === "sketches" ? "sketch" : tab === "fabrics" ? "fabric" : tab === "prints" ? "print" : tab === "firstRenders" ? "render" : tab;
+    const imageType = tab === "sketches" ? "sketch" : tab === "fabrics" ? "fabric" : tab === "prints" ? "print" : tab === "firstRenders" ? "render" : tab === "techPacks" ? "tech_pack" : tab;
     listImagesForSeason(seasonId, { image_type: imageType })
       .then(setTabImages)
       .catch(() => setTabImages([]))
@@ -375,6 +376,20 @@ export function SeasonDetailPage() {
               )}
             </div>
             {renderImageGrid(tabImages, "No renders yet. Generate renders from the garment workspace.")}
+          </section>
+        )}
+
+        {tab === "techPacks" && (
+          <section>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-xl text-bone-dim">Tech Packs</h2>
+              {tabImages.length > 0 && (
+                <span className="text-xs uppercase tracking-wide text-muted">
+                  {tabImages.length} tech packs
+                </span>
+              )}
+            </div>
+            {renderImageGrid(tabImages, "No tech packs yet. Generate tech packs from the garment workspace (Stage 4).")}
           </section>
         )}
 

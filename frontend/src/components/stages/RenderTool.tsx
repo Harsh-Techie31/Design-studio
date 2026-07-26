@@ -163,10 +163,12 @@ export function RenderTool({ garment, season, onGenerated, onStateChange }: Rend
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sketch_image: sketchImage.url,
+          sketch_image_id: sketchImage.id,
           gender,
           num_outputs: numOutputs,
           fabrics: validFabrics.map(f => ({
             image_url: f.image!.url,
+            image_id: f.image!.id,
             placements: f.placements,
             prompt: f.prompt,
             scale: f.scale,

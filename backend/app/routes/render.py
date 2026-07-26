@@ -24,6 +24,7 @@ router = APIRouter(tags=["render"])
 
 class FabricSlot(BaseModel):
     image_url: str  # URL from library or data URL from upload
+    image_id: str = ""  # DesignImage ID from library (if available)
     placements: list[str] = []
     prompt: str = ""
     scale: float = 1.0
@@ -31,6 +32,7 @@ class FabricSlot(BaseModel):
 
 class RenderGenerateRequest(BaseModel):
     sketch_image: str  # base64 data URL or URL from library
+    sketch_image_id: str = ""  # DesignImage ID from library (if available)
     gender: str = "male"
     num_outputs: int = 1
     fabrics: list[FabricSlot] = []
@@ -429,10 +431,11 @@ async def generate_render(
 
         # Build input_images refs from sketch and fabrics
         input_refs = []
-        if body.sketch_image:
-            input_refs.append(InputImageRef(image_id="sketch", stage=NodeKey.SKETCH, role="primary"))
+        if body.sketch_image_id:
+            input_refs.append(InputImageRef(image_id=body.sketch_image_id, stage=NodeKey.SKETCH, role="primary"))
         for fi, fab in enumerate(body.fabrics):
-            input_refs.append(InputImageRef(image_id=f"fabric_{fi}", stage=NodeKey.PRINT, role=f"fabric_{fi+1}"))
+            if fab.image_id:
+                input_refs.append(InputImageRef(image_id=fab.image_id, stage=NodeKey.PRINT, role=f"fabric_{fi+1}"))
 
         design_img = DesignImage(
             image_code=img_code,

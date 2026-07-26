@@ -6,6 +6,8 @@ import { StageOutputPanel } from "../components/StageOutputPanel";
 import { SketchTool } from "../components/stages/SketchTool";
 import { PrintTool, type PrintState } from "../components/stages/PrintTool";
 import { RenderTool, type RenderState } from "../components/stages/RenderTool";
+import { TechPackTool } from "../components/stages/TechPackTool";
+import { TechPackOutputPanel } from "../components/stages/TechPackOutputPanel";
 import { useStudio } from "../state/StudioContext";
 import { listImagesForGarment, toggleLike, toggleStar } from "../api/designImages";
 import type { DesignImage, NodeKey } from "../types";
@@ -193,7 +195,16 @@ export function StageWorkspacePage() {
           />
         )}
 
-        {currentStage !== "sketch" && currentStage !== "print" && currentStage !== "render" && (
+        {currentStage === "techPack" && (
+          <TechPackTool
+            garment={garment}
+            season={season}
+            onGenerated={handleGenerated}
+            renders={images}
+          />
+        )}
+
+        {currentStage !== "sketch" && currentStage !== "print" && currentStage !== "render" && currentStage !== "techPack" && (
           <aside className="flex w-full flex-col items-center justify-center bg-surface p-8 lg:w-[350px]">
             <i className="ti ti-tools text-3xl text-muted" />
             <p className="mt-3 text-sm text-muted">
@@ -207,15 +218,23 @@ export function StageWorkspacePage() {
 
         {/* Right Panel — output grid */}
         <div className="flex flex-1 flex-col overflow-hidden">
-          <StageOutputPanel
-            images={images}
-            loading={loading}
-            onToggleLike={handleToggleLike}
-            onToggleStar={handleToggleStar}
-            onNextStage={handleNextStage}
-            nextStageLabel={getNextStageLabel()}
-            canvasPreview={printCanvasPreview}
-          />
+          {currentStage === "techPack" ? (
+            <TechPackOutputPanel
+              images={images}
+              imageType="tech_pack"
+              onRefresh={fetchImages}
+            />
+          ) : (
+            <StageOutputPanel
+              images={images}
+              loading={loading}
+              onToggleLike={handleToggleLike}
+              onToggleStar={handleToggleStar}
+              onNextStage={handleNextStage}
+              nextStageLabel={getNextStageLabel()}
+              canvasPreview={printCanvasPreview}
+            />
+          )}
         </div>
       </div>
     </div>
