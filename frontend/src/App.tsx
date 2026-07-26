@@ -4,6 +4,7 @@ import { LandingPage } from "./pages/LandingPage";
 import { SeasonsListPage } from "./pages/SeasonsListPage";
 import { SeasonDetailPage } from "./pages/SeasonDetailPage";
 import { GarmentDetailPage } from "./pages/GarmentDetailPage";
+import { StageWorkspacePage } from "./pages/StageWorkspacePage";
 
 function App() {
   return (
@@ -16,6 +17,10 @@ function App() {
           <Route
             path="/seasons/:seasonId/garments/:garmentId"
             element={<GarmentDetailPage />}
+          />
+          <Route
+            path="/seasons/:seasonId/garments/:garmentId/stage/:nodeKey"
+            element={<StageWorkspacePage />}
           />
         </Routes>
       </BrowserRouter>

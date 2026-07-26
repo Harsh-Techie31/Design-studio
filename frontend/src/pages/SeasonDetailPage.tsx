@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { NavBar } from "../components/NavBar";
 import { MoodboardTile } from "../components/MoodboardTile";
@@ -8,7 +8,8 @@ import { GarmentCard } from "../components/GarmentCard";
 import { Modal } from "../components/Modal";
 import { StartMoodboardModal } from "../components/StartMoodboardModal";
 import { useStudio } from "../state/StudioContext";
-import { CATEGORY_DEFS, seedFromId, type GarmentCategory, type MoodboardImage } from "../types";
+import { listImagesForSeason, toggleLike } from "../api/designImages";
+import { CATEGORY_DEFS, seedFromId, type GarmentCategory, type DesignImage, type MoodboardImage } from "../types";
 
 type SeasonTab = "overview" | "fabrics" | "prints" | "sketches" | "garments";
 
@@ -36,6 +37,8 @@ export function SeasonDetailPage() {
   const [moodboardOpen, setMoodboardOpen] = useState(false);
   const [briefExpanded, setBriefExpanded] = useState(false);
   const [tab, setTab] = useState<SeasonTab>("overview");
+  const [tabImages, setTabImages] = useState<DesignImage[]>([]);
+  const [tabLoading, setTabLoading] = useState(false);
 
   const season = getSeason(seasonId ?? "");
 
@@ -61,6 +64,20 @@ export function SeasonDetailPage() {
   const brief = season!.moodboard.analysis.brief;
   const status = season!.moodboard.status;
 
+  // Fetch images for non-overview tabs
+  useEffect(() => {
+    if (tab === "overview" || tab === "garments" || !seasonId) {
+      setTabImages([]);
+      return;
+    }
+    setTabLoading(true);
+    const imageType = tab === "sketches" ? "sketch" : tab === "fabrics" ? "fabric" : "print";
+    listImagesForSeason(seasonId, { image_type: imageType })
+      .then(setTabImages)
+      .catch(() => setTabImages([]))
+      .finally(() => setTabLoading(false));
+  }, [tab, seasonId]);
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!category) return;
@@ -79,6 +96,63 @@ export function SeasonDetailPage() {
       analyzeMoodboard(season!.id);
     }
   }
+
+  async function handleToggleLike(imageId: string) {
+    try {
+      const updated = await toggleLike(imageId);
+      setTabImages((prev) => prev.map((img) => (img.id === imageId ? updated : img)));
+    } catch (e) {
+      console.error("Failed to toggle like:", e);
+    }
+  }
+
+  const renderImageGrid = (images: DesignImage[], emptyMessage: string) => {
+    if (tabLoading) {
+      return (
+        <div className="flex items-center justify-center py-16">
+          <i className="ti ti-loader-2 animate-spin text-xl text-brass" />
+        </div>
+      );
+    }
+    if (images.length === 0) {
+      return (
+        <div className="rounded-xl border border-dashed border-line py-16 text-center text-sm text-bone-dim">
+          {emptyMessage}
+        </div>
+      );
+    }
+    return (
+      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+        {images.map((img) => (
+          <div
+            key={img.id}
+            className={`group relative overflow-hidden rounded-xl border transition-all ${
+              img.liked
+                ? "border-green-500/50 ring-2 ring-green-500/20"
+                : "border-line hover:border-brass/30"
+            }`}
+          >
+            <div className="aspect-[3/4] bg-ink-soft">
+              <img src={img.url} alt={img.image_code} className="h-full w-full object-contain" loading="lazy" />
+            </div>
+            <div className="flex items-center justify-between px-2 py-1.5">
+              <span className="font-mono text-[10px] text-muted">
+                {img.image_code.split("_").slice(-2).join("_")}
+              </span>
+              <button
+                onClick={() => handleToggleLike(img.id)}
+                className={`rounded p-1 text-xs transition-colors ${
+                  img.liked ? "text-green-400" : "text-muted hover:text-green-400"
+                }`}
+              >
+                <i className={`ti ti-heart${img.liked ? "-filled" : ""}`} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   const garmentsSection = (
     <section className="mt-16 first:mt-0">
@@ -248,21 +322,45 @@ export function SeasonDetailPage() {
         )}
 
         {tab === "fabrics" && (
-          <div className="py-16 text-center text-sm text-bone-dim">
-            Fabric library for this season. Add fabrics you want available across all garments.
-          </div>
+          <section>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-xl text-bone-dim">Fabrics</h2>
+              {tabImages.length > 0 && (
+                <span className="text-xs uppercase tracking-wide text-muted">
+                  {tabImages.length} fabrics
+                </span>
+              )}
+            </div>
+            {renderImageGrid(tabImages, "No fabrics yet. Generate fabrics from the garment workspace.")}
+          </section>
         )}
 
         {tab === "prints" && (
-          <div className="py-16 text-center text-sm text-bone-dim">
-            Print library for this season.
-          </div>
+          <section>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-xl text-bone-dim">Prints</h2>
+              {tabImages.length > 0 && (
+                <span className="text-xs uppercase tracking-wide text-muted">
+                  {tabImages.length} prints
+                </span>
+              )}
+            </div>
+            {renderImageGrid(tabImages, "No prints yet. Generate prints from the garment workspace.")}
+          </section>
         )}
 
         {tab === "sketches" && (
-          <div className="py-16 text-center text-sm text-bone-dim">
-            Reference sketches you have uploaded manually for this season.
-          </div>
+          <section>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-xl text-bone-dim">Sketches</h2>
+              {tabImages.length > 0 && (
+                <span className="text-xs uppercase tracking-wide text-muted">
+                  {tabImages.length} sketches
+                </span>
+              )}
+            </div>
+            {renderImageGrid(tabImages, "No sketches yet. Generate sketches from the garment workspace.")}
+          </section>
         )}
 
         {tab === "garments" && garmentsSection}

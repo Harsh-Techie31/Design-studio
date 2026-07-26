@@ -63,3 +63,16 @@ class MoodboardStatus(str, Enum):
 class ImageSource(str, Enum):
     UPLOAD = "upload"
     PINTEREST = "pinterest"
+
+
+class ImageType(str, Enum):
+    SKETCH = "sketch"
+    FABRIC = "fabric"
+    RENDER = "render"
+    PRINT = "print"
+    TECH_PACK = "tech_pack"
+    PATTERN = "pattern"
+    THREE_D = "3d"
+    PHOTO = "photo"
+    MOODBOARD = "moodboard"
+    REFERENCE = "reference"

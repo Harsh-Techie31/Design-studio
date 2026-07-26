@@ -19,6 +19,7 @@ class NodeRunResponse(BaseModel):
     liked: bool
     inputs: list[dict]
     output: dict
+    output_image_ids: list[str]
     ai: dict
     created_at: str
     updated_at: str

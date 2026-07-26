@@ -130,7 +130,60 @@ export interface NodeRun {
   liked: boolean;
   inputs: RunInputRef[];
   output: NodeOutput;
+  output_image_ids: string[];
   ai: AIMeta;
+  created_at: string;
+  updated_at: string;
+}
+
+// ─── DesignImage (central image library) ─────────────────────────────────────
+
+export type ImageType =
+  | "sketch"
+  | "fabric"
+  | "render"
+  | "print"
+  | "tech_pack"
+  | "pattern"
+  | "3d"
+  | "photo"
+  | "moodboard"
+  | "reference";
+
+export type ImageView = "front" | "back" | "front_and_back" | "flat" | "3d" | "model";
+
+export interface InputImageRef {
+  image_id: string;
+  stage: NodeKey;
+  role: "primary" | "reference" | "style";
+}
+
+export interface DesignImage {
+  id: string;
+  image_code: string;
+  index: number;
+  season_id: string;
+  garment_id: string;
+  node_key: NodeKey;
+  run_id: string;
+  version: number;
+  image_type: ImageType;
+  view: ImageView;
+  liked: boolean;
+  starred: boolean;
+  input_images: InputImageRef[];
+  source: string;
+  ai_model: string | null;
+  ai_prompt: string | null;
+  params: Record<string, unknown>;
+  url: string;
+  imagekit_file_id: string | null;
+  file_size_bytes: number | null;
+  width: number | null;
+  height: number | null;
+  file_format: string;
+  note: string;
+  tags: string[];
   created_at: string;
   updated_at: string;
 }

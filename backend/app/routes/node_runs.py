@@ -33,6 +33,7 @@ def _serialize_run(r: NodeRun) -> dict:
             "text": r.output.text,
             "extra": r.output.extra,
         },
+        "output_image_ids": r.output_image_ids,
         "ai": {
             "model": r.ai.model,
             "prompt": r.ai.prompt,

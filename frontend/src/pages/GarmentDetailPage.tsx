@@ -1,19 +1,16 @@
-import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { NavBar } from "../components/NavBar";
 import { NodeCard } from "../components/NodeCard";
 import { PaletteSwatches } from "../components/PaletteSwatches";
-import { Modal } from "../components/Modal";
 import { PlaceholderTile } from "../components/PlaceholderTile";
 import { useStudio } from "../state/StudioContext";
 import { NODE_DEFS } from "../data/mockData";
 import { seedFromId } from "../types";
-import type { NodeDef } from "../types";
 
 export function GarmentDetailPage() {
   const { seasonId, garmentId } = useParams<{ seasonId: string; garmentId: string }>();
   const { getSeason, getGarment } = useStudio();
-  const [activeNode, setActiveNode] = useState<NodeDef | null>(null);
+  const navigate = useNavigate();
 
   const season = getSeason(seasonId ?? "");
   const garment = getGarment(garmentId ?? "");
@@ -68,22 +65,13 @@ export function GarmentDetailPage() {
               key={def.key}
               def={def}
               summary={garment.node_summary[def.key]}
-              onOpen={() => setActiveNode(def)}
+              onOpen={() =>
+                navigate(`/seasons/${season.id}/garments/${garment.id}/stage/${def.key}`)
+              }
             />
           ))}
         </div>
       </main>
-
-      <Modal
-        open={activeNode !== null}
-        onClose={() => setActiveNode(null)}
-        title={activeNode?.label ?? ""}
-      >
-        <p className="text-sm text-bone-dim">{activeNode?.hint}</p>
-        <div className="mt-4 rounded-lg border border-dashed border-line px-4 py-10 text-center text-sm text-muted">
-          This node's tool isn't wired up yet — it'll drop in here.
-        </div>
-      </Modal>
     </div>
   );
 }

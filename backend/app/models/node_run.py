@@ -47,6 +47,7 @@ class NodeRun(Document):
     liked: bool = False
     inputs: list[RunInputRef] = Field(default_factory=list)
     output: NodeOutput = Field(default_factory=NodeOutput)
+    output_image_ids: list[str] = Field(default_factory=list)
     ai: AIMeta = Field(default_factory=AIMeta)
 
     created_at: datetime = Field(default_factory=utcnow)
