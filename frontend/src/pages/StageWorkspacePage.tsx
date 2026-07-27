@@ -8,6 +8,8 @@ import { PrintTool, type PrintState } from "../components/stages/PrintTool";
 import { RenderTool, type RenderState } from "../components/stages/RenderTool";
 import { TechPackTool } from "../components/stages/TechPackTool";
 import { TechPackOutputPanel } from "../components/stages/TechPackOutputPanel";
+import { PatternTool } from "../components/stages/PatternTool";
+import { PatternOutputPanel } from "../components/stages/PatternOutputPanel";
 import { useStudio } from "../state/StudioContext";
 import { listImagesForGarment, toggleLike, toggleStar } from "../api/designImages";
 import type { DesignImage, NodeKey } from "../types";
@@ -204,8 +206,17 @@ export function StageWorkspacePage() {
           />
         )}
 
-        {currentStage !== "sketch" && currentStage !== "print" && currentStage !== "render" && currentStage !== "techPack" && (
-          <aside className="flex w-full flex-col items-center justify-center bg-surface p-8 lg:w-[350px]">
+        {currentStage === "pattern" && (
+          <PatternTool
+            garment={garment}
+            season={season}
+            onGenerated={handleGenerated}
+            techPacks={images}
+          />
+        )}
+
+        {currentStage !== "sketch" && currentStage !== "print" && currentStage !== "render" && currentStage !== "techPack" && currentStage !== "pattern" && (
+          <aside className="flex w-full flex-col items-center justify-center bg-surface p-8 lg:w-[480px]">
             <i className="ti ti-tools text-3xl text-muted" />
             <p className="mt-3 text-sm text-muted">
               {NODE_DEFS.find((d) => d.key === currentStage)?.label} tool coming soon
@@ -222,6 +233,12 @@ export function StageWorkspacePage() {
             <TechPackOutputPanel
               images={images}
               imageType="tech_pack"
+              onRefresh={fetchImages}
+            />
+          ) : currentStage === "pattern" ? (
+            <PatternOutputPanel
+              images={images}
+              imageType="pattern"
               onRefresh={fetchImages}
             />
           ) : (

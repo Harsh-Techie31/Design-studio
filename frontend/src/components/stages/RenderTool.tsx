@@ -197,7 +197,7 @@ export function RenderTool({ garment, season, onGenerated, onStateChange }: Rend
   // ─── Render ───────────────────────────────────────────────────────
 
   return (
-    <aside className="flex h-full w-full flex-col overflow-y-auto bg-surface p-5 lg:w-[350px]">
+    <aside className="flex h-full w-full flex-col overflow-y-auto bg-surface p-6 lg:w-[480px]">
       {/* 1. Sketch */}
       <Section label="1. Sketch" required>
         {sketchImage ? (
@@ -213,7 +213,7 @@ export function RenderTool({ garment, season, onGenerated, onStateChange }: Rend
             >
               <i className="ti ti-x text-sm" />
             </button>
-            <div className="mt-1.5 font-mono text-[10px] text-muted">
+            <div className="mt-1.5 font-mono text-[11px] text-muted">
               {sketchImage.image_code}
             </div>
           </div>
@@ -223,8 +223,8 @@ export function RenderTool({ garment, season, onGenerated, onStateChange }: Rend
             className="flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed border-line bg-ink-soft p-6 transition-colors hover:border-brass/30"
           >
             <i className="ti ti-pencil-ruler text-2xl text-muted" />
-            <span className="text-xs text-muted">Choose Sketch</span>
-            <span className="text-[10px] text-muted">Upload or pick from library</span>
+            <span className="text-sm text-muted">Choose Sketch</span>
+            <span className="text-[11px] text-muted">Upload or pick from library</span>
           </button>
         )}
       </Section>
@@ -236,7 +236,7 @@ export function RenderTool({ garment, season, onGenerated, onStateChange }: Rend
             <button
               key={opt.value}
               onClick={() => setGender(opt.value)}
-              className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-xs transition-all ${
+              className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm transition-all ${
                 gender === opt.value
                   ? "border-brass bg-brass/15 font-semibold text-brass"
                   : "border-line bg-ink-soft text-muted hover:border-brass/30"
@@ -269,7 +269,7 @@ export function RenderTool({ garment, season, onGenerated, onStateChange }: Rend
         {fabrics.length < MAX_FABRICS && (
           <button
             onClick={addFabricSlot}
-            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-line py-2 text-xs text-muted transition-colors hover:border-brass/30 hover:text-bone-dim"
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-line py-2 text-sm text-muted transition-colors hover:border-brass/30 hover:text-bone-dim"
           >
             <i className="ti ti-plus" />
             Add Fabric
@@ -281,13 +281,13 @@ export function RenderTool({ garment, season, onGenerated, onStateChange }: Rend
       <Section label="4. Trims" hint="Coming Soon">
         <div className="rounded-lg border border-line bg-ink-soft p-4 text-center">
           <i className="ti ti-scissors text-xl text-muted" />
-          <p className="mt-1.5 text-xs text-muted">Trims selection coming soon</p>
+          <p className="mt-1.5 text-sm text-muted">Trims selection coming soon</p>
         </div>
       </Section>
 
       {/* Error */}
       {error && (
-        <div className="mb-3 rounded-lg border border-red-500/30 bg-red-500/5 px-3 py-2 text-xs text-red-400">
+        <div className="mb-3 rounded-lg border border-red-500/30 bg-red-500/5 px-3 py-2 text-sm text-red-400">
           {error}
         </div>
       )}
@@ -296,13 +296,13 @@ export function RenderTool({ garment, season, onGenerated, onStateChange }: Rend
       <div className="mt-auto flex flex-col gap-3 border-t border-line pt-4">
         {/* Output quantity */}
         <div className="flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-wide text-muted">Outputs</span>
+          <span className="text-[11px] uppercase tracking-wide text-muted">Outputs</span>
           <div className="flex gap-1">
             {[1, 2, 4].map(n => (
               <button
                 key={n}
                 onClick={() => setNumOutputs(n)}
-                className={`rounded px-3 py-1 text-xs transition-all ${
+                className={`rounded px-3 py-1 text-sm transition-all ${
                   numOutputs === n
                     ? "bg-brass text-ink font-semibold"
                     : "bg-ink-soft text-muted hover:text-bone-dim"
@@ -317,7 +317,7 @@ export function RenderTool({ garment, season, onGenerated, onStateChange }: Rend
         <button
           onClick={handleGenerate}
           disabled={isGenerating || !sketchImage || fabrics.every(f => !f.image)}
-          className={`flex w-full items-center justify-center gap-2 rounded-xl py-3 text-xs font-bold uppercase tracking-wider transition-all ${
+          className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold uppercase tracking-wider transition-all ${
             !sketchImage || fabrics.every(f => !f.image)
               ? "cursor-not-allowed bg-line text-muted"
               : "bg-brass text-ink hover:bg-brass-soft"
@@ -338,12 +338,12 @@ export function RenderTool({ garment, season, onGenerated, onStateChange }: Rend
 
         {/* Note */}
         <div>
-          <label className="mb-1 block text-[10px] uppercase text-muted">Note</label>
+          <label className="mb-1 block text-[11px] uppercase text-muted">Note</label>
           <input
             value={note}
             onChange={(e) => setNote(e.target.value.slice(0, 250))}
             placeholder="Optional note..."
-            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-xs text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none"
+            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none"
           />
         </div>
       </div>
@@ -395,12 +395,12 @@ function FabricSlotCard({
     <div className="rounded-lg border border-line bg-ink-soft p-3">
       {/* Header */}
       <div className="mb-2.5 flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-widest text-brass">
+        <span className="text-[11px] font-semibold uppercase tracking-widest text-brass">
           Fabric #{index + 1}
         </span>
         {canRemove && (
           <button onClick={onRemove} className="text-muted hover:text-red-400">
-            <i className="ti ti-trash text-xs" />
+            <i className="ti ti-trash text-sm" />
           </button>
         )}
       </div>
@@ -417,7 +417,7 @@ function FabricSlotCard({
             onClick={onPickImage}
             className="absolute right-1.5 top-1.5 rounded bg-ink/80 p-1 text-muted hover:text-bone"
           >
-            <i className="ti ti-pencil text-[10px]" />
+            <i className="ti ti-pencil text-[11px]" />
           </button>
           <div className="mt-1 font-mono text-[9px] text-muted">
             {slot.image.image_code}
@@ -426,7 +426,7 @@ function FabricSlotCard({
       ) : (
         <button
           onClick={onPickImage}
-          className="mb-2.5 flex w-full items-center justify-center gap-2 rounded border-2 border-dashed border-line py-4 text-xs text-muted transition-colors hover:border-brass/30"
+          className="mb-2.5 flex w-full items-center justify-center gap-2 rounded border-2 border-dashed border-line py-4 text-sm text-muted transition-colors hover:border-brass/30"
         >
           <i className="ti ti-upload" />
           Pick Fabric
@@ -443,7 +443,7 @@ function FabricSlotCard({
             <button
               key={p.value}
               onClick={() => onTogglePlacement(p.value)}
-              className={`rounded-full px-2 py-0.5 text-[10px] transition-all ${
+              className={`rounded-full px-2 py-0.5 text-[11px] transition-all ${
                 slot.placements.includes(p.value)
                   ? "bg-brass/20 text-brass border border-brass/40"
                   : "bg-ink text-muted border border-line hover:border-brass/20"
@@ -459,7 +459,7 @@ function FabricSlotCard({
       <div className="mb-2.5">
         <div className="mb-1 flex justify-between">
           <span className="text-[9px] uppercase tracking-wide text-muted">Scale</span>
-          <span className="text-[10px] font-mono font-bold text-brass">{slot.scale.toFixed(1)}x</span>
+          <span className="text-[11px] font-mono font-bold text-brass">{slot.scale.toFixed(1)}x</span>
         </div>
         <input
           type="range"
@@ -502,13 +502,13 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mb-5 border-t border-line pt-4 first:border-0 first:pt-0">
-      <div className="mb-2.5 flex items-center gap-2">
-        <label className="text-[11px] font-semibold uppercase tracking-widest text-brass">
+    <div className="mb-6 border-t border-line pt-5 first:border-0 first:pt-0">
+      <div className="mb-3 flex items-center gap-2">
+        <label className="text-[13px] font-semibold uppercase tracking-widest text-brass">
           {label}
           {required && <span className="ml-0.5 text-red-500">*</span>}
         </label>
-        {hint && <span className="text-[10px] text-muted">{hint}</span>}
+        {hint && <span className="text-[11px] text-muted">{hint}</span>}
       </div>
       {children}
     </div>

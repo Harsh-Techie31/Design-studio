@@ -1,4 +1,4 @@
-# Design Studio — Project Analysis
+# Design Studio — Project Analysis - v1
 
 An AI-assisted fashion design tool where designers build **Seasons** (12-image moodboards with AI-extracted style profiles) and create **Garments** inside them, each moving through a 7-stage fashion pipeline from sketch to photoshoot.
 

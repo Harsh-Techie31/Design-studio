@@ -215,12 +215,12 @@ export function TechPackTool({
   const measureFields = Object.keys(measurements);
 
   return (
-    <aside className="flex h-full w-full flex-col overflow-y-auto bg-surface p-5 lg:w-[350px]">
+    <aside className="flex h-full w-full flex-col overflow-y-auto bg-surface p-6 lg:w-[480px]">
       {/* Section A: References */}
       <Section label="A. References from Previous Stages">
         {/* Render reference */}
         <div className="mb-3">
-          <label className="mb-1.5 block text-[10px] uppercase tracking-wide text-muted">
+          <label className="mb-1.5 block text-[11px] uppercase tracking-wide text-muted">
             Render (Stage 3)
           </label>
           {selectedRender ? (
@@ -234,14 +234,14 @@ export function TechPackTool({
                 onClick={() => setRenderPickerOpen(true)}
                 className="absolute right-2 top-2 rounded bg-ink/80 p-1 text-muted hover:text-bone"
               >
-                <i className="ti ti-pencil text-[10px]" />
+                <i className="ti ti-pencil text-[11px]" />
               </button>
-              <div className="mt-1 font-mono text-[10px] text-muted">
+              <div className="mt-1 font-mono text-[11px] text-muted">
                 {selectedRender.image_code}
               </div>
               <button
                 onClick={() => setRenderPickerOpen(true)}
-                className="mt-1 text-[10px] text-brass hover:text-brass-soft"
+                className="mt-1 text-[11px] text-brass hover:text-brass-soft"
               >
                 Switch render
               </button>
@@ -252,7 +252,7 @@ export function TechPackTool({
               className="flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed border-line bg-ink-soft p-6 transition-colors hover:border-brass/30"
             >
               <i className="ti ti-photo text-2xl text-muted" />
-              <span className="text-xs text-muted">Select a render</span>
+              <span className="text-sm text-muted">Select a render</span>
             </button>
           )}
         </div>
@@ -305,7 +305,7 @@ export function TechPackTool({
       <Section label={`C. Construction Details`} hint={category}>
         {constructionFields.map((cf) => (
           <div key={cf.field} className="mb-3">
-            <label className="mb-1.5 block text-[10px] uppercase tracking-wide text-muted">
+            <label className="mb-1.5 block text-[11px] uppercase tracking-wide text-muted">
               {cf.field}
             </label>
             <div className="flex flex-wrap gap-1.5">
@@ -330,7 +330,7 @@ export function TechPackTool({
       {/* Section D: Stitch & Seam */}
       <Section label="D. Stitch and Seam">
         <div className="mb-3">
-          <label className="mb-1.5 block text-[10px] uppercase tracking-wide text-muted">
+          <label className="mb-1.5 block text-[11px] uppercase tracking-wide text-muted">
             Stitch type
           </label>
           <div className="flex flex-wrap gap-1.5">
@@ -350,7 +350,7 @@ export function TechPackTool({
           </div>
         </div>
         <div>
-          <label className="mb-1.5 block text-[10px] uppercase tracking-wide text-muted">
+          <label className="mb-1.5 block text-[11px] uppercase tracking-wide text-muted">
             Seam type
           </label>
           <div className="flex flex-wrap gap-1.5">
@@ -377,7 +377,7 @@ export function TechPackTool({
           {BOM_FIELDS.map((bf) => (
             <div key={bf.key}>
               <div className="mb-1 flex items-center gap-1.5">
-                <span className="text-[10px] text-muted">{bf.key}</span>
+                <span className="text-[11px] text-muted">{bf.key}</span>
                 {bf.autoFilled && (
                   <span className="rounded-full bg-brass/10 px-1.5 py-0.5 text-[8px] text-brass">
                     auto-filled
@@ -388,7 +388,7 @@ export function TechPackTool({
                 value={bom[bf.key] || ""}
                 onChange={(e) => handleBomChange(bf.key, e.target.value)}
                 placeholder={bf.placeholder}
-                className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-xs text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none"
+                className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none"
               />
             </div>
           ))}
@@ -400,7 +400,7 @@ export function TechPackTool({
         <div className="grid grid-cols-2 gap-2">
           {measureFields.map((field) => (
             <div key={field} className="flex items-center gap-2 rounded-lg border border-line bg-ink-soft px-2.5 py-1.5">
-              <span className="flex-1 text-[10px] text-muted truncate">{field}</span>
+              <span className="flex-1 text-[11px] text-muted truncate">{field}</span>
               <input
                 type="number"
                 value={measurements[field] || ""}
@@ -422,16 +422,16 @@ export function TechPackTool({
           }}
           maxLength={200}
           placeholder="Double needle topstitch at 6mm, bar tack at stress points, etc."
-          className="w-full min-h-[60px] rounded-lg border border-line bg-ink-soft px-3 py-2 text-xs text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none resize-none"
+          className="w-full min-h-[60px] rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none resize-none"
         />
-        <div className={`text-right text-[10px] mt-1 ${constructionNotes.length > 180 ? "text-brass" : "text-muted"}`}>
+        <div className={`text-right text-[11px] mt-1 ${constructionNotes.length > 180 ? "text-brass" : "text-muted"}`}>
           {constructionNotes.length}/200
         </div>
       </Section>
 
       {/* Error */}
       {error && (
-        <div className="mb-3 rounded-lg border border-red-500/30 bg-red-500/5 px-3 py-2 text-xs text-red-400">
+        <div className="mb-3 rounded-lg border border-red-500/30 bg-red-500/5 px-3 py-2 text-sm text-red-400">
           {error}
         </div>
       )}
@@ -440,13 +440,13 @@ export function TechPackTool({
       <div className="mt-auto flex flex-col gap-3 border-t border-line pt-4">
         {/* Quantity */}
         <div className="flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-wide text-muted">Outputs</span>
+          <span className="text-[11px] uppercase tracking-wide text-muted">Outputs</span>
           <div className="flex gap-1">
             {[1, 2, 3, 4].map((n) => (
               <button
                 key={n}
                 onClick={() => setNumOutputs(n)}
-                className={`rounded px-3 py-1 text-xs transition-all ${
+                className={`rounded px-3 py-1 text-sm transition-all ${
                   numOutputs === n
                     ? "bg-brass text-ink font-semibold"
                     : "bg-ink-soft text-muted hover:text-bone-dim"
@@ -462,7 +462,7 @@ export function TechPackTool({
         <button
           onClick={handleGenerate}
           disabled={isGenerating || !selectedRender}
-          className={`flex w-full items-center justify-center gap-2 rounded-xl py-3 text-xs font-bold uppercase tracking-wider transition-all ${
+          className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold uppercase tracking-wider transition-all ${
             !selectedRender
               ? "cursor-not-allowed bg-line text-muted"
               : "bg-brass text-ink hover:bg-brass-soft"
@@ -483,12 +483,12 @@ export function TechPackTool({
 
         {/* Note */}
         <div>
-          <label className="mb-1 block text-[10px] uppercase text-muted">Note</label>
+          <label className="mb-1 block text-[11px] uppercase text-muted">Note</label>
           <input
             value={note}
             onChange={(e) => setNote(e.target.value.slice(0, 250))}
             placeholder="Optional note..."
-            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-xs text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none"
+            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none"
           />
         </div>
       </div>
@@ -518,12 +518,12 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mb-5 border-t border-line pt-4 first:border-0 first:pt-0">
-      <div className="mb-2.5 flex items-center gap-2">
-        <label className="text-[11px] font-semibold uppercase tracking-widest text-brass">
+    <div className="mb-6 border-t border-line pt-5 first:border-0 first:pt-0">
+      <div className="mb-3 flex items-center gap-2">
+        <label className="text-[13px] font-semibold uppercase tracking-widest text-brass">
           {label}
         </label>
-        {hint && <span className="text-[10px] text-muted">{hint}</span>}
+        {hint && <span className="text-[11px] text-muted">{hint}</span>}
       </div>
       {children}
     </div>
@@ -543,9 +543,9 @@ function Badge({
 }) {
   return (
     <div className="inline-flex items-center gap-1.5 rounded-lg border border-line bg-ink-soft px-2.5 py-1.5 text-[11px] text-muted">
-      {icon && <i className={`ti ${icon} text-xs`} />}
+      {icon && <i className={`ti ${icon} text-sm`} />}
       {label && <span>{label}:</span>}
-      <strong className={`text-bone font-medium ${mono ? "font-mono text-[10px]" : ""}`}>
+      <strong className={`text-bone font-medium ${mono ? "font-mono text-[11px]" : ""}`}>
         {value}
       </strong>
     </div>

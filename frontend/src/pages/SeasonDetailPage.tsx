@@ -11,7 +11,7 @@ import { useStudio } from "../state/StudioContext";
 import { listImagesForSeason, toggleLike, deleteImage } from "../api/designImages";
 import { CATEGORY_DEFS, seedFromId, type GarmentCategory, type DesignImage, type MoodboardImage } from "../types";
 
-type SeasonTab = "overview" | "prints" | "fabrics" | "sketches" | "firstRenders" | "techPacks" | "garments";
+type SeasonTab = "overview" | "prints" | "fabrics" | "sketches" | "firstRenders" | "techPacks" | "patterns" | "garments";
 
 const SEASON_TABS: { key: SeasonTab; label: string }[] = [
   { key: "overview", label: "Overview" },
@@ -20,6 +20,7 @@ const SEASON_TABS: { key: SeasonTab; label: string }[] = [
   { key: "sketches", label: "Sketches" },
   { key: "firstRenders", label: "First Renders" },
   { key: "techPacks", label: "Tech Packs" },
+  { key: "patterns", label: "Patterns" },
   { key: "garments", label: "Garments" },
 ];
 
@@ -73,7 +74,7 @@ export function SeasonDetailPage() {
       return;
     }
     setTabLoading(true);
-    const imageType = tab === "sketches" ? "sketch" : tab === "fabrics" ? "fabric" : tab === "prints" ? "print" : tab === "firstRenders" ? "render" : tab === "techPacks" ? "tech_pack" : tab;
+    const imageType = tab === "sketches" ? "sketch" : tab === "fabrics" ? "fabric" : tab === "prints" ? "print" : tab === "firstRenders" ? "render" : tab === "techPacks" ? "tech_pack" : tab === "patterns" ? "pattern" : tab;
     listImagesForSeason(seasonId, { image_type: imageType })
       .then(setTabImages)
       .catch(() => setTabImages([]))
@@ -407,6 +408,20 @@ export function SeasonDetailPage() {
               )}
             </div>
             {renderImageGrid(tabImages, "No tech packs yet. Generate tech packs from the garment workspace (Stage 4).")}
+          </section>
+        )}
+
+        {tab === "patterns" && (
+          <section>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-display text-xl text-bone-dim">Patterns</h2>
+              {tabImages.length > 0 && (
+                <span className="text-xs uppercase tracking-wide text-muted">
+                  {tabImages.length} patterns
+                </span>
+              )}
+            </div>
+            {renderImageGrid(tabImages, "No patterns yet. Generate patterns from the garment workspace (Stage 5).")}
           </section>
         )}
 

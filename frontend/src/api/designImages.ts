@@ -222,3 +222,63 @@ export async function generateTechPack(
 
   return res.json();
 }
+
+// ─── Pattern generation ─────────────────────────────────────────────
+
+export interface PatternGenerateParams {
+  tech_pack_image_url: string;
+  gender: string;
+  body_measurements: Record<string, number>;
+  construction: Record<string, string>;
+  fabric_type: string;
+  seam_allowance: string;
+  hem_allowance: string;
+  grain_line: string;
+  ease: string;
+  pattern_markings: string[];
+  additional_notes: string;
+  num_outputs: number;
+  note: string;
+}
+
+export interface PatternGenerateResponse {
+  success: boolean;
+  run: {
+    id: string;
+    code: string;
+    iteration: number;
+    version: number;
+    status: string;
+    node_key: string;
+  };
+  image: {
+    id: string;
+    image_code: string;
+    url: string;
+    source: string;
+    ai_model: string | null;
+  };
+  style_code: string;
+}
+
+export async function generatePattern(
+  garmentId: string,
+  params: PatternGenerateParams,
+  geminiApiKey?: string
+): Promise<PatternGenerateResponse> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (geminiApiKey) headers["X-Gemini-API-Key"] = geminiApiKey;
+
+  const res = await fetch(`/api/garments/${garmentId}/nodes/pattern/generate`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(params),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Generation failed" }));
+    throw new Error(err.detail || "Pattern generation failed");
+  }
+
+  return res.json();
+}

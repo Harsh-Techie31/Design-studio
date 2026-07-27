@@ -139,12 +139,12 @@ export function SketchTool({ garment, season, onGenerated }: SketchToolProps) {
   const isPromptOver = promptLength > 200;
 
   return (
-    <aside className="flex h-full w-full flex-col overflow-y-auto bg-surface p-5 lg:w-[350px]">
+    <aside className="flex h-full w-full flex-col overflow-y-auto bg-surface p-6 lg:w-[480px]">
       {/* 1. Category (read-only) */}
       <Section label="1. Category" hint="From garment">
         <div className="inline-flex items-center gap-2 rounded-lg border border-brass/30 bg-brass/10 px-3 py-1.5">
           <i className="ti ti-shirt text-sm text-brass" />
-          <span className="text-xs font-medium text-brass">{CATEGORY_LABELS[category]}</span>
+          <span className="text-sm font-medium text-brass">{CATEGORY_LABELS[category]}</span>
         </div>
       </Section>
 
@@ -192,7 +192,7 @@ export function SketchTool({ garment, season, onGenerated }: SketchToolProps) {
             }}
             maxLength={220}
             placeholder="E.g. Double breasted waist with tailored fit details..."
-            className={`w-full resize-none rounded-lg border bg-ink-soft p-3 text-xs text-bone placeholder:text-muted focus:outline-none ${
+            className={`w-full resize-none rounded-lg border bg-ink-soft p-3 text-sm text-bone placeholder:text-muted focus:outline-none ${
               isPromptOver
                 ? "border-red-500"
                 : isPromptGold
@@ -202,9 +202,9 @@ export function SketchTool({ garment, season, onGenerated }: SketchToolProps) {
             rows={3}
           />
           <div className="mt-1 flex justify-between px-1">
-            <span className="text-[10px] text-muted">Appends to prompt</span>
+            <span className="text-[11px] text-muted">Appends to prompt</span>
             <span
-              className={`text-[10px] font-mono ${
+              className={`text-[11px] font-mono ${
                 isPromptOver ? "text-red-500" : isPromptGold ? "text-amber-500" : "text-muted"
               }`}
             >
@@ -224,7 +224,7 @@ export function SketchTool({ garment, season, onGenerated }: SketchToolProps) {
                 <button
                   key={i}
                   onClick={() => handleMoodboardToggle(i)}
-                  className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs transition-all ${
+                  className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-all ${
                     isSelected
                       ? "border-brass bg-brass/10 text-brass"
                       : "border-line bg-ink-soft text-muted hover:border-brass/30"
@@ -244,7 +244,7 @@ export function SketchTool({ garment, season, onGenerated }: SketchToolProps) {
         ) : (
           <div className="rounded-lg border border-dashed border-line bg-ink-soft p-4 text-center">
             <i className="ti ti-photo-off text-lg text-muted" />
-            <p className="mt-1 text-xs text-muted">
+            <p className="mt-1 text-sm text-muted">
               No moodboard yet. Add one in the season overview.
             </p>
           </div>
@@ -254,8 +254,8 @@ export function SketchTool({ garment, season, onGenerated }: SketchToolProps) {
         {hasMoodboard && (
           <div className="mt-3 rounded-lg border border-line bg-ink-soft p-3">
             <div className="mb-1 flex justify-between">
-              <span className="text-[10px] uppercase tracking-wide text-muted">Mood Influence</span>
-              <span className="text-[11px] font-bold text-brass">{moodInfluence}%</span>
+              <span className="text-[11px] uppercase tracking-wide text-muted">Mood Influence</span>
+              <span className="text-[12px] font-bold text-brass">{moodInfluence}%</span>
             </div>
             <input
               type="range"
@@ -293,7 +293,7 @@ export function SketchTool({ garment, season, onGenerated }: SketchToolProps) {
 
       {/* Error */}
       {error && (
-        <div className="mb-3 rounded-lg border border-red-500/30 bg-red-500/5 px-3 py-2 text-xs text-red-400">
+        <div className="mb-3 rounded-lg border border-red-500/30 bg-red-500/5 px-3 py-2 text-sm text-red-400">
           {error}
         </div>
       )}
@@ -303,7 +303,7 @@ export function SketchTool({ garment, season, onGenerated }: SketchToolProps) {
         <button
           onClick={handleGenerate}
           disabled={isGenerating || !gender || !silhouette}
-          className={`flex w-full items-center justify-center gap-2 rounded-xl py-3 text-xs font-bold uppercase tracking-wider transition-all ${
+          className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold uppercase tracking-wider transition-all ${
             !gender || !silhouette
               ? "cursor-not-allowed bg-line text-muted"
               : "bg-brass text-ink hover:bg-brass-soft"
@@ -324,7 +324,7 @@ export function SketchTool({ garment, season, onGenerated }: SketchToolProps) {
 
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-line" />
-          <span className="text-[10px] uppercase text-muted">or</span>
+          <span className="text-[11px] uppercase text-muted">or</span>
           <div className="h-px flex-1 bg-line" />
         </div>
 
@@ -337,21 +337,21 @@ export function SketchTool({ garment, season, onGenerated }: SketchToolProps) {
         />
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-ink-soft py-2.5 text-xs text-muted transition-colors hover:border-brass/30 hover:text-brass"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-ink-soft py-3 text-sm text-muted transition-colors hover:border-brass/30 hover:text-brass"
         >
           <i className="ti ti-upload" />
           <span>Upload your own sketch</span>
         </button>
-        <span className="text-center text-[10px] text-muted">JPG, PNG, max 5MB</span>
+        <span className="text-center text-[11px] text-muted">JPG, PNG, max 5MB</span>
 
         {/* Note field */}
         <div>
-          <label className="mb-1 block text-[10px] uppercase text-muted">Note</label>
+          <label className="mb-1 block text-[11px] uppercase text-muted">Note</label>
           <input
             value={note}
             onChange={(e) => setNote(e.target.value.slice(0, 250))}
             placeholder="Optional note..."
-            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-xs text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none"
+            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2.5 text-sm text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none"
           />
         </div>
       </div>
@@ -373,13 +373,13 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mb-5 border-t border-line pt-4 first:border-0 first:pt-0">
-      <div className="mb-2.5 flex items-center gap-2">
-        <label className="text-[11px] font-semibold uppercase tracking-widest text-brass">
+    <div className="mb-6 border-t border-line pt-5 first:border-0 first:pt-0">
+      <div className="mb-3 flex items-center gap-2">
+        <label className="text-[13px] font-semibold uppercase tracking-widest text-brass">
           {label}
           {required && <span className="ml-0.5 text-red-500">*</span>}
         </label>
-        {hint && <span className="text-[10px] text-muted">{hint}</span>}
+        {hint && <span className="text-[11px] text-muted">{hint}</span>}
       </div>
       {children}
     </div>
@@ -401,7 +401,7 @@ function Chip({
     <button
       onClick={onClick}
       className={`rounded-lg border transition-all ${
-        small ? "px-2.5 py-1.5 text-[11px]" : "px-3 py-2 text-xs"
+        small ? "px-3 py-2 text-[12px]" : "px-3.5 py-2.5 text-sm"
       } ${
         active
           ? "border-brass bg-brass/15 font-semibold text-brass"
