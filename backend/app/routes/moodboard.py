@@ -1,4 +1,5 @@
 import logging
+import re
 import uuid
 from datetime import datetime, timezone
 
@@ -16,6 +17,32 @@ router = APIRouter(prefix="/api/seasons", tags=["moodboard"])
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def _sanitize_error(exc: Exception) -> str:
+    """Convert an exception to a user-safe error message, stripping secrets."""
+    raw = str(exc)
+
+    # Strip API keys from URLs (e.g. ?key=XXXX or &key=XXXX)
+    sanitized = re.sub(r'[?&]key=[A-Za-z0-9_\-]+', '', raw)
+
+    # Map known error patterns to friendly messages
+    lower = raw.lower()
+    if "400" in lower and ("bad request" in lower or "invalid" in lower):
+        return "The analysis service rejected the request. Please try again or upload different images."
+    if "403" in lower or "permission" in lower:
+        return "Access denied. Please check your API configuration."
+    if "429" in lower or "rate" in lower or "quota" in lower:
+        return "Too many requests. Please wait a moment and try again."
+    if "timeout" in lower or "timed out" in lower:
+        return "The analysis took too long. Please try again with fewer images."
+    if "500" in lower or "502" in lower or "503" in lower:
+        return "The analysis service is temporarily unavailable. Please try again later."
+    if "connection" in lower or "connect" in lower:
+        return "Could not reach the analysis service. Please check your connection."
+
+    # Fallback: return sanitized string (no API keys) truncated for safety
+    return sanitized[:200] if sanitized else "An unexpected error occurred."
 
 
 def _serialize_moodboard(season: Season) -> dict:
@@ -167,7 +194,7 @@ async def analyze_moodboard(season_id: str):
     except Exception as e:
         logger.error(f"Gemini analysis failed: {type(e).__name__}: {e}")
         season.moodboard.status = MoodboardStatus.FAILED
-        season.moodboard.analysis.error = str(e)
+        season.moodboard.analysis.error = _sanitize_error(e)
 
     season.updated_at = _now()
     await season.save()

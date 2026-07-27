@@ -1,3 +1,4 @@
+import base64
 import json
 import logging
 
@@ -30,8 +31,35 @@ def _guess_mime(url: str) -> str:
     return "image/jpeg"
 
 
+async def _download_image_as_inline(url: str) -> dict | None:
+    """Download an image URL and return an inlineData part."""
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            resp = await client.get(url)
+            resp.raise_for_status()
+            mime = _guess_mime(url)
+            content_type = resp.headers.get("content-type", "")
+            if "png" in content_type:
+                mime = "image/png"
+            elif "webp" in content_type:
+                mime = "image/webp"
+            elif "jpeg" in content_type or "jpg" in content_type:
+                mime = "image/jpeg"
+            b64 = base64.b64encode(resp.content).decode()
+            logger.info(f"Downloaded {url[:80]}... ({len(resp.content)} bytes, {mime})")
+            return {
+                "inlineData": {
+                    "mimeType": mime,
+                    "data": b64,
+                }
+            }
+    except Exception as e:
+        logger.error(f"Failed to download image {url[:80]}...: {e}")
+        return None
+
+
 async def analyze_moodboard(image_urls: list[str]) -> dict:
-    """Send moodboard image URLs to Gemini and extract style profile."""
+    """Send moodboard images to Gemini and extract style profile."""
 
     real_urls = [u for u in image_urls if not u.startswith("mood-placeholder:")]
     real_urls = real_urls[:MAX_IMAGES]
@@ -42,12 +70,12 @@ async def analyze_moodboard(image_urls: list[str]) -> dict:
 
     parts = []
     for url in real_urls:
-        parts.append({
-            "fileData": {
-                "mimeType": _guess_mime(url),
-                "fileUri": url,
-            }
-        })
+        inline = await _download_image_as_inline(url)
+        if inline:
+            parts.append(inline)
+
+    if not parts:
+        raise ValueError("Failed to download any moodboard images")
 
     parts.append({"text": ANALYSIS_PROMPT})
 

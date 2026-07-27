@@ -284,16 +284,23 @@ export function SeasonDetailPage() {
               )}
 
               {status === "failed" && (
-                <div className="mt-6 rounded-xl border border-red-500/30 bg-red-500/5 px-5 py-4">
-                  <p className="text-sm text-red-400">
-                    Analysis failed: {season.moodboard.analysis.error ?? "Unknown error"}
-                  </p>
-                  <button
-                    onClick={() => analyzeMoodboard(season!.id)}
-                    className="mt-2 text-xs text-brass hover:text-brass-soft"
-                  >
-                    Retry analysis
-                  </button>
+                <div className="mt-6 rounded-xl border border-red-500/20 bg-red-500/[0.04] px-5 py-4">
+                  <div className="flex items-start gap-3">
+                    <i className="ti ti-alert-triangle mt-0.5 text-base text-red-400/80" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-red-400">Analysis failed</p>
+                      <p className="mt-1 text-xs text-red-400/60">
+                        {season.moodboard.analysis.error ?? "Something went wrong. Please try again."}
+                      </p>
+                      <button
+                        onClick={() => analyzeMoodboard(season!.id)}
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20"
+                      >
+                        <i className="ti ti-refresh text-[11px]" />
+                        Retry analysis
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
 

@@ -159,6 +159,12 @@ export function StudioProvider({ children }: { children: ReactNode }) {
         );
       } catch (e: any) {
         console.error("[StudioContext] Analysis failed:", e);
+        const rawMsg = e?.message ?? "Unknown error";
+        const safeMsg = rawMsg.includes("key=")
+          ? "Analysis service error. Please try again."
+          : rawMsg.length > 200
+            ? rawMsg.slice(0, 200)
+            : rawMsg;
         setSeasons((prev) =>
           prev.map((s) =>
             s.id === seasonId
@@ -167,7 +173,7 @@ export function StudioProvider({ children }: { children: ReactNode }) {
                   moodboard: {
                     ...s.moodboard,
                     status: "failed" as const,
-                    analysis: { ...s.moodboard.analysis, error: e.message },
+                    analysis: { ...s.moodboard.analysis, error: safeMsg },
                   },
                 }
               : s,
