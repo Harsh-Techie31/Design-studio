@@ -45,70 +45,24 @@ class PrintGenerateRequest(BaseModel):
 def _build_gemini_prompt(
     fabric_type: str,
     background_color: str,
-    canvas_width: int,
-    canvas_height: int,
-    scale: float,
-    repeat_type: str,
-    spacing_x: int,
-    spacing_y: int,
-    rotation: float,
-    moodboard_palette: list[str],
+    **_,
 ) -> str:
-    """
-    Build a robust, detailed prompt for Gemini to generate a production-ready
-    seamless fabric pattern. The prompt includes all design parameters and
-    instructs Gemini to output a high-quality textile print.
-    """
-
-    palette_str = ", ".join(moodboard_palette) if moodboard_palette else "none provided"
-
-    spacing_desc = "tightly packed, seamless, edge-to-edge pattern with zero visible gaps"
-    if spacing_x > 20 or spacing_y > 20:
-        spacing_desc = f"spaced-out layout with generous breathing room ({spacing_x}px horizontal, {spacing_y}px vertical gap) between each motif repeat"
-
-    scale_desc = "delicate, intricate small-scale repeating print"
-    if scale > 1.2:
-        scale_desc = "bold, prominent large-scale focal-point pattern"
-    elif scale < 0.4:
-        scale_desc = "ultra-fine, highly dense micro-pattern"
-
-    rotation_desc = "upright vertical alignment"
-    if rotation != 0:
-        rotation_desc = f"gracefully rotated {int(rotation)} degrees, creating a dynamic diagonal flow"
-
-    repeat_desc = {
-        "block": "standard grid repeat — motifs aligned in straight rows and columns",
-        "half-drop": "half-drop repeat — every other column is offset vertically by 50%, creating a staggered cascade",
-        "brick": "half-brick repeat — every other row is offset horizontally by 50%, like a brick wall pattern",
-        "mirror": "mirror/diamond repeat — motifs are alternately flipped horizontally and vertically, creating kaleidoscopic symmetry",
-    }.get(repeat_type, "standard grid repeat")
-
-    prompt = f"""You are an expert fashion textile designer and masterprint artist creating a production-ready seamless fabric pattern.
-
-TASK:
-Generate a seamless, tileable fabric pattern image based on the provided canvas preview. The preview shows the desired layout, scale, rotation, and spacing of the motif. Your job is to transform this into a polished, production-quality textile print.
-
-DESIGN SPECIFICATIONS:
-- Fabric Type: {fabric_type} — render the pattern with the characteristic texture and drape of {fabric_type} fabric
-- Background Color: {background_color} — this is the base fabric color; the motif pattern sits on top of this
-- Export Resolution: {canvas_width}x{canvas_height} pixels — generate at this exact size
-- Scale: {scale}x — {scale_desc}
-- Repeat Type: {repeat_desc}
-- Spacing: {spacing_desc}
-- Rotation: {rotation_desc}
-- Moodboard Palette: {palette_str} — if any of these colors appear in the motif, ensure they are preserved and harmonized
-
-QUALITY REQUIREMENTS:
-1. SEAMLESS TILING: The output MUST tile perfectly both horizontally and vertically. The left edge must match the right edge, and the top edge must match the bottom edge. No visible seams, no offset shifts, no broken motifs at tile boundaries.
-2. TEXTURE AUTHENTICITY: Render the {fabric_type} fabric texture realistically — include subtle weave patterns, sheen, drape characteristics, and material-specific visual qualities that make it look like real {fabric_type}.
-3. COLOR HARMONY: The motif colors should complement the {background_color} background. If the moodboard palette was provided, ensure color coherence with those reference tones.
-4. PATTERN DENSITY: Fill the canvas completely with the pattern. No large empty areas, no awkward gaps. Every pixel should contribute to the textile design.
-5. PRODUCTION QUALITY: This output will be used for actual fabric printing. Ensure clean edges, consistent color values, and professional-grade output suitable for textile manufacturing.
-
-OUTPUT:
-Generate a single seamless tileable fabric pattern image at {canvas_width}x{canvas_height} pixels. The image should be a complete, self-contained fabric swatch that tiles perfectly when repeated."""
-
+    prompt = (
+        f"Transform the provided pattern into a photorealistic, high-quality seamless fabric texture. "
+        f"Material: {fabric_type} with its authentic weave, sheen, and micro-textural characteristics. "
+        f"Base Color: {background_color}. "
+        f"Visual Style: 1:1 aspect ratio macro studio photography of a perfectly flat fabric swatch. "
+        f"Lighting & Geometry: Even, flat studio illumination with absolutely zero shadows, zero drape, and zero folds. "
+        f"STRICT INSTRUCTIONS: The output MUST tile perfectly both horizontally and vertically with no visible seams. "
+        f"Do not alter the scale or geometry of the underlying print. Completely fill the frame with the flat fabric texture."
+    )
     return prompt
+
+
+NEGATIVE_PROMPT = (
+    "3D volume, drape, folds, wrinkles, shadows, uneven lighting, gradient, vignette, human hands, "
+    "garments, clothing, sewing tools, borders, frames, text"
+)
 
 
 # ─── Gemini API call ────────────────────────────────────────────────
@@ -259,14 +213,6 @@ async def generate_print(
     prompt = _build_gemini_prompt(
         fabric_type=body.fabric_type,
         background_color=body.background_color,
-        canvas_width=body.canvas_width,
-        canvas_height=body.canvas_height,
-        scale=body.scale,
-        repeat_type=body.repeat_type,
-        spacing_x=body.spacing_x,
-        spacing_y=body.spacing_y,
-        rotation=body.rotation,
-        moodboard_palette=body.moodboard_palette,
     )
 
     # ─── Call Gemini ───
@@ -281,6 +227,7 @@ async def generate_print(
                 source = "ai"
                 run.ai.model = "gemini-2.5-flash-image"
                 run.ai.prompt = prompt
+                logger.info(f"NEW PROMPT | {prompt[:200]}")
         except Exception as e:
             logger.error(f"Gemini generation failed: {e}")
 
