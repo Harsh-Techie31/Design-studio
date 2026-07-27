@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from .config import settings
 from .db import init_db
 from .routes.seasons import router as seasons_router
 from .routes.garments import router as garments_router
@@ -30,9 +31,10 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Design Studio API", lifespan=lifespan)
 
+cors_origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
