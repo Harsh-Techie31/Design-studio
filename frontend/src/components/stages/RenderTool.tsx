@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { ImagePickerModal } from "../ImagePickerModal";
+import { API_BASE } from "../../api/client";
 import type { Garment, Season, DesignImage } from "../../types";
 
 export interface RenderFabricSlot {
@@ -158,7 +159,7 @@ export function RenderTool({ garment, season, onGenerated, onStateChange }: Rend
     setIsGenerating(true);
 
     try {
-      const res = await fetch(`/api/garments/${garment.id}/nodes/render/generate`, {
+      const res = await fetch(`${API_BASE}/api/garments/${garment.id}/nodes/render/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

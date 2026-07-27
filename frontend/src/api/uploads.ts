@@ -1,3 +1,4 @@
+import { API_BASE } from "./client";
 import type { MoodboardImage } from "../types";
 
 interface UploadResponse {
@@ -30,7 +31,7 @@ export async function uploadMoodboardImages(
     formData.append("name", name);
   }
 
-  const res = await fetch(`/api/seasons/${seasonId}/moodboard/images`, {
+  const res = await fetch(`${API_BASE}/api/seasons/${seasonId}/moodboard/images`, {
     method: "POST",
     body: formData,
   });
@@ -48,7 +49,7 @@ export async function deleteMoodboardImage(
   imageIndex: number,
 ): Promise<void> {
   const res = await fetch(
-    `/api/seasons/${seasonId}/moodboard/images/${imageIndex}`,
+    `${API_BASE}/api/seasons/${seasonId}/moodboard/images/${imageIndex}`,
     { method: "DELETE" },
   );
 
