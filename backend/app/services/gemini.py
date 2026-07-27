@@ -8,7 +8,7 @@ from app.config import settings
 logger = logging.getLogger("gemini")
 
 GEMINI_MODEL = "gemini-2.5-flash"
-GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent"
+GEMINI_API_URL = f"{settings.vertex_base_url}/{GEMINI_MODEL}:generateContent"
 
 MAX_IMAGES = 5
 
@@ -52,7 +52,7 @@ async def analyze_moodboard(image_urls: list[str]) -> dict:
     parts.append({"text": ANALYSIS_PROMPT})
 
     payload = {
-        "contents": [{"parts": parts}],
+        "contents": [{"role": "user", "parts": parts}],
         "generationConfig": {
             "temperature": 0.7,
             "topP": 0.95,

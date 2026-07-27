@@ -139,13 +139,13 @@ async def _synthesize_prompt(
 
     async with httpx.AsyncClient(timeout=30.0) as client:
         payload = {
-            "contents": [{"parts": parts}],
+            "contents": [{"role": "user", "parts": parts}],
             "generationConfig": {
                 "temperature": 0.3,
                 "maxOutputTokens": 1000,
             },
         }
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+        url = f"{settings.vertex_base_url}/gemini-2.5-flash:generateContent?key={api_key}"
         resp = await client.post(url, json=payload)
 
         if resp.status_code == 200:
@@ -204,13 +204,13 @@ async def _generate_image(
 
     async with httpx.AsyncClient(timeout=60.0) as client:
         payload = {
-            "contents": [{"parts": parts}],
+            "contents": [{"role": "user", "parts": parts}],
             "generationConfig": {
                 "temperature": temperature,
                 "responseModalities": ["TEXT", "IMAGE"],
             },
         }
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key={api_key}"
+        url = f"{settings.vertex_base_url}/gemini-2.5-flash-image:generateContent?key={api_key}"
         resp = await client.post(url, json=payload)
 
         if resp.status_code != 200:

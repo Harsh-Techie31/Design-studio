@@ -133,6 +133,7 @@ async def _generate_with_gemini(
         payload = {
             "contents": [
                 {
+                    "role": "user",
                     "parts": [
                         {"text": prompt},
                         {
@@ -150,7 +151,7 @@ async def _generate_with_gemini(
             },
         }
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key={api_key}"
+        url = f"{settings.vertex_base_url}/gemini-2.5-flash-image:generateContent?key={api_key}"
 
         logger.info("Calling Gemini 2.5 Flash Image for pattern generation...")
         resp = await client.post(url, json=payload)

@@ -570,11 +570,11 @@ async def _generate_with_gemini(
             )
 
             payload = {
-                "contents": [{"parts": [{"text": prompt}, {"text": f"Avoid: {negative_prompt}"}]}],
+                "contents": [{"role": "user", "parts": [{"text": prompt}, {"text": f"Avoid: {negative_prompt}"}]}],
                 "generationConfig": {"temperature": 0.5 + (0.1 * idx)},
             }
 
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key={api_key}"
+            url = f"{settings.vertex_base_url}/gemini-2.5-flash-image:generateContent?key={api_key}"
 
             try:
                 resp = await client.post(url, json=payload)
