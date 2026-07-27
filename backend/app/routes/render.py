@@ -48,38 +48,27 @@ def _build_fallback_prompt(
     sketch_desc: str = "",
 ) -> str:
     """Local fallback prompt builder when Gemini text model is unavailable."""
-    fabric_lines = []
+    fabric_instructions = ""
     for i, f in enumerate(fabrics):
-        p_text = (
-            f"on target panels ({', '.join(f.get('placements', []))})"
-            if f.get("placements")
-            else ""
+        name = f.get("prompt", f"Fabric #{i+1}")
+        placements = f.get("placements", [])
+        custom_notes = f" User instructions: {f['prompt']}" if f.get("prompt") else ""
+        fabric_instructions += (
+            f"Fabric {i+1} ({name}): "
+            f"Target zones: {', '.join(placements) if placements else 'full garment'}."
+            f"{custom_notes} | "
         )
-        if f.get("prompt"):
-            fabric_lines.append(
-                f"Fabric #{i+1} ({f['prompt']}) {p_text} applied flatly with clipping mask pattern"
-            )
-        else:
-            fabric_lines.append(f"Fabric #{i+1} texture mapped seamlessly {p_text} as a flat vector tile")
 
-    fab_details = ", ".join(fabric_lines)
-    fusing_text = (
-        f"The output is a single 2D vector CAD render that beautifully merges these material textures onto their designated flat panels: {fab_details}."
-        if fab_details
-        else ""
+    prompt = (
+        f"A clean, full-color 2D technical flat CAD fashion render of a {gender} garment. "
+        f"Strictly maintain the exact structural lines, silhouette, and construction details of the provided input sketch. "
+        f"Material Mapping: {fabric_instructions} "
+        f"Visual Style: Completely flat 2D layout. The fabrics must look flatly printed onto the designated garment panels. "
+        f"Construction details including seam lines and topstitching must remain visibly overlaid on top of the applied fabrics. "
+        f"STRICT INSTRUCTIONS: Pure solid white background. Absolute zero 3D volume, zero drape, zero shadows. "
+        f"No mannequins, no human body parts."
     )
-    fusing_text += " If the sketch includes pants, trousers, or other lower-body garments, do not apply any fabric textures, patterns, or colors to them; keep them completely plain with clean black outlines."
-
-    return (
-        f"2D technical CAD flat drawing and vector illustration of a custom {gender} garment, "
-        f"strictly following the shape, structural lines, cuts, and flat silhouette of the sketch. "
-        f"Laid completely flat with absolute zero 3D volume, zero body curvature, and zero mannequin shapes. "
-        f"Plain white solid background with clean crisp black stroke outlines. "
-        f"NO human body parts, NO face, NO head, NO neck, NO hair, NO arms, NO skin, NO legs. "
-        f"The garment is displayed completely flat, laid out in 2D with absolute flat texture fills and clean seams. "
-        f"{fusing_text} Precise technical lines, neat stitching, clean vector style. "
-        f"Output a single cohesive flat 2D garment render."
-    )
+    return prompt
 
 
 async def _synthesize_prompt(
@@ -104,9 +93,10 @@ async def _synthesize_prompt(
         "CRITICAL DESIGN CONSTRAINTS:\n"
         "1. STRICT 2D VECTOR FLAT DRAWING / TECHNICAL CAD ILLUSTRATION STYLE: The output image must be a perfectly flat 2D vector technical sketch. It must have clean, crisp, solid black outer stroke lines. It must have ABSOLUTELY NO 3D volumetric effect, NO 3D body curvature, NO mannequin shadows, NO realistic depth or shadows, NO photorealistic folds, and NO human body parts. It must be an entirely flat, 2D vector design presentation on a plain white background.\n"
         "2. 2D FLAT TEXTURE MAPPING: The fabric patterns, colors, and textures must be filled flatly inside the outlines of their respective panels, without any 3D warp, shading, or realistic folding distortions.\n"
-        "3. Compile all fabrics into a SINGLE, cohesive, flat 2D garment render.\n"
-        "4. IF the sketch contains pants, trousers, shorts, or any other lower-body garment, DO NOT apply any fabric pattern, texture, or color to that lower garment. Keep them completely plain with just black outlines.\n"
-        "5. Output ONLY the raw prompt text itself. Do not include any introductory remarks, conversation, explanations, or codeblocks."
+        "3. Construction details including seam lines and topstitching must remain visibly overlaid on top of the applied fabrics.\n"
+        "4. Compile all fabrics into a SINGLE, cohesive, flat 2D garment render.\n"
+        "5. IF the sketch contains pants, trousers, shorts, or any other lower-body garment, DO NOT apply any fabric pattern, texture, or color to that lower garment. Keep them completely plain with just black outlines.\n"
+        "6. Output ONLY the raw prompt text itself. Do not include any introductory remarks, conversation, explanations, or codeblocks."
     )
 
     parts = [
@@ -182,7 +172,7 @@ async def _generate_image(
     Returns PNG bytes or None.
     """
     parts = [
-        {"text": f"Generate a clean 2D vector CAD technical flat sketch with flat clipping-masked fabric patterns based on this design. Prompt: {prompt}"},
+        {"text": prompt},
         {"text": "Silhouette Sketch Reference:"},
         {
             "inlineData": {
@@ -378,6 +368,7 @@ async def generate_render(
                 api_key, sketch_b64, sketch_mime, body.gender, resolved_fabrics,
             )
             run.ai.prompt = synthesized_prompt
+            logger.info(f"NEW PROMPT | {synthesized_prompt[:200]}")
 
             # Step 2: Generate images
             for idx in range(body.num_outputs):
