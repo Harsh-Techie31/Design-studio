@@ -1,4 +1,4 @@
-import { request } from "./client";
+import { API_BASE, request } from "./client";
 import type { DesignImage } from "../types";
 
 export async function listImagesForSeason(
@@ -69,7 +69,7 @@ export async function uploadImageToLibrary(params: {
   formData.append("image_type", params.image_type);
   if (params.note) formData.append("note", params.note);
 
-  const res = await fetch("/api/images/upload", {
+  const res = await fetch(`${API_BASE}/api/images/upload`, {
     method: "POST",
     body: formData,
   });
@@ -152,7 +152,7 @@ export async function generateSketch(
   const headers: Record<string, string> = {};
   if (geminiApiKey) headers["X-Gemini-API-Key"] = geminiApiKey;
 
-  const res = await fetch(`/api/garments/${garmentId}/nodes/sketch/generate`, {
+  const res = await fetch(`${API_BASE}/api/garments/${garmentId}/nodes/sketch/generate`, {
     method: "POST",
     headers,
     body: formData,
@@ -209,7 +209,7 @@ export async function generateTechPack(
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (geminiApiKey) headers["X-Gemini-API-Key"] = geminiApiKey;
 
-  const res = await fetch(`/api/garments/${garmentId}/nodes/techPack/generate`, {
+  const res = await fetch(`${API_BASE}/api/garments/${garmentId}/nodes/techPack/generate`, {
     method: "POST",
     headers,
     body: JSON.stringify(params),
@@ -269,7 +269,7 @@ export async function generatePattern(
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (geminiApiKey) headers["X-Gemini-API-Key"] = geminiApiKey;
 
-  const res = await fetch(`/api/garments/${garmentId}/nodes/pattern/generate`, {
+  const res = await fetch(`${API_BASE}/api/garments/${garmentId}/nodes/pattern/generate`, {
     method: "POST",
     headers,
     body: JSON.stringify(params),

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { API_BASE } from "../../api/client";
 import type { Garment, Season, DesignImage } from "../../types";
 
 export interface PrintState {
@@ -144,7 +145,7 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
       // Export canvas state as base64 image
       const canvasBase64 = exportCanvasToBase64();
 
-      const res = await fetch(`/api/garments/${garment.id}/nodes/print/generate`, {
+      const res = await fetch(`${API_BASE}/api/garments/${garment.id}/nodes/print/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
