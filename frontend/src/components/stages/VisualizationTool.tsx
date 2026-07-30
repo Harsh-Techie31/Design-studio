@@ -40,23 +40,42 @@ export function VisualizationTool({ garment, season, onGenerated }: Visualizatio
     }
     setError(null);
     setIsGenerating(true);
+
+    const params = {
+      render_image_url: renderImage.id,
+      model_avatar: modelAvatar,
+      background,
+      lighting,
+      additional_notes: additionalNotes,
+      num_outputs: numOutputs,
+      note,
+    };
+
+    console.log("[VIZ] ─── Generate clicked ───");
+    console.log("[VIZ] garment:", { id: garment.id, name: garment.name, category: garment.category });
+    console.log("[VIZ] season:", { id: season.id, code: season.code });
+    console.log("[VIZ] renderImage:", { id: renderImage.id, image_code: renderImage.image_code, url: renderImage.url?.substring(0, 80) });
+    console.log("[VIZ] params:", JSON.stringify(params, null, 2));
+
     try {
-      const result = await generateVisualization(garment.id, {
-        render_image_url: renderImage.id,
-        model_avatar: modelAvatar,
-        background,
-        lighting,
-        additional_notes: additionalNotes,
-        num_outputs: numOutputs,
-        note,
-      });
+      console.log("[VIZ] Calling generateVisualization API...");
+      const result = await generateVisualization(garment.id, params);
+      console.log("[VIZ] API response:", { success: result.success, imageCount: result.images?.length, model_avatar: result.model_avatar });
+      console.log("[VIZ] run:", result.run);
+      if (result.images?.length > 0) {
+        console.log("[VIZ] images:", result.images.map((img: any) => ({ id: img.id, code: img.image_code, source: img.source, ai_model: img.ai_model })));
+      }
       if (result.success && result.images?.length > 0) {
         onGenerated(result.images[0] as unknown as DesignImage);
+      } else {
+        console.warn("[VIZ] No images returned in response");
       }
     } catch (e: any) {
+      console.error("[VIZ] Generation failed:", e.message, e);
       setError(e.message || "Generation failed");
     } finally {
       setIsGenerating(false);
+      console.log("[VIZ] ─── Generate finished ───");
     }
   };
 
@@ -203,6 +222,7 @@ export function VisualizationTool({ garment, season, onGenerated }: Visualizatio
         open={renderPickerOpen}
         onClose={() => setRenderPickerOpen(false)}
         onSelect={(img) => {
+          console.log("[VIZ] Render image selected:", { id: img.id, image_code: img.image_code, url: img.url?.substring(0, 80) });
           setRenderImage(img);
           setRenderPickerOpen(false);
         }}

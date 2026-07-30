@@ -65,11 +65,13 @@ export function StageWorkspacePage() {
   const fetchImages = async () => {
     if (!garmentId) return;
     setLoading(true);
+    console.log(`[STAGE] Fetching images for garment=${garmentId}, stage=${currentStage}`);
     try {
       const data = await listImagesForGarment(garmentId, { node_key: currentStage });
+      console.log(`[STAGE] Fetched ${data.length} images for stage=${currentStage}`);
       setImages(data);
     } catch (e) {
-      console.error("Failed to load images:", e);
+      console.error("[STAGE] Failed to load images:", e);
     } finally {
       setLoading(false);
     }
@@ -97,7 +99,12 @@ export function StageWorkspacePage() {
     }
   };
 
-  const handleGenerated = (_response: any) => {
+  const handleGenerated = (response: any) => {
+    console.log("[STAGE] Generation complete — re-fetching images. Response:", {
+      runCode: response?.run?.code,
+      imageCount: response?.images?.length,
+      success: response?.success,
+    });
     // Re-fetch images to include the new ones
     fetchImages();
   };

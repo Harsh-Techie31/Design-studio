@@ -325,18 +325,30 @@ export async function generateVisualization(
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (geminiApiKey) headers["X-Gemini-API-Key"] = geminiApiKey;
 
-  const res = await fetch(`${API_BASE}/api/garments/${garmentId}/nodes/visualization/generate`, {
+  const url = `${API_BASE}/api/garments/${garmentId}/nodes/visualization/generate`;
+  console.log("[API:VIZ] POST", url);
+  console.log("[API:VIZ] headers:", { ...headers, "X-Gemini-API-Key": geminiApiKey ? "***present***" : "not set" });
+  console.log("[API:VIZ] body:", JSON.stringify(params, null, 2));
+
+  const t0 = performance.now();
+  const res = await fetch(url, {
     method: "POST",
     headers,
     body: JSON.stringify(params),
   });
+  const elapsed = Math.round(performance.now() - t0);
+
+  console.log("[API:VIZ] Response:", { status: res.status, ok: res.ok, elapsed: `${elapsed}ms` });
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: "Generation failed" }));
+    console.error("[API:VIZ] Error:", err);
     throw new Error(err.detail || "Visualization generation failed");
   }
 
-  return res.json();
+  const data = await res.json();
+  console.log("[API:VIZ] Success:", { runCode: data.run?.code, imageCount: data.images?.length, model_avatar: data.model_avatar });
+  return data;
 }
 
 // ─── Photoshoot generation ───────────────────────────────────────────
@@ -385,16 +397,28 @@ export async function generatePhotoshoot(
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (geminiApiKey) headers["X-Gemini-API-Key"] = geminiApiKey;
 
-  const res = await fetch(`${API_BASE}/api/garments/${garmentId}/nodes/photoshoot/generate`, {
+  const url = `${API_BASE}/api/garments/${garmentId}/nodes/photoshoot/generate`;
+  console.log("[API:SHOOT] POST", url);
+  console.log("[API:SHOOT] headers:", { ...headers, "X-Gemini-API-Key": geminiApiKey ? "***present***" : "not set" });
+  console.log("[API:SHOOT] body:", JSON.stringify(params, null, 2));
+
+  const t0 = performance.now();
+  const res = await fetch(url, {
     method: "POST",
     headers,
     body: JSON.stringify(params),
   });
+  const elapsed = Math.round(performance.now() - t0);
+
+  console.log("[API:SHOOT] Response:", { status: res.status, ok: res.ok, elapsed: `${elapsed}ms` });
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: "Generation failed" }));
+    console.error("[API:SHOOT] Error:", err);
     throw new Error(err.detail || "Photoshoot generation failed");
   }
 
-  return res.json();
+  const data = await res.json();
+  console.log("[API:SHOOT] Success:", { runCode: data.run?.code, imageCount: data.images?.length, model_avatar: data.model_avatar });
+  return data;
 }

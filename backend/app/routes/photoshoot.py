@@ -137,13 +137,13 @@ async def _generate_photoshoot_image(
 
     async with httpx.AsyncClient(timeout=60.0) as client:
         payload = {
-            "contents": [{"parts": parts}],
+            "contents": [{"role": "user", "parts": parts}],
             "generationConfig": {
                 "temperature": temperature,
                 "responseModalities": ["TEXT", "IMAGE"],
             },
         }
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key={api_key}"
+        url = f"{settings.vertex_base_url}/gemini-2.5-flash-image:generateContent?key={api_key}"
         resp = await client.post(url, json=payload)
 
         if resp.status_code != 200:
@@ -191,28 +191,46 @@ async def generate_photoshoot(
     The model persona is carried forward from whichever one was used in that visualization
     — it is not re-selected here, so Stage 7 always matches Stage 6.
     """
+    logger.info("=" * 60)
+    logger.info("[SHOOT] POST /api/garments/%s/nodes/photoshoot/generate", garment_id)
+    logger.info("[SHOOT] Request body: viz_image=%s, moodboard_influence=%s, shot_type=%s, location=%s, time=%s, mood=%s, pose=%s, custom_pose=%s, num_outputs=%d, note=%s",
+                body.visualization_image_url, body.moodboard_influence, body.shot_type,
+                body.location, body.time_of_day, body.mood, body.pose,
+                body.custom_pose or "(none)", body.num_outputs, body.note or "(none)")
 
     garment = await Garment.get(garment_id)
     if not garment:
+        logger.error("[SHOOT] Garment %s not found", garment_id)
         raise HTTPException(status_code=404, detail="Garment not found")
     if not garment.category:
+        logger.error("[SHOOT] Garment %s has no category set", garment_id)
         raise HTTPException(status_code=400, detail="Garment has no category set")
+    logger.info("[SHOOT] Garment: name=%s, category=%s, style_number=%d, version=%d",
+                garment.name, garment.category.value, garment.style_number, garment.current_version)
 
     season = await Season.get(garment.season_id)
     if not season:
+        logger.error("[SHOOT] Season %s not found", garment.season_id)
         raise HTTPException(status_code=404, detail="Season not found")
+    logger.info("[SHOOT] Season: code=%s, moodboard.status=%s", season.code, season.moodboard.status if season.moodboard else "none")
 
     if not body.visualization_image_url:
+        logger.error("[SHOOT] No visualization_image_url provided")
         raise HTTPException(status_code=400, detail="A 3D visualization image is required")
 
     # ─── Resolve visualization image (required) ───
     viz_img = await DesignImage.get(body.visualization_image_url)
     if viz_img:
+        logger.info("[SHOOT] Viz image found in library: id=%s, code=%s, type=%s, model_avatar=%s",
+                    str(viz_img.id), viz_img.image_code, viz_img.image_type,
+                    (viz_img.params or {}).get("model_avatar", "?"))
         viz_bytes = await fetch_image_bytes(viz_img.url)
     else:
+        logger.info("[SHOOT] visualization_image_url is not a DesignImage ID, treating as raw URL: %s", body.visualization_image_url[:80])
         viz_bytes = await fetch_image_bytes(body.visualization_image_url)
 
     if not viz_bytes:
+        logger.error("[SHOOT] Failed to load visualization image bytes")
         raise HTTPException(status_code=400, detail="Failed to load 3D visualization image")
 
     viz_mime = (
@@ -221,11 +239,13 @@ async def generate_photoshoot(
         else "image/png"
     )
     viz_b64 = base64.b64encode(viz_bytes).decode()
+    logger.info("[SHOOT] Viz image loaded: %d bytes, mime=%s, b64_length=%d", len(viz_bytes), viz_mime, len(viz_b64))
 
     # Model persona is carried forward from the selected visualization — not re-picked here.
     model_avatar = (
         (viz_img.params or {}).get("model_avatar", DEFAULT_MODEL_AVATAR) if viz_img else DEFAULT_MODEL_AVATAR
     )
+    logger.info("[SHOOT] Model avatar (carried from viz): %s", model_avatar)
 
     # ─── Create NodeRun ───
     existing = await NodeRun.find(
@@ -233,6 +253,7 @@ async def generate_photoshoot(
         NodeRun.node_key == NodeKey.PHOTOSHOOT,
     ).to_list()
     iteration = len(existing) + 1
+    logger.info("[SHOOT] Existing runs for photoshoot: %d, new iteration=%d", len(existing), iteration)
 
     version = garment.current_version
     stage_index = STAGE_ORDER.index(NodeKey.PHOTOSHOOT)
@@ -247,11 +268,14 @@ async def generate_photoshoot(
             version = garment.current_version + 1
             garment.current_version = version
             await garment.save()
+            logger.info("[SHOOT] Downstream runs exist — version bumped to %d", version)
+    logger.info("[SHOOT] Final version=%d", version)
 
     code = (
         f"{season.code}_{garment.category.value}_{garment.style_number:03d}"
         f"_v{version}_{STAGE_ABBREVIATIONS[NodeKey.PHOTOSHOOT]}_R{iteration:02d}"
     )
+    logger.info("[SHOOT] Generated code: %s", code)
 
     now = datetime.now(timezone.utc)
 
@@ -271,11 +295,15 @@ async def generate_photoshoot(
         updated_at=now,
     )
     await run.insert()
+    logger.info("[SHOOT] NodeRun created: id=%s, status=processing", str(run.id))
 
     # ─── Build prompt ───
     category_code = garment.category.value
     category_display = category_display_name(category_code)
     moodboard_text = _build_moodboard_text(season) if body.moodboard_influence else ""
+    logger.info("[SHOOT] Moodboard influence: %s, moodboard_text present: %s", body.moodboard_influence, bool(moodboard_text))
+    if moodboard_text:
+        logger.info("[SHOOT] Moodboard text: %s", moodboard_text[:200])
     prompt = _build_photoshoot_prompt(
         category_display=category_display,
         model_avatar=model_avatar,
@@ -288,32 +316,38 @@ async def generate_photoshoot(
         additional_notes=body.additional_notes,
         moodboard_text=moodboard_text,
     )
-    logger.info(f"Photoshoot prompt: {prompt[:200]}...")
+    logger.info("[SHOOT] Prompt built (%d chars): %s...", len(prompt), prompt[:300])
 
     # ─── Generate via Gemini ───
     api_key = (x_gemini_api_key or "").strip() or (settings.ai_key or "").strip()
     generated_images = []  # list of {"bytes": bytes, "source": str}
 
     num_outputs = max(1, min(4, body.num_outputs))
+    logger.info("[SHOOT] num_outputs=%d, api_key present=%s", num_outputs, bool(api_key))
 
     if api_key:
         try:
             for idx in range(num_outputs):
+                logger.info("[SHOOT] Calling Gemini for output %d/%d (temperature=%.2f)...", idx + 1, num_outputs, 0.5 + (0.1 * idx))
                 img_bytes = await _generate_photoshoot_image(
                     api_key, prompt, viz_b64, viz_mime,
                     temperature=0.5 + (0.1 * idx),
                 )
                 if img_bytes:
                     generated_images.append({"bytes": img_bytes, "source": "ai"})
+                    logger.info("[SHOOT] Gemini output %d: %d bytes", idx + 1, len(img_bytes))
+                else:
+                    logger.warning("[SHOOT] Gemini output %d: no image returned", idx + 1)
             if generated_images:
                 run.ai.model = "gemini-2.5-flash-image"
                 run.ai.prompt = prompt
+                logger.info("[SHOOT] Gemini generation complete: %d images", len(generated_images))
         except Exception as e:
-            logger.error(f"Gemini photoshoot generation failed: {e}")
+            logger.error("[SHOOT] Gemini photoshoot generation failed: %s", e, exc_info=True)
 
     # ─── Fallback: lightweight placeholder if AI unavailable/failed ───
     if not generated_images:
-        logger.info("No AI images generated, using placeholder fallback")
+        logger.warning("[SHOOT] No AI images generated — falling back to PIL placeholder")
         placeholder_bytes = build_placeholder_image(
             "[Photoshoot]",
             f"{model_avatar} — {category_display} — AI generation unavailable",
@@ -321,6 +355,7 @@ async def generate_photoshoot(
         )
         generated_images.append({"bytes": placeholder_bytes, "source": "pil-fallback"})
         run.ai.model = "pil-fallback"
+        logger.info("[SHOOT] Placeholder created: %d bytes", len(placeholder_bytes))
 
     # ─── Upload to ImageKit + Create DesignImage documents ───
     output_image_ids = []
@@ -329,6 +364,7 @@ async def generate_photoshoot(
     input_refs = []
     if viz_img:
         input_refs.append(InputImageRef(image_id=str(viz_img.id), stage=NodeKey.VISUALIZATION, role="primary"))
+        logger.info("[SHOOT] Input lineage: viz image_id=%s", str(viz_img.id))
 
     for idx, img_data in enumerate(generated_images):
         count_str = f"{idx + 1:02d}"
@@ -338,15 +374,17 @@ async def generate_photoshoot(
         folder = f"/design-studio/{garment.season_id}/{garment_id}/photoshoots/"
 
         try:
+            logger.info("[SHOOT] Uploading to ImageKit: %s (%d bytes)", img_code, len(img_data["bytes"]))
             ik_result = _upload_to_imagekit(img_data["bytes"], folder=folder, file_name=file_name)
             img_url = ik_result["url"]
             ik_file_id = ik_result["file_id"]
-            logger.info(f"ImageKit upload OK: {img_code} -> {img_url[:60]}...")
+            logger.info("[SHOOT] ImageKit upload OK: %s -> %s", img_code, img_url[:80])
         except Exception as e:
-            logger.error(f"ImageKit upload failed for {img_code}: {e}")
+            logger.error("[SHOOT] ImageKit upload failed for %s: %s", img_code, e)
             b64 = base64.b64encode(img_data["bytes"]).decode()
             img_url = f"data:image/png;base64,{b64}"
             ik_file_id = None
+            logger.warning("[SHOOT] Using data URL fallback for %s", img_code)
 
         design_img = DesignImage(
             image_code=img_code,
@@ -385,6 +423,7 @@ async def generate_photoshoot(
         await design_img.insert()
         output_image_ids.append(str(design_img.id))
         design_images.append(design_img)
+        logger.info("[SHOOT] DesignImage created: id=%s, code=%s, source=%s", str(design_img.id), img_code, img_data["source"])
 
     # ─── Update NodeRun ───
     run.output = NodeOutput(images=[img.url for img in design_images])
@@ -392,6 +431,8 @@ async def generate_photoshoot(
     run.status = RunStatus.COMPLETE
     run.ai.completed_at = datetime.now(timezone.utc)
     await run.save()
+    logger.info("[SHOOT] NodeRun completed: id=%s, status=complete, images=%d", str(run.id), len(design_images))
+    logger.info("=" * 60)
 
     return {
         "success": True,

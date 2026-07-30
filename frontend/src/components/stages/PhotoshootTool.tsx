@@ -66,27 +66,47 @@ export function PhotoshootTool({ garment, season, onGenerated }: PhotoshootToolP
     }
     setError(null);
     setIsGenerating(true);
+
+    const params = {
+      visualization_image_url: vizImage.id,
+      moodboard_influence: moodboardReady && moodboardInfluence,
+      shot_type: shotType,
+      location,
+      time_of_day: timeOfDay,
+      mood,
+      pose,
+      custom_pose: customPose,
+      additional_notes: additionalNotes,
+      num_outputs: numOutputs,
+      note,
+    };
+
+    console.log("[SHOOT] ─── Generate clicked ───");
+    console.log("[SHOOT] garment:", { id: garment.id, name: garment.name, category: garment.category });
+    console.log("[SHOOT] season:", { id: season.id, code: season.code });
+    console.log("[SHOOT] vizImage:", { id: vizImage.id, image_code: vizImage.image_code, url: vizImage.url?.substring(0, 80) });
+    console.log("[SHOOT] moodboardReady:", moodboardReady, "moodboardInfluence:", moodboardInfluence);
+    console.log("[SHOOT] params:", JSON.stringify(params, null, 2));
+
     try {
-      const result = await generatePhotoshoot(garment.id, {
-        visualization_image_url: vizImage.id,
-        moodboard_influence: moodboardReady && moodboardInfluence,
-        shot_type: shotType,
-        location,
-        time_of_day: timeOfDay,
-        mood,
-        pose,
-        custom_pose: customPose,
-        additional_notes: additionalNotes,
-        num_outputs: numOutputs,
-        note,
-      });
+      console.log("[SHOOT] Calling generatePhotoshoot API...");
+      const result = await generatePhotoshoot(garment.id, params);
+      console.log("[SHOOT] API response:", { success: result.success, imageCount: result.images?.length, model_avatar: result.model_avatar });
+      console.log("[SHOOT] run:", result.run);
+      if (result.images?.length > 0) {
+        console.log("[SHOOT] images:", result.images.map((img: any) => ({ id: img.id, code: img.image_code, source: img.source, ai_model: img.ai_model })));
+      }
       if (result.success && result.images?.length > 0) {
         onGenerated(result.images[0] as unknown as DesignImage);
+      } else {
+        console.warn("[SHOOT] No images returned in response");
       }
     } catch (e: any) {
+      console.error("[SHOOT] Generation failed:", e.message, e);
       setError(e.message || "Generation failed");
     } finally {
       setIsGenerating(false);
+      console.log("[SHOOT] ─── Generate finished ───");
     }
   };
 
@@ -273,6 +293,7 @@ export function PhotoshootTool({ garment, season, onGenerated }: PhotoshootToolP
         open={vizPickerOpen}
         onClose={() => setVizPickerOpen(false)}
         onSelect={(img) => {
+          console.log("[SHOOT] Viz image selected:", { id: img.id, image_code: img.image_code, url: img.url?.substring(0, 80) });
           setVizImage(img);
           setVizPickerOpen(false);
         }}

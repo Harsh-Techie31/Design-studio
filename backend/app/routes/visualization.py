@@ -98,13 +98,13 @@ async def _generate_visualization_image(
 
     async with httpx.AsyncClient(timeout=60.0) as client:
         payload = {
-            "contents": [{"parts": parts}],
+            "contents": [{"role": "user", "parts": parts}],
             "generationConfig": {
                 "temperature": temperature,
                 "responseModalities": ["TEXT", "IMAGE"],
             },
         }
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key={api_key}"
+        url = f"{settings.vertex_base_url}/gemini-2.5-flash-image:generateContent?key={api_key}"
         resp = await client.post(url, json=payload)
 
         if resp.status_code != 200:
@@ -151,28 +151,43 @@ async def generate_visualization(
     on a fixed male/female model, using the selected Render output as the fabric/print/
     color reference. Framing is derived automatically from the garment's category.
     """
+    logger.info("=" * 60)
+    logger.info("[VIS] POST /api/garments/%s/nodes/visualization/generate", garment_id)
+    logger.info("[VIS] Request body: render_image_url=%s, model_avatar=%s, background=%s, lighting=%s, num_outputs=%d, note=%s",
+                body.render_image_url, body.model_avatar, body.background, body.lighting, body.num_outputs, body.note or "(none)")
 
     garment = await Garment.get(garment_id)
     if not garment:
+        logger.error("[VIS] Garment %s not found", garment_id)
         raise HTTPException(status_code=404, detail="Garment not found")
     if not garment.category:
+        logger.error("[VIS] Garment %s has no category set", garment_id)
         raise HTTPException(status_code=400, detail="Garment has no category set")
+    logger.info("[VIS] Garment: name=%s, category=%s, style_number=%d, version=%d",
+                garment.name, garment.category.value, garment.style_number, garment.current_version)
 
     season = await Season.get(garment.season_id)
     if not season:
+        logger.error("[VIS] Season %s not found", garment.season_id)
         raise HTTPException(status_code=404, detail="Season not found")
+    logger.info("[VIS] Season: code=%s", season.code)
 
     if not body.render_image_url:
+        logger.error("[VIS] No render_image_url provided")
         raise HTTPException(status_code=400, detail="A render image is required")
 
     # ─── Resolve render image (required) ───
     render_img = await DesignImage.get(body.render_image_url)
     if render_img:
+        logger.info("[VIS] Render image found in library: id=%s, code=%s, type=%s, url=%s",
+                    str(render_img.id), render_img.image_code, render_img.image_type, render_img.url[:80])
         render_bytes = await fetch_image_bytes(render_img.url)
     else:
+        logger.info("[VIS] render_image_url is not a DesignImage ID, treating as raw URL: %s", body.render_image_url[:80])
         render_bytes = await fetch_image_bytes(body.render_image_url)
 
     if not render_bytes:
+        logger.error("[VIS] Failed to load render image bytes")
         raise HTTPException(status_code=400, detail="Failed to load render image")
 
     render_mime = (
@@ -181,6 +196,7 @@ async def generate_visualization(
         else "image/png"
     )
     render_b64 = base64.b64encode(render_bytes).decode()
+    logger.info("[VIS] Render image loaded: %d bytes, mime=%s, b64_length=%d", len(render_bytes), render_mime, len(render_b64))
 
     # ─── Create NodeRun ───
     existing = await NodeRun.find(
@@ -188,6 +204,7 @@ async def generate_visualization(
         NodeRun.node_key == NodeKey.VISUALIZATION,
     ).to_list()
     iteration = len(existing) + 1
+    logger.info("[VIS] Existing runs for visualization: %d, new iteration=%d", len(existing), iteration)
 
     version = garment.current_version
     stage_index = STAGE_ORDER.index(NodeKey.VISUALIZATION)
@@ -202,11 +219,14 @@ async def generate_visualization(
             version = garment.current_version + 1
             garment.current_version = version
             await garment.save()
+            logger.info("[VIS] Downstream runs exist — version bumped to %d", version)
+    logger.info("[VIS] Final version=%d", version)
 
     code = (
         f"{season.code}_{garment.category.value}_{garment.style_number:03d}"
         f"_v{version}_{STAGE_ABBREVIATIONS[NodeKey.VISUALIZATION]}_R{iteration:02d}"
     )
+    logger.info("[VIS] Generated code: %s", code)
 
     now = datetime.now(timezone.utc)
 
@@ -226,6 +246,7 @@ async def generate_visualization(
         updated_at=now,
     )
     await run.insert()
+    logger.info("[VIS] NodeRun created: id=%s, status=processing", str(run.id))
 
     # ─── Build prompt ───
     category_code = garment.category.value
@@ -238,38 +259,45 @@ async def generate_visualization(
         lighting=body.lighting,
         additional_notes=body.additional_notes,
     )
-    logger.info(f"Visualization prompt: {prompt[:200]}...")
+    logger.info("[VIS] Prompt built (%d chars): %s...", len(prompt), prompt[:300])
 
     # ─── Generate via Gemini ───
     api_key = (x_gemini_api_key or "").strip() or (settings.ai_key or "").strip()
     generated_images = []  # list of {"bytes": bytes, "source": str}
 
     num_outputs = max(1, min(4, body.num_outputs))
+    logger.info("[VIS] num_outputs=%d, api_key present=%s", num_outputs, bool(api_key))
 
     if api_key:
         try:
             for idx in range(num_outputs):
+                logger.info("[VIS] Calling Gemini for output %d/%d (temperature=%.2f)...", idx + 1, num_outputs, 0.5 + (0.1 * idx))
                 img_bytes = await _generate_visualization_image(
                     api_key, prompt, render_b64, render_mime,
                     temperature=0.5 + (0.1 * idx),
                 )
                 if img_bytes:
                     generated_images.append({"bytes": img_bytes, "source": "ai"})
+                    logger.info("[VIS] Gemini output %d: %d bytes", idx + 1, len(img_bytes))
+                else:
+                    logger.warning("[VIS] Gemini output %d: no image returned", idx + 1)
             if generated_images:
                 run.ai.model = "gemini-2.5-flash-image"
                 run.ai.prompt = prompt
+                logger.info("[VIS] Gemini generation complete: %d images", len(generated_images))
         except Exception as e:
-            logger.error(f"Gemini visualization generation failed: {e}")
+            logger.error("[VIS] Gemini visualization generation failed: %s", e, exc_info=True)
 
     # ─── Fallback: lightweight placeholder if AI unavailable/failed ───
     if not generated_images:
-        logger.info("No AI images generated, using placeholder fallback")
+        logger.warning("[VIS] No AI images generated — falling back to PIL placeholder")
         placeholder_bytes = build_placeholder_image(
             "[3D Visualization]",
             f"{body.model_avatar} — {category_display} — AI generation unavailable",
         )
         generated_images.append({"bytes": placeholder_bytes, "source": "pil-fallback"})
         run.ai.model = "pil-fallback"
+        logger.info("[VIS] Placeholder created: %d bytes", len(placeholder_bytes))
 
     # ─── Upload to ImageKit + Create DesignImage documents ───
     output_image_ids = []
@@ -278,6 +306,7 @@ async def generate_visualization(
     input_refs = []
     if render_img:
         input_refs.append(InputImageRef(image_id=str(render_img.id), stage=NodeKey.RENDER, role="primary"))
+        logger.info("[VIS] Input lineage: render image_id=%s", str(render_img.id))
 
     for idx, img_data in enumerate(generated_images):
         count_str = f"{idx + 1:02d}"
@@ -287,15 +316,17 @@ async def generate_visualization(
         folder = f"/design-studio/{garment.season_id}/{garment_id}/visualizations/"
 
         try:
+            logger.info("[VIS] Uploading to ImageKit: %s (%d bytes)", img_code, len(img_data["bytes"]))
             ik_result = _upload_to_imagekit(img_data["bytes"], folder=folder, file_name=file_name)
             img_url = ik_result["url"]
             ik_file_id = ik_result["file_id"]
-            logger.info(f"ImageKit upload OK: {img_code} -> {img_url[:60]}...")
+            logger.info("[VIS] ImageKit upload OK: %s -> %s", img_code, img_url[:80])
         except Exception as e:
-            logger.error(f"ImageKit upload failed for {img_code}: {e}")
+            logger.error("[VIS] ImageKit upload failed for %s: %s", img_code, e)
             b64 = base64.b64encode(img_data["bytes"]).decode()
             img_url = f"data:image/png;base64,{b64}"
             ik_file_id = None
+            logger.warning("[VIS] Using data URL fallback for %s", img_code)
 
         design_img = DesignImage(
             image_code=img_code,
@@ -329,6 +360,7 @@ async def generate_visualization(
         await design_img.insert()
         output_image_ids.append(str(design_img.id))
         design_images.append(design_img)
+        logger.info("[VIS] DesignImage created: id=%s, code=%s, source=%s", str(design_img.id), img_code, img_data["source"])
 
     # ─── Update NodeRun ───
     run.output = NodeOutput(images=[img.url for img in design_images])
@@ -336,6 +368,8 @@ async def generate_visualization(
     run.status = RunStatus.COMPLETE
     run.ai.completed_at = datetime.now(timezone.utc)
     await run.save()
+    logger.info("[VIS] NodeRun completed: id=%s, status=complete, images=%d", str(run.id), len(design_images))
+    logger.info("=" * 60)
 
     return {
         "success": True,
