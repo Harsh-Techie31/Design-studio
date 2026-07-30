@@ -8,7 +8,7 @@ interface ImagePickerModalProps {
   onClose: () => void;
   onSelect: (image: DesignImage) => void;
   seasonId: string;
-  imageType: "sketch" | "fabric" | "print" | "render";
+  imageType: "sketch" | "fabric" | "print" | "render" | "3d";
   title?: string;
 }
 
