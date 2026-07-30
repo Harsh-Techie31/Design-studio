@@ -7,6 +7,10 @@ interface PatternOutputPanelProps {
   imageType?: string;
   onRefresh?: () => void;
   pendingCount?: number;
+  onNextStage?: () => void;
+  nextStageLabel?: string;
+  isFinalStage?: boolean;
+  onExport?: () => void;
 }
 
 export function PatternOutputPanel({
@@ -14,11 +18,17 @@ export function PatternOutputPanel({
   imageType = "pattern",
   onRefresh,
   pendingCount = 0,
+  onNextStage,
+  nextStageLabel,
+  isFinalStage,
+  onExport,
 }: PatternOutputPanelProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const filtered = images.filter((i) => i.image_type === imageType);
   const selected = filtered.find((i) => i.id === selectedId) || null;
+  const likedCount = filtered.filter((i) => i.liked).length;
+  const hasLiked = likedCount > 0;
 
   const handleLike = async (id: string) => {
     try {
@@ -53,6 +63,7 @@ export function PatternOutputPanel({
         </div>
       ) : (
         <div className="flex flex-1 overflow-hidden">
+          {/* Thumbnail strip (left) */}
           <div className="w-[88px] flex flex-col border-r border-line bg-ink overflow-y-auto py-2 px-1.5 gap-2">
             {Array.from({ length: pendingCount }).map((_, i) => (
               <div key={`pending-${i}`} className="w-full animate-pulse rounded-lg border border-dashed border-brass/30 bg-ink-soft/50">
@@ -74,34 +85,44 @@ export function PatternOutputPanel({
                   <div className="text-center font-mono text-[8px] text-bone-dim truncate">{img.image_code}</div>
                 </div>
                 {img.liked && (
-                  <div className="absolute right-1 top-1 rounded-full bg-brass/80 p-0.5">
-                    <i className="ti ti-star text-[8px] text-ink" />
+                  <div className="absolute right-1 top-1 rounded-full bg-green-500/80 p-0.5">
+                    <i className="ti ti-heart-filled text-[8px] text-ink" />
                   </div>
                 )}
               </button>
             ))}
           </div>
 
-          <div className="flex flex-1 flex-col bg-ink-soft/30">
+          {/* Large preview (right) */}
+          <div className="flex flex-1 flex-col overflow-hidden bg-ink-soft/30">
             {selected ? (
               <>
-                <div className="flex flex-1 items-center justify-center p-4">
-                  <img src={selected.url} alt={selected.image_code} className="max-h-full max-w-full rounded-lg border border-line object-contain shadow-xl" />
+                {/* Image — constrained to fill available space */}
+                <div className="flex flex-1 items-center justify-center overflow-hidden p-4">
+                  <img
+                    src={selected.url}
+                    alt={selected.image_code}
+                    className="max-h-full max-w-full rounded-lg border border-line object-contain shadow-xl"
+                  />
                 </div>
+
+                {/* Actions bar */}
                 <div className="flex items-center justify-between border-t border-line px-4 py-2.5">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleLike(selected.id)}
                       className={`rounded-lg px-3 py-1.5 text-[11px] transition-all ${
-                        selected.liked ? "bg-brass/20 text-brass" : "bg-ink text-muted hover:text-bone-dim"
+                        selected.liked
+                          ? "bg-green-500/20 text-green-400"
+                          : "bg-ink text-muted hover:text-green-400"
                       }`}
                     >
-                      <i className={`ti ti-star mr-1 ${selected.liked ? "fill-current" : ""}`} />
-                      {selected.liked ? "Starred" : "Star"}
+                      <i className={`ti ti-heart-filled mr-1 ${selected.liked ? "fill-current" : ""}`} />
+                      {selected.liked ? "Liked" : "Like"}
                     </button>
                     <button className="rounded-lg bg-ink px-3 py-1.5 text-[11px] text-muted hover:text-bone-dim">
                       <i className="ti ti-download mr-1" />
-                      Download PNG
+                      Download
                     </button>
                   </div>
                   <span className="font-mono text-[10px] text-muted">{selected.image_code}</span>
@@ -119,6 +140,59 @@ export function PatternOutputPanel({
               <div className="flex flex-1 items-center justify-center text-muted text-xs">Select a pattern from the strip</div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Bottom bar — next stage / export */}
+      {(onNextStage || isFinalStage) && filtered.length > 0 && (
+        <div className="flex items-center justify-between border-t border-line px-4 py-3">
+          <p className="text-xs text-muted">
+            {isFinalStage ? (
+              likedCount > 0 ? (
+                <>
+                  <i className="ti ti-check mr-1.5 text-green-400" />
+                  <span className="font-medium text-green-400">{likedCount}</span> selected
+                  {likedCount !== 1 ? "s" : ""} ready for export
+                </>
+              ) : (
+                "Like at least 1 to export"
+              )
+            ) : hasLiked ? (
+              <>
+                <span className="font-medium text-green-400">{likedCount}</span> image
+                {likedCount !== 1 ? "s" : ""} selected
+              </>
+            ) : (
+              "Like at least 1 image to proceed"
+            )}
+          </p>
+          {isFinalStage ? (
+            <button
+              onClick={onExport}
+              disabled={!hasLiked}
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
+                hasLiked
+                  ? "bg-brass text-ink hover:bg-brass-soft"
+                  : "cursor-not-allowed bg-line text-muted"
+              }`}
+            >
+              <i className="ti ti-download text-xs" />
+              Export Selected
+            </button>
+          ) : (
+            <button
+              onClick={onNextStage}
+              disabled={!hasLiked}
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
+                hasLiked
+                  ? "bg-brass text-ink hover:bg-brass-soft"
+                  : "cursor-not-allowed bg-line text-muted"
+              }`}
+            >
+              {nextStageLabel || "Next Stage"}
+              <i className="ti ti-arrow-right text-xs" />
+            </button>
+          )}
         </div>
       )}
     </div>

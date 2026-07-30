@@ -285,6 +285,8 @@ export function StageWorkspacePage() {
               imageType="tech_pack"
               onRefresh={fetchImages}
               pendingCount={pendingCount}
+              onNextStage={handleNextStage}
+              nextStageLabel={getNextStageLabel()}
             />
           ) : currentStage === "pattern" ? (
             <PatternOutputPanel
@@ -292,6 +294,8 @@ export function StageWorkspacePage() {
               imageType="pattern"
               onRefresh={fetchImages}
               pendingCount={pendingCount}
+              onNextStage={handleNextStage}
+              nextStageLabel={getNextStageLabel()}
             />
           ) : (
             <StageOutputPanel
