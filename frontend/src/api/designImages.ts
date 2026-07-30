@@ -338,3 +338,63 @@ export async function generateVisualization(
 
   return res.json();
 }
+
+// ─── Photoshoot generation ───────────────────────────────────────────
+
+export interface PhotoshootGenerateParams {
+  visualization_image_url: string;
+  moodboard_influence: boolean;
+  shot_type: string;
+  location: string;
+  time_of_day: string;
+  mood: string;
+  pose: string;
+  custom_pose: string;
+  additional_notes: string;
+  num_outputs: number;
+  note: string;
+}
+
+export interface PhotoshootGenerateResponse {
+  success: boolean;
+  run: {
+    id: string;
+    code: string;
+    iteration: number;
+    version: number;
+    status: string;
+    node_key: string;
+  };
+  images: {
+    id: string;
+    image_code: string;
+    url: string;
+    index: number;
+    source: string;
+    ai_model: string | null;
+  }[];
+  prompt: string;
+  model_avatar: string;
+}
+
+export async function generatePhotoshoot(
+  garmentId: string,
+  params: PhotoshootGenerateParams,
+  geminiApiKey?: string
+): Promise<PhotoshootGenerateResponse> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (geminiApiKey) headers["X-Gemini-API-Key"] = geminiApiKey;
+
+  const res = await fetch(`${API_BASE}/api/garments/${garmentId}/nodes/photoshoot/generate`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(params),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Generation failed" }));
+    throw new Error(err.detail || "Photoshoot generation failed");
+  }
+
+  return res.json();
+}

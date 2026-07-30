@@ -11,6 +11,8 @@ interface StageOutputPanelProps {
   onNextStage?: () => void;
   nextStageLabel?: string;
   canvasPreview?: React.ReactNode;
+  isFinalStage?: boolean;
+  onExport?: () => void;
 }
 
 type FilterType = "all" | "liked" | "unliked" | "starred";
@@ -25,6 +27,8 @@ export function StageOutputPanel({
   onNextStage,
   nextStageLabel,
   canvasPreview,
+  isFinalStage,
+  onExport,
 }: StageOutputPanelProps) {
   const [filter, setFilter] = useState<FilterType>("all");
   const [lightboxImage, setLightboxImage] = useState<DesignImage | null>(null);
@@ -314,21 +318,22 @@ export function StageOutputPanel({
         )}
       </div>
 
-      {/* Proceed bar */}
-      {onNextStage && (
+      {/* Proceed / Export bar */}
+      {isFinalStage ? (
         <div className="flex items-center justify-between border-t border-line px-4 py-3">
           <p className="text-xs text-muted">
             {likedCount > 0 ? (
               <>
-                <span className="font-medium text-green-400">{likedCount}</span> image
-                {likedCount !== 1 ? "s" : ""} selected
+                <i className="ti ti-check mr-1.5 text-green-400" />
+                <span className="font-medium text-green-400">{likedCount}</span> selected photo
+                {likedCount !== 1 ? "s" : ""} ready for collection
               </>
             ) : (
-              "Like at least 1 image to proceed"
+              "Like at least 1 photo to export"
             )}
           </p>
           <button
-            onClick={onNextStage}
+            onClick={onExport}
             disabled={!hasLiked}
             className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
               hasLiked
@@ -336,10 +341,37 @@ export function StageOutputPanel({
                 : "cursor-not-allowed bg-line text-muted"
             }`}
           >
-            {nextStageLabel || "Next Stage"}
-            <i className="ti ti-arrow-right text-xs" />
+            <i className="ti ti-download text-xs" />
+            Export Selected
           </button>
         </div>
+      ) : (
+        onNextStage && (
+          <div className="flex items-center justify-between border-t border-line px-4 py-3">
+            <p className="text-xs text-muted">
+              {likedCount > 0 ? (
+                <>
+                  <span className="font-medium text-green-400">{likedCount}</span> image
+                  {likedCount !== 1 ? "s" : ""} selected
+                </>
+              ) : (
+                "Like at least 1 image to proceed"
+              )}
+            </p>
+            <button
+              onClick={onNextStage}
+              disabled={!hasLiked}
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
+                hasLiked
+                  ? "bg-brass text-ink hover:bg-brass-soft"
+                  : "cursor-not-allowed bg-line text-muted"
+              }`}
+            >
+              {nextStageLabel || "Next Stage"}
+              <i className="ti ti-arrow-right text-xs" />
+            </button>
+          </div>
+        )
       )}
 
       {/* Lightbox */}

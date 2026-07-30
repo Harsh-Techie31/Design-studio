@@ -11,6 +11,7 @@ import { TechPackOutputPanel } from "../components/stages/TechPackOutputPanel";
 import { PatternTool } from "../components/stages/PatternTool";
 import { PatternOutputPanel } from "../components/stages/PatternOutputPanel";
 import { VisualizationTool } from "../components/stages/VisualizationTool";
+import { PhotoshootTool } from "../components/stages/PhotoshootTool";
 import { useStudio } from "../state/StudioContext";
 import { listImagesForGarment, toggleLike, toggleStar } from "../api/designImages";
 import type { DesignImage, NodeKey } from "../types";
@@ -99,6 +100,18 @@ export function StageWorkspacePage() {
   const handleGenerated = (_response: any) => {
     // Re-fetch images to include the new ones
     fetchImages();
+  };
+
+  const handleExport = () => {
+    const likedImages = images.filter((img) => img.liked);
+    likedImages.forEach((img, i) => {
+      setTimeout(() => {
+        const a = document.createElement("a");
+        a.href = img.url;
+        a.download = `${img.image_code}.png`;
+        a.click();
+      }, i * 200); // stagger so the browser doesn't block simultaneous downloads
+    });
   };
 
   const handlePrintStateChange = useCallback((newState: Partial<PrintState>) => {
@@ -224,7 +237,15 @@ export function StageWorkspacePage() {
           />
         )}
 
-        {currentStage !== "sketch" && currentStage !== "print" && currentStage !== "render" && currentStage !== "techPack" && currentStage !== "pattern" && currentStage !== "visualization" && (
+        {currentStage === "photoshoot" && (
+          <PhotoshootTool
+            garment={garment}
+            season={season}
+            onGenerated={handleGenerated}
+          />
+        )}
+
+        {currentStage !== "sketch" && currentStage !== "print" && currentStage !== "render" && currentStage !== "techPack" && currentStage !== "pattern" && currentStage !== "visualization" && currentStage !== "photoshoot" && (
           <aside className="flex w-full flex-col items-center justify-center bg-surface p-8 lg:w-[480px]">
             <i className="ti ti-tools text-3xl text-muted" />
             <p className="mt-3 text-sm text-muted">
@@ -259,6 +280,8 @@ export function StageWorkspacePage() {
               onNextStage={handleNextStage}
               nextStageLabel={getNextStageLabel()}
               canvasPreview={printCanvasPreview}
+              isFinalStage={currentStage === "photoshoot"}
+              onExport={handleExport}
             />
           )}
         </div>
