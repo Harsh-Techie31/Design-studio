@@ -79,11 +79,16 @@ async def create_garment(season_id: str, body: GarmentCreate):
         raise HTTPException(status_code=404, detail="Season not found")
     existing_count = await Garment.find(Garment.season_id == season_id).count()
     now = _now()
+
+    # Auto-generate name: SEASON_CODE_CATEGORY_001
+    style_number = existing_count + 1
+    auto_name = f"{season.code}_{body.category.value}_{style_number:03d}"
+
     garment = Garment(
         season_id=season_id,
-        name=body.name.strip() or "Untitled Garment",
+        name=auto_name,
         category=body.category,
-        style_number=existing_count + 1,
+        style_number=style_number,
         created_at=now,
         updated_at=now,
     )

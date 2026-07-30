@@ -11,12 +11,11 @@ export async function getGarment(id: string): Promise<Garment> {
 
 export async function createGarment(
   seasonId: string,
-  name: string,
   category: GarmentCategory,
 ): Promise<Garment> {
   return request<Garment>(`/seasons/${seasonId}/garments`, {
     method: "POST",
-    body: JSON.stringify({ name, category }),
+    body: JSON.stringify({ category }),
   });
 }
 

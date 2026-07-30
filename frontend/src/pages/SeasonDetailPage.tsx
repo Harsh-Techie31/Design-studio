@@ -35,7 +35,6 @@ export function SeasonDetailPage() {
   } = useStudio();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
   const [category, setCategory] = useState<GarmentCategory | null>(null);
   const [moodboardOpen, setMoodboardOpen] = useState(false);
   const [briefExpanded, setBriefExpanded] = useState(false);
@@ -84,8 +83,7 @@ export function SeasonDetailPage() {
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!category) return;
-    const garment = await createGarment(season!.id, name, category);
-    setName("");
+    const garment = await createGarment(season!.id, category);
     setCategory(null);
     setOpen(false);
     navigate(`/seasons/${season!.id}/garments/${garment.id}`);
@@ -465,18 +463,9 @@ export function SeasonDetailPage() {
               ))}
             </div>
           </div>
-          <div>
-            <label className="mb-1.5 block text-xs uppercase tracking-wide text-muted">
-              Garment name
-            </label>
-            <input
-              autoFocus
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Frayed Silk Trench"
-              className="w-full rounded-lg border border-line bg-ink-soft px-3.5 py-2.5 text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none"
-            />
-          </div>
+          <p className="text-[11px] text-muted">
+            Name will be auto-generated as <span className="font-mono text-bone-dim">{season?.code || "SS27"}_{"{CATEGORY}"}_{"{###}"}</span>
+          </p>
           <button
             type="submit"
             disabled={!category}

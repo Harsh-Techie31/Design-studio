@@ -21,7 +21,7 @@ interface StudioContextValue {
   getGarmentsForSeason: (seasonId: string) => Garment[];
   getGarment: (id: string) => Garment | undefined;
   createSeason: (code: string) => Promise<Season>;
-  createGarment: (seasonId: string, name: string, category: GarmentCategory) => Promise<Garment>;
+  createGarment: (seasonId: string, category: GarmentCategory) => Promise<Garment>;
   setMoodboardImages: (seasonId: string, images: MoodboardImage[], name?: string) => Promise<void>;
   analyzeMoodboard: (seasonId: string) => Promise<void>;
   refreshSeasons: () => Promise<void>;
@@ -92,8 +92,8 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   );
 
   const createGarment = useCallback(
-    async (seasonId: string, name: string, category: GarmentCategory) => {
-      const garment = await garmentsApi.createGarment(seasonId, name, category);
+    async (seasonId: string, category: GarmentCategory) => {
+      const garment = await garmentsApi.createGarment(seasonId, category);
       setGarments((prev) => [garment, ...prev]);
       return garment;
     },

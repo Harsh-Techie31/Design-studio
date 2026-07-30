@@ -4,7 +4,7 @@ from app.models.enums import GarmentCategory
 
 
 class GarmentCreate(BaseModel):
-    name: str
+    name: str = ""
     category: GarmentCategory
 
 
