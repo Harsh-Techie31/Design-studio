@@ -13,6 +13,7 @@ interface StageOutputPanelProps {
   canvasPreview?: React.ReactNode;
   isFinalStage?: boolean;
   onExport?: () => void;
+  pendingCount?: number;
 }
 
 type FilterType = "all" | "liked" | "unliked" | "starred";
@@ -29,6 +30,7 @@ export function StageOutputPanel({
   canvasPreview,
   isFinalStage,
   onExport,
+  pendingCount = 0,
 }: StageOutputPanelProps) {
   const [filter, setFilter] = useState<FilterType>("all");
   const [lightboxImage, setLightboxImage] = useState<DesignImage | null>(null);
@@ -99,7 +101,7 @@ export function StageOutputPanel({
 
           {/* Image list */}
           <div className="flex-1 overflow-y-auto p-3">
-            {filtered.length === 0 ? (
+            {filtered.length === 0 && pendingCount === 0 ? (
               <div className="flex h-full items-center justify-center">
                 <p className="text-center text-xs text-muted">
                   {images.length === 0
@@ -109,6 +111,9 @@ export function StageOutputPanel({
               </div>
             ) : (
               <div className="flex flex-col gap-2">
+                {Array.from({ length: pendingCount }).map((_, i) => (
+                  <SkeletonCard key={`pending-${i}`} />
+                ))}
                 {filtered.map((img) => (
                   <OutputCard
                     key={img.id}
@@ -219,7 +224,7 @@ export function StageOutputPanel({
 
       {/* Image grid */}
       <div className="flex-1 overflow-y-auto p-4">
-        {filtered.length === 0 ? (
+        {filtered.length === 0 && pendingCount === 0 ? (
           <div className="flex h-full items-center justify-center">
             <p className="text-sm text-muted">
               {images.length === 0
@@ -229,6 +234,9 @@ export function StageOutputPanel({
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+            {Array.from({ length: pendingCount }).map((_, i) => (
+              <SkeletonGridCard key={`pending-${i}`} />
+            ))}
             {filtered.map((img) => (
               <div
                 key={img.id}
@@ -416,6 +424,47 @@ export function StageOutputPanel({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Skeleton Cards (pending generation) ────────────────────────────
+
+function SkeletonCard() {
+  return (
+    <div className="group relative overflow-hidden rounded-lg border border-brass/20 border-dashed bg-ink-soft/50 animate-pulse">
+      <div className="flex cursor-pointer items-center gap-3 p-2">
+        <div className="h-16 w-16 rounded bg-line/50" />
+        <div className="flex-1 space-y-2">
+          <div className="h-2.5 w-3/4 rounded bg-line/50" />
+          <div className="h-2 w-1/2 rounded bg-line/30" />
+        </div>
+      </div>
+      <div className="flex items-center gap-1 border-t border-dashed border-line/50 px-2 py-1.5">
+        <div className="h-5 w-5 rounded bg-line/30" />
+        <div className="h-5 w-5 rounded bg-line/30" />
+        <div className="h-5 w-5 rounded bg-line/30" />
+        <div className="ml-auto flex items-center gap-1 text-brass/60">
+          <i className="ti ti-loader-2 animate-spin text-xs" />
+          <span className="text-[9px]">Generating...</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SkeletonGridCard() {
+  return (
+    <div className="overflow-hidden rounded-xl border border-brass/20 border-dashed bg-ink-soft/50 animate-pulse">
+      {/* Image area */}
+      <div className="aspect-[4/3] flex items-center justify-center bg-line/20">
+        <i className="ti ti-loader-2 animate-spin text-2xl text-brass/40" />
+      </div>
+      {/* Code label */}
+      <div className="flex items-center justify-between px-2.5 py-1.5">
+        <div className="h-2.5 w-20 rounded bg-line/40" />
+        <div className="h-2 w-8 rounded bg-line/30" />
+      </div>
     </div>
   );
 }

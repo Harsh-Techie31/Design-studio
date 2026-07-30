@@ -27,6 +27,7 @@ interface TechPackToolProps {
   onGenerated: (image: any) => void;
   onStateChange?: (state: Partial<TechPackState>) => void;
   renders: DesignImage[];
+  onStartGenerating?: (count: number) => void;
 }
 
 export function TechPackTool({
@@ -35,6 +36,7 @@ export function TechPackTool({
   onGenerated,
   onStateChange,
   renders,
+  onStartGenerating,
 }: TechPackToolProps) {
   // Selected render
   const [selectedRender, setSelectedRender] = useState<DesignImage | null>(null);
@@ -177,6 +179,7 @@ export function TechPackTool({
   // ─── Generate ─────────────────────────────────────────────────────
 
   const handleGenerate = async () => {
+    onStartGenerating?.(numOutputs);
     if (!selectedRender) {
       setError("Please select a render first");
       return;

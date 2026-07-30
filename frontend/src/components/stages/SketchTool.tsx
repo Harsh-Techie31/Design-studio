@@ -6,6 +6,7 @@ interface SketchToolProps {
   garment: Garment;
   season: Season;
   onGenerated: (response: SketchGenerateResponse) => void;
+  onStartGenerating?: (count: number) => void;
 }
 
 const SILHOUETTES: Record<string, string[]> = {
@@ -47,7 +48,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   JUMP: "Jumpsuit",
 };
 
-export function SketchTool({ garment, season, onGenerated }: SketchToolProps) {
+export function SketchTool({ garment, season, onGenerated, onStartGenerating }: SketchToolProps) {
   const category = garment.category || "PANT";
 
   const [gender, setGender] = useState<string | null>(null);
@@ -92,6 +93,7 @@ export function SketchTool({ garment, season, onGenerated }: SketchToolProps) {
   };
 
   const handleGenerate = async () => {
+    onStartGenerating?.(numOutputs);
     if (!gender) {
       setError("Please select a gender");
       return;

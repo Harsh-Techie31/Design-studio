@@ -7,6 +7,7 @@ interface VisualizationToolProps {
   garment: Garment;
   season: Season;
   onGenerated: (image: DesignImage) => void;
+  onStartGenerating?: (count: number) => void;
 }
 
 const MODEL_OPTIONS = [
@@ -17,7 +18,7 @@ const MODEL_OPTIONS = [
 const BACKGROUND_OPTIONS = ["Plain studio", "Outdoor", "Indoor"];
 const LIGHTING_OPTIONS = ["Soft", "Dramatic", "Natural"];
 
-export function VisualizationTool({ garment, season, onGenerated }: VisualizationToolProps) {
+export function VisualizationTool({ garment, season, onGenerated, onStartGenerating }: VisualizationToolProps) {
   const category = garment.category || "SHIRT";
 
   const [renderImage, setRenderImage] = useState<DesignImage | null>(null);
@@ -34,6 +35,7 @@ export function VisualizationTool({ garment, season, onGenerated }: Visualizatio
   const [error, setError] = useState<string | null>(null);
 
   const handleGenerate = async () => {
+    onStartGenerating?.(numOutputs);
     if (!renderImage) {
       setError("Please select a render first");
       return;

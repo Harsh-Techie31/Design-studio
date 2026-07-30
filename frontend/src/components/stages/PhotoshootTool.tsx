@@ -7,6 +7,7 @@ interface PhotoshootToolProps {
   garment: Garment;
   season: Season;
   onGenerated: (image: DesignImage) => void;
+  onStartGenerating?: (count: number) => void;
 }
 
 const SHOT_TYPE_OPTIONS = ["Single shot", "Multi-angle", "Editorial", "Full body + Detail"];
@@ -38,7 +39,7 @@ const MOOD_OPTIONS = [
 
 const POSE_OPTIONS = ["Standing", "Walking", "Sitting", "Leaning", "Dynamic"];
 
-export function PhotoshootTool({ garment, season, onGenerated }: PhotoshootToolProps) {
+export function PhotoshootTool({ garment, season, onGenerated, onStartGenerating }: PhotoshootToolProps) {
   const category = garment.category || "SHIRT";
   const moodboardReady = season.moodboard?.status === "ready";
 
@@ -60,6 +61,7 @@ export function PhotoshootTool({ garment, season, onGenerated }: PhotoshootToolP
   const [error, setError] = useState<string | null>(null);
 
   const handleGenerate = async () => {
+    onStartGenerating?.(numOutputs);
     if (!vizImage) {
       setError("Please select a 3D visualization first");
       return;

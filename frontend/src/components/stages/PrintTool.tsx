@@ -21,6 +21,7 @@ interface PrintToolProps {
   onGenerated: (image: DesignImage) => void;
   onStateChange?: (state: Partial<PrintState>) => void;
   canvasRef?: React.RefObject<HTMLCanvasElement | null>;
+  onStartGenerating?: (count: number) => void;
 }
 
 const REPEAT_TYPES = [
@@ -43,7 +44,7 @@ const FABRIC_TYPES = [
   { value: "poplin", label: "Poplin", desc: "Fine horizontal ribs" },
 ];
 
-export function PrintTool({ garment, season, onGenerated, onStateChange, canvasRef }: PrintToolProps) {
+export function PrintTool({ garment, season, onGenerated, onStateChange, canvasRef, onStartGenerating }: PrintToolProps) {
   // Motif state
   const [motifImage, setMotifImage] = useState<string | null>(null);
   const [motifFile, setMotifFile] = useState<File | null>(null);
@@ -133,6 +134,7 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
   // ─── Generate ─────────────────────────────────────────────────────
 
   const handleGenerate = async () => {
+    onStartGenerating?.(1);
     if (!motifImage) {
       setError("Please upload a motif image first");
       return;

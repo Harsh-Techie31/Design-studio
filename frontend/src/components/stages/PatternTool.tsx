@@ -10,9 +10,10 @@ interface PatternToolProps {
   season: Season;
   onGenerated: (image: any) => void;
   techPacks: DesignImage[];
+  onStartGenerating?: (count: number) => void;
 }
 
-export function PatternTool({ garment, season, onGenerated, techPacks }: PatternToolProps) {
+export function PatternTool({ garment, season, onGenerated, techPacks, onStartGenerating }: PatternToolProps) {
   const category = garment.category || "SHIRT";
   const [selectedTechPack, setSelectedTechPack] = useState<DesignImage | null>(null);
   const [tpPickerOpen, setTpPickerOpen] = useState(false);
@@ -72,6 +73,7 @@ export function PatternTool({ garment, season, onGenerated, techPacks }: Pattern
   };
 
   const handleGenerate = async () => {
+    onStartGenerating?.(numOutputs);
     if (!selectedTechPack) {
       setError("Please select a tech pack first");
       return;

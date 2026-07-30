@@ -36,6 +36,7 @@ export function StageWorkspacePage() {
 
   const [images, setImages] = useState<DesignImage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pendingCount, setPendingCount] = useState(0);
 
   // Print canvas state
   const [printState, setPrintState] = useState<PrintState>({
@@ -99,12 +100,17 @@ export function StageWorkspacePage() {
     }
   };
 
+  const handleStartGenerating = (count: number) => {
+    setPendingCount(count);
+  };
+
   const handleGenerated = (response: any) => {
     console.log("[STAGE] Generation complete — re-fetching images. Response:", {
       runCode: response?.run?.code,
       imageCount: response?.images?.length,
       success: response?.success,
     });
+    setPendingCount(0);
     // Re-fetch images to include the new ones
     fetchImages();
   };
@@ -196,6 +202,7 @@ export function StageWorkspacePage() {
             garment={garment}
             season={season}
             onGenerated={handleGenerated}
+            onStartGenerating={handleStartGenerating}
           />
         )}
 
@@ -206,6 +213,7 @@ export function StageWorkspacePage() {
             onGenerated={handleGenerated}
             onStateChange={handlePrintStateChange}
             canvasRef={canvasRef}
+            onStartGenerating={handleStartGenerating}
           />
         )}
 
@@ -215,6 +223,7 @@ export function StageWorkspacePage() {
             season={season}
             onGenerated={handleGenerated}
             onStateChange={handleRenderStateChange}
+            onStartGenerating={handleStartGenerating}
           />
         )}
 
@@ -224,6 +233,7 @@ export function StageWorkspacePage() {
             season={season}
             onGenerated={handleGenerated}
             renders={images}
+            onStartGenerating={handleStartGenerating}
           />
         )}
 
@@ -233,6 +243,7 @@ export function StageWorkspacePage() {
             season={season}
             onGenerated={handleGenerated}
             techPacks={images}
+            onStartGenerating={handleStartGenerating}
           />
         )}
 
@@ -241,6 +252,7 @@ export function StageWorkspacePage() {
             garment={garment}
             season={season}
             onGenerated={handleGenerated}
+            onStartGenerating={handleStartGenerating}
           />
         )}
 
@@ -249,6 +261,7 @@ export function StageWorkspacePage() {
             garment={garment}
             season={season}
             onGenerated={handleGenerated}
+            onStartGenerating={handleStartGenerating}
           />
         )}
 
@@ -271,12 +284,14 @@ export function StageWorkspacePage() {
               images={images}
               imageType="tech_pack"
               onRefresh={fetchImages}
+              pendingCount={pendingCount}
             />
           ) : currentStage === "pattern" ? (
             <PatternOutputPanel
               images={images}
               imageType="pattern"
               onRefresh={fetchImages}
+              pendingCount={pendingCount}
             />
           ) : (
             <StageOutputPanel
@@ -289,6 +304,7 @@ export function StageWorkspacePage() {
               canvasPreview={printCanvasPreview}
               isFinalStage={currentStage === "photoshoot"}
               onExport={handleExport}
+              pendingCount={pendingCount}
             />
           )}
         </div>

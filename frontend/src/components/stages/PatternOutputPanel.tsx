@@ -6,12 +6,14 @@ interface PatternOutputPanelProps {
   images: DesignImage[];
   imageType?: string;
   onRefresh?: () => void;
+  pendingCount?: number;
 }
 
 export function PatternOutputPanel({
   images,
   imageType = "pattern",
   onRefresh,
+  pendingCount = 0,
 }: PatternOutputPanelProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -39,11 +41,11 @@ export function PatternOutputPanel({
           Pattern Output
         </h3>
         <span className="rounded-full bg-ink-soft px-2.5 py-1 text-[10px] font-mono text-muted">
-          {filtered.length}
+          {filtered.length}{pendingCount > 0 ? ` + ${pendingCount}` : ""}
         </span>
       </div>
 
-      {filtered.length === 0 ? (
+      {filtered.length === 0 && pendingCount === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 text-muted">
           <i className="ti ti-scissors text-4xl" />
           <span className="text-xs">No patterns yet</span>
@@ -52,6 +54,11 @@ export function PatternOutputPanel({
       ) : (
         <div className="flex flex-1 overflow-hidden">
           <div className="w-[88px] flex flex-col border-r border-line bg-ink overflow-y-auto py-2 px-1.5 gap-2">
+            {Array.from({ length: pendingCount }).map((_, i) => (
+              <div key={`pending-${i}`} className="w-full animate-pulse rounded-lg border border-dashed border-brass/30 bg-ink-soft/50">
+                <div className="aspect-[3/4] w-full bg-line/30" />
+              </div>
+            ))}
             {filtered.map((img) => (
               <button
                 key={img.id}
@@ -100,6 +107,14 @@ export function PatternOutputPanel({
                   <span className="font-mono text-[10px] text-muted">{selected.image_code}</span>
                 </div>
               </>
+            ) : pendingCount > 0 ? (
+              <div className="flex flex-1 flex-col items-center justify-center gap-3 animate-pulse">
+                <div className="aspect-[3/4] w-48 rounded-lg border border-dashed border-brass/30 bg-line/20" />
+                <div className="flex items-center gap-2 text-brass/60">
+                  <i className="ti ti-loader-2 animate-spin text-sm" />
+                  <span className="text-xs">Generating pattern...</span>
+                </div>
+              </div>
             ) : (
               <div className="flex flex-1 items-center justify-center text-muted text-xs">Select a pattern from the strip</div>
             )}

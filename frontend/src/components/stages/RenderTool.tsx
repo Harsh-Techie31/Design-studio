@@ -22,6 +22,7 @@ interface RenderToolProps {
   season: Season;
   onGenerated: (image: DesignImage) => void;
   onStateChange?: (state: Partial<RenderState>) => void;
+  onStartGenerating?: (count: number) => void;
 }
 
 const GENDER_OPTIONS = [
@@ -46,7 +47,7 @@ const PLACEMENT_OPTIONS = [
 
 const MAX_FABRICS = 3;
 
-export function RenderTool({ garment, season, onGenerated, onStateChange }: RenderToolProps) {
+export function RenderTool({ garment, season, onGenerated, onStateChange, onStartGenerating }: RenderToolProps) {
   // Sketch state
   const [sketchImage, setSketchImage] = useState<DesignImage | null>(null);
 
@@ -144,6 +145,7 @@ export function RenderTool({ garment, season, onGenerated, onStateChange }: Rend
   // ─── Generate ─────────────────────────────────────────────────────
 
   const handleGenerate = async () => {
+    onStartGenerating?.(numOutputs);
     if (!sketchImage) {
       setError("Please select a sketch first");
       return;
