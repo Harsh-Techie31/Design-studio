@@ -16,6 +16,7 @@ from .routes.print import router as print_router
 from .routes.render import router as render_router
 from .routes.techpack import router as techpack_router
 from .routes.pattern import router as pattern_router
+from .routes.visualization import router as visualization_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -50,6 +51,7 @@ app.include_router(print_router)
 app.include_router(render_router)
 app.include_router(techpack_router)
 app.include_router(pattern_router)
+app.include_router(visualization_router)
 
 
 @app.get("/health")

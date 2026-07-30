@@ -282,3 +282,59 @@ export async function generatePattern(
 
   return res.json();
 }
+
+// ─── 3D Visualization generation ────────────────────────────────────
+
+export interface VisualizationGenerateParams {
+  render_image_url: string;
+  model_avatar: string;
+  background: string;
+  lighting: string;
+  additional_notes: string;
+  num_outputs: number;
+  note: string;
+}
+
+export interface VisualizationGenerateResponse {
+  success: boolean;
+  run: {
+    id: string;
+    code: string;
+    iteration: number;
+    version: number;
+    status: string;
+    node_key: string;
+  };
+  images: {
+    id: string;
+    image_code: string;
+    url: string;
+    index: number;
+    source: string;
+    ai_model: string | null;
+  }[];
+  prompt: string;
+  model_avatar: string;
+}
+
+export async function generateVisualization(
+  garmentId: string,
+  params: VisualizationGenerateParams,
+  geminiApiKey?: string
+): Promise<VisualizationGenerateResponse> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  if (geminiApiKey) headers["X-Gemini-API-Key"] = geminiApiKey;
+
+  const res = await fetch(`${API_BASE}/api/garments/${garmentId}/nodes/visualization/generate`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(params),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Generation failed" }));
+    throw new Error(err.detail || "Visualization generation failed");
+  }
+
+  return res.json();
+}

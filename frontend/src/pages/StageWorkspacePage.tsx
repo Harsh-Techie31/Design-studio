@@ -10,6 +10,7 @@ import { TechPackTool } from "../components/stages/TechPackTool";
 import { TechPackOutputPanel } from "../components/stages/TechPackOutputPanel";
 import { PatternTool } from "../components/stages/PatternTool";
 import { PatternOutputPanel } from "../components/stages/PatternOutputPanel";
+import { VisualizationTool } from "../components/stages/VisualizationTool";
 import { useStudio } from "../state/StudioContext";
 import { listImagesForGarment, toggleLike, toggleStar } from "../api/designImages";
 import type { DesignImage, NodeKey } from "../types";
@@ -215,7 +216,15 @@ export function StageWorkspacePage() {
           />
         )}
 
-        {currentStage !== "sketch" && currentStage !== "print" && currentStage !== "render" && currentStage !== "techPack" && currentStage !== "pattern" && (
+        {currentStage === "visualization" && (
+          <VisualizationTool
+            garment={garment}
+            season={season}
+            onGenerated={handleGenerated}
+          />
+        )}
+
+        {currentStage !== "sketch" && currentStage !== "print" && currentStage !== "render" && currentStage !== "techPack" && currentStage !== "pattern" && currentStage !== "visualization" && (
           <aside className="flex w-full flex-col items-center justify-center bg-surface p-8 lg:w-[480px]">
             <i className="ti ti-tools text-3xl text-muted" />
             <p className="mt-3 text-sm text-muted">
