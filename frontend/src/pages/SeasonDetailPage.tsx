@@ -32,6 +32,7 @@ export function SeasonDetailPage() {
     createGarment,
     setMoodboardImages,
     analyzeMoodboard,
+    loading: studioLoading,
   } = useStudio();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -43,6 +44,17 @@ export function SeasonDetailPage() {
   const [tabLoading, setTabLoading] = useState(false);
 
   const season = getSeason(seasonId ?? "");
+
+  if (studioLoading && !season) {
+    return (
+      <div className="min-h-screen bg-ink text-bone">
+        <NavBar />
+        <main className="mx-auto max-w-6xl px-6 py-24 text-center">
+          <i className="ti ti-loader-2 animate-spin text-2xl text-brass" />
+        </main>
+      </div>
+    );
+  }
 
   if (!season) {
     return (
@@ -189,7 +201,19 @@ export function SeasonDetailPage() {
         </button>
       </div>
 
-      {garments.length === 0 ? (
+      {studioLoading ? (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-line bg-surface overflow-hidden animate-pulse">
+              <div className="h-48 bg-line/30" />
+              <div className="p-4 space-y-3">
+                <div className="h-5 w-32 rounded bg-line/30" />
+                <div className="h-3 w-24 rounded bg-line/20" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : garments.length === 0 ? (
         <div className="rounded-xl border border-dashed border-line py-20 text-center text-bone-dim">
           No garments yet in this season.
         </div>

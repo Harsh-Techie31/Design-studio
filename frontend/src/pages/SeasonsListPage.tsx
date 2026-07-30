@@ -10,7 +10,7 @@ function normalizeCode(raw: string): string {
 }
 
 export function SeasonsListPage() {
-  const { seasons, garments, createSeason } = useStudio();
+  const { seasons, garments, loading, createSeason } = useStudio();
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState("");
   const navigate = useNavigate();
@@ -46,7 +46,20 @@ export function SeasonsListPage() {
           </p>
         </div>
 
-        {seasons.length === 0 ? (
+        {loading ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="rounded-xl border border-line bg-surface overflow-hidden animate-pulse">
+                <div className="h-40 bg-line/30" />
+                <div className="p-4 space-y-3">
+                  <div className="h-5 w-24 rounded bg-line/30" />
+                  <div className="h-3 w-32 rounded bg-line/20" />
+                  <div className="h-3 w-20 rounded bg-line/20" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : seasons.length === 0 ? (
           <div className="rounded-xl border border-dashed border-line py-24 text-center text-bone-dim">
             No seasons yet. Create your first one to set a mood.
           </div>

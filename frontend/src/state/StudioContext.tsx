@@ -48,16 +48,13 @@ export function StudioProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
+        setError(null);
         const s = await seasonsApi.listSeasons();
         setSeasons(s);
         const ids = s.map((x) => x.id);
         if (ids.length > 0) {
-          const all: Garment[] = [];
-          for (const sid of ids) {
-            const gs = await garmentsApi.listGarments(sid);
-            all.push(...gs);
-          }
-          setGarments(all);
+          const results = await Promise.all(ids.map((sid) => garmentsApi.listGarments(sid)));
+          setGarments(results.flat());
         }
       } catch (e: any) {
         setError(e.message);
