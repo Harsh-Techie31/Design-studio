@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ImagePickerModal } from "../ImagePickerModal";
-import { generatePhotoshoot } from "../../api/designImages";
+import { generatePhotoshoot, listImagesForGarment } from "../../api/designImages";
 import type { Garment, Season, DesignImage } from "../../types";
 
 interface PhotoshootToolProps {
@@ -45,6 +45,21 @@ export function PhotoshootTool({ garment, season, onGenerated, onStartGenerating
 
   const [vizImage, setVizImage] = useState<DesignImage | null>(null);
   const [vizPickerOpen, setVizPickerOpen] = useState(false);
+
+  // Fetch liked visualization from previous stage
+  useEffect(() => {
+    if (!garment?.id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const liked = await listImagesForGarment(garment.id, { node_key: "visualization", liked: true });
+        if (!cancelled && liked.length > 0 && !vizImage) {
+          setVizImage(liked[0]);
+        }
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, [garment?.id]);
 
   const [moodboardInfluence, setMoodboardInfluence] = useState(moodboardReady);
   const [shotType, setShotType] = useState(SHOT_TYPE_OPTIONS[0]);

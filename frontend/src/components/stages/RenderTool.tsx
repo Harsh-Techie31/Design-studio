@@ -1,6 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { ImagePickerModal } from "../ImagePickerModal";
 import { API_BASE } from "../../api/client";
+import { listImagesForGarment } from "../../api/designImages";
 import type { Garment, Season, DesignImage } from "../../types";
 
 export interface RenderFabricSlot {
@@ -51,6 +52,21 @@ export function RenderTool({ garment, season, onGenerated, onStateChange, onStar
   // Sketch state
   const [sketchImage, setSketchImage] = useState<DesignImage | null>(null);
 
+  // Fetch liked sketch from previous stage
+  useEffect(() => {
+    if (!garment?.id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const liked = await listImagesForGarment(garment.id, { node_key: "sketch", liked: true });
+        if (!cancelled && liked.length > 0 && !sketchImage) {
+          setSketchImage(liked[0]);
+        }
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, [garment?.id]);
+
   // Gender
   const [gender, setGender] = useState("male");
 
@@ -58,6 +74,26 @@ export function RenderTool({ garment, season, onGenerated, onStateChange, onStar
   const [fabrics, setFabrics] = useState<RenderFabricSlot[]>([
     { image: null, placements: [], prompt: "", scale: 1.0 },
   ]);
+
+  // Fetch liked print for first fabric slot
+  useEffect(() => {
+    if (!garment?.id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const liked = await listImagesForGarment(garment.id, { node_key: "print", liked: true });
+        if (!cancelled && liked.length > 0) {
+          setFabrics(prev => {
+            if (prev[0]?.image) return prev;
+            const next = [...prev];
+            next[0] = { ...next[0], image: liked[0] };
+            return next;
+          });
+        }
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, [garment?.id]);
 
   // Output quantity
   const [numOutputs, setNumOutputs] = useState(1);

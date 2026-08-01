@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ImagePickerModal } from "../ImagePickerModal";
-import { generateVisualization } from "../../api/designImages";
+import { generateVisualization, listImagesForGarment } from "../../api/designImages";
 import type { Garment, Season, DesignImage } from "../../types";
 
 interface VisualizationToolProps {
@@ -27,6 +27,21 @@ export function VisualizationTool({ garment, season, onGenerated, onStartGenerat
   const category = garment.category || "SHIRT";
 
   const [renderImage, setRenderImage] = useState<DesignImage | null>(null);
+
+  // Fetch liked render from previous stage
+  useEffect(() => {
+    if (!garment?.id) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const liked = await listImagesForGarment(garment.id, { node_key: "render", liked: true });
+        if (!cancelled && liked.length > 0 && !renderImage) {
+          setRenderImage(liked[0]);
+        }
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, [garment?.id]);
   const [renderPickerOpen, setRenderPickerOpen] = useState(false);
 
   const [modelAvatar, setModelAvatar] = useState("Model A");

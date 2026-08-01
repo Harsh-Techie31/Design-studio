@@ -82,12 +82,28 @@ export function TechPackTool({
     setMeasurements(getDefaultMeasurements(category, gender));
   }, [category, selectedRender]);
 
-  // Auto-select first render if none selected
+  // Auto-select: liked render from previous stage, or first render in picker
   useEffect(() => {
-    if (!selectedRender && renders.length > 0) {
-      setSelectedRender(renders[0]);
-    }
-  }, [selectedRender, renders]);
+    if (selectedRender) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const liked = await listImagesForGarment(garment.id, { node_key: "render", liked: true });
+        if (!cancelled && !selectedRender) {
+          if (liked.length > 0) {
+            setSelectedRender(liked[0]);
+          } else if (renders.length > 0) {
+            setSelectedRender(renders[0]);
+          }
+        }
+      } catch {
+        if (!cancelled && !selectedRender && renders.length > 0) {
+          setSelectedRender(renders[0]);
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [garment.id, renders]);
 
   // Fetch referenced images (sketch + fabrics) when render changes
   const [refImages, setRefImages] = useState<DesignImage[]>([]);

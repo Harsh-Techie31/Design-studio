@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ImagePickerModal } from "../ImagePickerModal";
-import { generatePattern, type PatternGenerateResponse } from "../../api/designImages";
+import { generatePattern, type PatternGenerateResponse, listImagesForGarment } from "../../api/designImages";
 import { CONSTRUCTION_OPTIONS } from "../../data/techpackConfig";
 import { getDefaultBodyMeasurements, PATTERN_SETTINGS, PATTERN_SETTINGS_DEFAULTS } from "../../data/patternConfig";
 import type { Garment, Season, DesignImage } from "../../types";
@@ -53,12 +53,28 @@ export function PatternTool({ garment, season, onGenerated, techPacks, onStartGe
     setEditedMeasurements(new Set());
   }, [category]);
 
-  // Auto-select latest tech pack
+  // Auto-select: liked tech pack from previous stage, or first tech pack in picker
   useEffect(() => {
-    if (!selectedTechPack && techPacks.length > 0) {
-      setSelectedTechPack(techPacks[0]);
-    }
-  }, [selectedTechPack, techPacks]);
+    if (selectedTechPack) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const liked = await listImagesForGarment(garment.id, { node_key: "techPack", liked: true });
+        if (!cancelled && !selectedTechPack) {
+          if (liked.length > 0) {
+            setSelectedTechPack(liked[0]);
+          } else if (techPacks.length > 0) {
+            setSelectedTechPack(techPacks[0]);
+          }
+        }
+      } catch {
+        if (!cancelled && !selectedTechPack && techPacks.length > 0) {
+          setSelectedTechPack(techPacks[0]);
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [garment.id, techPacks]);
 
   const handleMeasurementChange = (field: string, value: number) => {
     setBodyMeasurements(prev => ({ ...prev, [field]: value }));
