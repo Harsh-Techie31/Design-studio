@@ -441,15 +441,15 @@ function FabricSlotCard({
         <label className="mb-1.5 block text-[9px] uppercase tracking-wide text-muted">
           Placement
         </label>
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1.5">
           {PLACEMENT_OPTIONS.map((p) => (
             <button
               key={p.value}
               onClick={() => onTogglePlacement(p.value)}
-              className={`rounded-full px-2 py-0.5 text-[11px] transition-all ${
+              className={`rounded-full px-3 py-1.5 text-[11px] font-medium transition-all ${
                 slot.placements.includes(p.value)
                   ? "bg-brass/20 text-brass border border-brass/40"
-                  : "bg-ink text-muted border border-line hover:border-brass/20"
+                  : "bg-ink-soft text-muted border border-line hover:border-brass/30"
               }`}
             >
               {p.label}
