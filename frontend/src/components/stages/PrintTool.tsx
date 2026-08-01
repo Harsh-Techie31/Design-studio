@@ -371,7 +371,7 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
         </div>
 
         {/* Export Resolution */}
-        <div>
+        <div className="mb-4">
           <label className="mb-2 block text-[11px] uppercase tracking-wide text-muted">
             Export Resolution
           </label>
@@ -394,6 +394,17 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Note */}
+        <div>
+          <label className="mb-1 block text-[11px] uppercase text-muted">Note</label>
+          <input
+            value={note}
+            onChange={(e) => setNote(e.target.value.slice(0, 250))}
+            placeholder="Optional note..."
+            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none"
+          />
         </div>
       </Section>
 
@@ -427,17 +438,6 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
             </>
           )}
         </button>
-
-        {/* Note field */}
-        <div>
-          <label className="mb-1 block text-[11px] uppercase text-muted">Note</label>
-          <input
-            value={note}
-            onChange={(e) => setNote(e.target.value.slice(0, 250))}
-            placeholder="Optional note..."
-            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none"
-          />
-        </div>
       </div>
     </aside>
   );
