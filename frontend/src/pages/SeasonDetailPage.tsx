@@ -159,45 +159,96 @@ export function SeasonDetailPage() {
         </div>
       );
     }
-    return (
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
-        {images.map((img) => (
-          <div
-            key={img.id}
-            className={`group relative overflow-hidden rounded-xl border transition-all ${
+
+    const starred = images.filter(img => img.starred);
+    const selected = images.filter(img => img.liked && !img.starred);
+    const rest = images.filter(img => !img.liked && !img.starred);
+
+    const renderCard = (img: DesignImage) => (
+      <div
+        key={img.id}
+        className={`group relative overflow-hidden rounded-xl border-2 transition-all ${
+          img.starred
+            ? "border-amber-400/60 hover:border-amber-400"
+            : img.liked
+              ? "border-green-500/60 hover:border-green-500"
+              : "border-line hover:border-brass/30"
+        }`}
+      >
+        <div className="aspect-[3/4] bg-ink-soft">
+          <img src={img.url} alt={img.image_code} className="h-full w-full object-contain" loading="lazy" />
+        </div>
+        <button
+          onClick={() => handleDeleteImage(img.id)}
+          className="absolute right-1.5 top-1.5 rounded-lg bg-red-500/80 p-1.5 text-white opacity-0 transition-opacity hover:bg-red-600 group-hover:opacity-100"
+          title="Delete image"
+        >
+          <i className="ti ti-trash text-xs" />
+        </button>
+        {img.starred && (
+          <div className="absolute left-1.5 top-1.5 rounded-full bg-amber-400 px-1.5 py-0.5">
+            <span className="text-[7px] font-bold uppercase text-ink">Starred</span>
+          </div>
+        )}
+        {img.liked && !img.starred && (
+          <div className="absolute left-1.5 top-1.5 rounded-full bg-green-500 px-1.5 py-0.5">
+            <span className="text-[7px] font-bold uppercase text-white">Selected</span>
+          </div>
+        )}
+        <div className="flex items-center justify-between px-2 py-1.5">
+          <span className="font-mono text-[10px] text-muted">
+            {img.image_code.split("_").slice(-2).join("_")}
+          </span>
+          <button
+            onClick={() => handleToggleLike(img.id)}
+            className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide transition-all ${
               img.liked
-                ? "border-green-500/50 ring-2 ring-green-500/20"
-                : "border-line hover:border-brass/30"
+                ? "bg-green-500 text-white"
+                : "bg-ink text-muted hover:bg-green-500/20 hover:text-green-400"
             }`}
           >
-            <div className="aspect-[3/4] bg-ink-soft">
-              <img src={img.url} alt={img.image_code} className="h-full w-full object-contain" loading="lazy" />
+            {img.liked ? "Selected" : "Select"}
+          </button>
+        </div>
+      </div>
+    );
+
+    return (
+      <div className="space-y-4">
+        {starred.length > 0 && (
+          <div>
+            <div className="mb-2 flex items-center gap-2">
+              <i className="ti ti-star-filled text-xs text-amber-400" />
+              <span className="text-[11px] font-bold uppercase tracking-widest text-amber-400">Starred</span>
             </div>
-            {/* Delete button — top right, visible on hover */}
-            <button
-              onClick={() => handleDeleteImage(img.id)}
-              className="absolute right-1.5 top-1.5 rounded-lg bg-red-500/80 p-1.5 text-white opacity-0 transition-opacity hover:bg-red-600 group-hover:opacity-100"
-              title="Delete image"
-            >
-              <i className="ti ti-trash text-xs" />
-            </button>
-            <div className="flex items-center justify-between px-2 py-1.5">
-              <span className="font-mono text-[10px] text-muted">
-                {img.image_code.split("_").slice(-2).join("_")}
-              </span>
-              <button
-                onClick={() => handleToggleLike(img.id)}
-                className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide transition-all ${
-                  img.liked
-                    ? "bg-green-500 text-white"
-                    : "bg-ink text-muted hover:bg-green-500/20 hover:text-green-400"
-                }`}
-              >
-                {img.liked ? "Selected" : "Select"}
-              </button>
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+              {starred.map(renderCard)}
             </div>
           </div>
-        ))}
+        )}
+        {selected.length > 0 && (
+          <div>
+            <div className="mb-2 flex items-center gap-2">
+              <i className="ti ti-circle-check-filled text-xs text-green-400" />
+              <span className="text-[11px] font-bold uppercase tracking-widest text-green-400">Selected</span>
+            </div>
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+              {selected.map(renderCard)}
+            </div>
+          </div>
+        )}
+        {rest.length > 0 && (
+          <div>
+            {(starred.length > 0 || selected.length > 0) && (
+              <div className="mb-2 flex items-center gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-widest text-muted">All</span>
+              </div>
+            )}
+            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+              {rest.map(renderCard)}
+            </div>
+          </div>
+        )}
       </div>
     );
   };

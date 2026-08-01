@@ -159,40 +159,102 @@ export function ImagePickerModal({
               <br />
               <span className="text-xs text-muted">Upload one from the Upload tab, or generate in a stage.</span>
             </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-              {libraryImages.map((img) => (
-                <button
-                  key={img.id}
-                  onClick={() => setSelectedId(img.id)}
-                  className={`group relative overflow-hidden rounded-xl border-2 transition-all ${
-                    selectedId === img.id
-                      ? "border-brass ring-2 ring-brass/30"
-                      : "border-line hover:border-brass/30"
-                  }`}
-                >
-                  <div className="aspect-square bg-ink-soft">
-                    <img
-                      src={img.url}
-                      alt={img.image_code}
-                      className="h-full w-full object-contain"
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="px-2 py-1.5">
-                    <span className="font-mono text-[10px] text-muted">
-                      {img.image_code.split("_").slice(-2).join("_")}
-                    </span>
-                  </div>
-                  {selectedId === img.id && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-brass/10">
-                      <i className="ti ti-check rounded-full bg-brass p-1.5 text-ink" />
+          ) : (() => {
+            const starred = libraryImages.filter(img => img.starred);
+            const rest = libraryImages.filter(img => !img.starred);
+            return (
+              <div className="space-y-4">
+                {starred.length > 0 && (
+                  <div>
+                    <div className="mb-2 flex items-center gap-2">
+                      <i className="ti ti-star-filled text-xs text-amber-400" />
+                      <span className="text-[11px] font-bold uppercase tracking-widest text-amber-400">Starred</span>
                     </div>
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
+                    <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+                      {starred.map((img) => (
+                        <button
+                          key={img.id}
+                          onClick={() => setSelectedId(img.id)}
+                          className={`group relative overflow-hidden rounded-xl border-2 transition-all ${
+                            selectedId === img.id
+                              ? "border-brass ring-2 ring-brass/30"
+                              : "border-amber-400/60 hover:border-amber-400"
+                          }`}
+                        >
+                          <div className="aspect-square bg-ink-soft">
+                            <img
+                              src={img.url}
+                              alt={img.image_code}
+                              className="h-full w-full object-contain"
+                              loading="lazy"
+                            />
+                          </div>
+                          <div className="px-2 py-1.5">
+                            <span className="font-mono text-[10px] text-muted">
+                              {img.image_code.split("_").slice(-2).join("_")}
+                            </span>
+                          </div>
+                          {selectedId === img.id && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-brass/10">
+                              <i className="ti ti-check rounded-full bg-brass p-1.5 text-ink" />
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {rest.length > 0 && (
+                  <div>
+                    {starred.length > 0 && (
+                      <div className="mb-2 flex items-center gap-2">
+                        <span className="text-[11px] font-bold uppercase tracking-widest text-muted">All</span>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">
+                      {rest.map((img) => (
+                        <button
+                          key={img.id}
+                          onClick={() => setSelectedId(img.id)}
+                          className={`group relative overflow-hidden rounded-xl border-2 transition-all ${
+                            selectedId === img.id
+                              ? "border-brass ring-2 ring-brass/30"
+                              : img.liked
+                                ? "border-green-500/60 hover:border-green-500"
+                                : "border-line hover:border-brass/30"
+                          }`}
+                        >
+                          <div className="aspect-square bg-ink-soft">
+                            <img
+                              src={img.url}
+                              alt={img.image_code}
+                              className="h-full w-full object-contain"
+                              loading="lazy"
+                            />
+                          </div>
+                          <div className="px-2 py-1.5">
+                            <span className="font-mono text-[10px] text-muted">
+                              {img.image_code.split("_").slice(-2).join("_")}
+                            </span>
+                          </div>
+                          {img.liked && (
+                            <div className="absolute right-1 top-1 rounded-full bg-green-500 px-1.5 py-0.5">
+                              <span className="text-[7px] font-bold uppercase text-white">Selected</span>
+                            </div>
+                          )}
+                          {selectedId === img.id && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-brass/10">
+                              <i className="ti ti-check rounded-full bg-brass p-1.5 text-ink" />
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
         </div>
       )}
 
