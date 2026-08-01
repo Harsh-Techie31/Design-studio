@@ -299,7 +299,7 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating }: 
         </div>
       </Section>
 
-      {/* 7. Output Quantity */}
+      {/* 7. Output Quantity + Note */}
       <Section label="7. Sketches Per Batch" required>
         <div className="flex gap-2">
           {[1, 2, 3, 4].map((n) => (
@@ -307,6 +307,15 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating }: 
               {n}
             </Chip>
           ))}
+        </div>
+        <div className="mt-3">
+          <label className="mb-1 block text-[11px] uppercase text-muted">Note</label>
+          <input
+            value={note}
+            onChange={(e) => setNote(e.target.value.slice(0, 250))}
+            placeholder="Optional note..."
+            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2.5 text-sm text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none"
+          />
         </div>
       </Section>
 
@@ -362,17 +371,6 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating }: 
           <span>Upload your own sketch</span>
         </button>
         <span className="text-center text-[11px] text-muted">JPG, PNG, max 5MB</span>
-
-        {/* Note field */}
-        <div>
-          <label className="mb-1 block text-[11px] uppercase text-muted">Note</label>
-          <input
-            value={note}
-            onChange={(e) => setNote(e.target.value.slice(0, 250))}
-            placeholder="Optional note..."
-            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2.5 text-sm text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none"
-          />
-        </div>
       </div>
     </aside>
   );
