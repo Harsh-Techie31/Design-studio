@@ -187,11 +187,13 @@ export function SeasonDetailPage() {
               </span>
               <button
                 onClick={() => handleToggleLike(img.id)}
-                className={`rounded p-1 text-xs transition-colors ${
-                  img.liked ? "text-green-400" : "text-muted hover:text-green-400"
+                className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide transition-all ${
+                  img.liked
+                    ? "bg-green-500 text-white"
+                    : "bg-ink text-muted hover:bg-green-500/20 hover:text-green-400"
                 }`}
               >
-                <i className={`ti ti-heart${img.liked ? "-filled" : ""}`} />
+                {img.liked ? "Selected" : "Select"}
               </button>
             </div>
           </div>

@@ -102,8 +102,8 @@ export function PatternOutputPanel({
                   <div className="text-center font-mono text-[8px] text-bone-dim truncate">{img.image_code}</div>
                 </div>
                 {img.liked && (
-                  <div className="absolute right-1 top-1 rounded-full bg-green-500/80 p-0.5">
-                    <i className="ti ti-heart-filled text-[8px] text-ink" />
+                  <div className="absolute right-1 top-1 rounded-full bg-green-500 px-1.5 py-0.5">
+                    <span className="text-[7px] font-bold uppercase text-white">Selected</span>
                   </div>
                 )}
               </button>
@@ -131,14 +131,13 @@ export function PatternOutputPanel({
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleLike(selected.id)}
-                      className={`rounded-lg px-3 py-1.5 text-[11px] transition-all ${
+                      className={`rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide transition-all ${
                         selected.liked
-                          ? "bg-green-500/20 text-green-400"
-                          : "bg-ink text-muted hover:text-green-400"
+                          ? "bg-green-500 text-white"
+                          : "bg-ink text-muted hover:bg-green-500/20 hover:text-green-400"
                       }`}
                     >
-                      <i className={`ti ti-heart-filled mr-1 ${selected.liked ? "fill-current" : ""}`} />
-                      {selected.liked ? "Liked" : "Like"}
+                      {selected.liked ? "Selected" : "Select"}
                     </button>
                     <button
                       onClick={() => downloadImage(selected.url, `${selected.image_code}.png`)}

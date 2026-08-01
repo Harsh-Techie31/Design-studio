@@ -65,8 +65,8 @@ export function StageOutputPanel({
 
   const filters: { key: FilterType; label: string; count: number }[] = [
     { key: "all", label: "All", count: images.length },
-    { key: "liked", label: "Liked", count: likedCount },
-    { key: "unliked", label: "Not Liked", count: images.length - likedCount },
+    { key: "liked", label: "Selected", count: likedCount },
+    { key: "unliked", label: "Not Selected", count: images.length - likedCount },
     { key: "starred", label: "Starred", count: images.filter((i) => i.starred).length },
   ];
 
@@ -195,14 +195,13 @@ export function StageOutputPanel({
                 <div className="flex gap-2">
                   <button
                     onClick={() => onToggleLike(lightboxImage.id)}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                    className={`rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wide transition-all ${
                       lightboxImage.liked
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-surface text-muted hover:text-green-400"
+                        ? "bg-green-500 text-white"
+                        : "bg-ink text-muted hover:bg-green-500/20 hover:text-green-400"
                     }`}
                   >
-                    <i className="ti ti-heart-filled mr-1" />
-                    {lightboxImage.liked ? "Liked" : "Like"}
+                    {lightboxImage.liked ? "Selected" : "Select"}
                   </button>
                   <button
                     onClick={() => setLightboxImage(null)}
@@ -291,14 +290,14 @@ export function StageOutputPanel({
                       e.stopPropagation();
                       onToggleLike(img.id);
                     }}
-                    className={`rounded-md p-1.5 transition-colors ${
+                    className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide transition-all ${
                       img.liked
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-ink/80 text-muted hover:text-green-400"
+                        ? "bg-green-500 text-white"
+                        : "bg-ink/80 text-muted hover:bg-green-500/20 hover:text-green-400"
                     }`}
-                    title={img.liked ? "Unlike" : "Like"}
+                    title={img.liked ? "Deselect" : "Select"}
                   >
-                    <i className={`ti ti-heart-filled text-xs`} />
+                    {img.liked ? "Selected" : "Select"}
                   </button>
                   {onToggleStar && (
                     <button
@@ -413,14 +412,13 @@ export function StageOutputPanel({
               <div className="flex gap-2">
                 <button
                   onClick={() => onToggleLike(lightboxImage.id)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                  className={`rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wide transition-all ${
                     lightboxImage.liked
-                      ? "bg-green-500/20 text-green-400"
-                      : "bg-surface text-muted hover:text-green-400"
+                      ? "bg-green-500 text-white"
+                      : "bg-ink text-muted hover:bg-green-500/20 hover:text-green-400"
                   }`}
                 >
-                  <i className="ti ti-heart-filled mr-1" />
-                  {lightboxImage.liked ? "Liked" : "Like"}
+                  {lightboxImage.liked ? "Selected" : "Select"}
                 </button>
                 <button
                   onClick={() => setLightboxImage(null)}
@@ -522,14 +520,14 @@ function OutputCard({
       <div className="flex items-center gap-1 border-t border-line px-2 py-1.5">
         <button
           onClick={() => onToggleLike(image.id)}
-          className={`rounded p-1 transition-colors ${
+          className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide transition-all ${
             image.liked
-              ? "text-green-400"
-              : "text-muted hover:text-green-400"
+              ? "bg-green-500 text-white"
+              : "bg-ink text-muted hover:bg-green-500/20 hover:text-green-400"
           }`}
-          title={image.liked ? "Unlike" : "Like"}
+          title={image.liked ? "Deselect" : "Select"}
         >
-          <i className="ti ti-heart-filled text-xs" />
+          {image.liked ? "Selected" : "Select"}
         </button>
         {onToggleStar && (
           <button
