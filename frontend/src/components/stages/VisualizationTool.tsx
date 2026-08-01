@@ -17,6 +17,11 @@ const MODEL_OPTIONS = [
 
 const BACKGROUND_OPTIONS = ["Plain studio", "Outdoor", "Indoor"];
 const LIGHTING_OPTIONS = ["Soft", "Dramatic", "Natural"];
+const ASPECT_RATIO_OPTIONS = [
+  { value: "1:1", label: "1:1 Square", width: 1024, height: 1024 },
+  { value: "4:5", label: "4:5 Portrait", width: 1024, height: 1280 },
+  { value: "16:9", label: "16:9 Landscape", width: 1280, height: 720 },
+];
 
 export function VisualizationTool({ garment, season, onGenerated, onStartGenerating }: VisualizationToolProps) {
   const category = garment.category || "SHIRT";
@@ -27,6 +32,7 @@ export function VisualizationTool({ garment, season, onGenerated, onStartGenerat
   const [modelAvatar, setModelAvatar] = useState("Model A");
   const [background, setBackground] = useState(BACKGROUND_OPTIONS[0]);
   const [lighting, setLighting] = useState(LIGHTING_OPTIONS[0]);
+  const [aspectRatio, setAspectRatio] = useState(ASPECT_RATIO_OPTIONS[0].value);
   const [additionalNotes, setAdditionalNotes] = useState("");
   const [numOutputs, setNumOutputs] = useState(1);
   const [note, setNote] = useState("");
@@ -48,6 +54,7 @@ export function VisualizationTool({ garment, season, onGenerated, onStartGenerat
       model_avatar: modelAvatar,
       background,
       lighting,
+      aspect_ratio: aspectRatio,
       additional_notes: additionalNotes,
       num_outputs: numOutputs,
       note,
@@ -150,8 +157,36 @@ export function VisualizationTool({ garment, season, onGenerated, onStartGenerat
         <ChipGroup label="Lighting" options={LIGHTING_OPTIONS} selected={lighting} onSelect={setLighting} />
       </Section>
 
-      {/* Section E: Additional Notes */}
-      <Section label="E. Additional Notes">
+      {/* Section E: Aspect Ratio */}
+      <Section label="E. Aspect Ratio">
+        <div className="flex flex-wrap gap-2">
+          {ASPECT_RATIO_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setAspectRatio(opt.value)}
+              className={`flex items-center gap-2 rounded-lg border px-3 py-2 transition-all ${
+                aspectRatio === opt.value
+                  ? "border-brass/60 bg-brass/10 text-brass"
+                  : "border-line bg-ink-soft text-muted hover:border-brass/20"
+              }`}
+            >
+              <div
+                className={`border ${
+                  aspectRatio === opt.value ? "border-brass/60" : "border-muted/40"
+                }`}
+                style={{
+                  width: opt.value === "1:1" ? 16 : opt.value === "4:5" ? 12 : 20,
+                  height: opt.value === "1:1" ? 16 : opt.value === "4:5" ? 15 : 11,
+                }}
+              />
+              <span className="text-xs font-medium">{opt.label}</span>
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      {/* Section F: Additional Notes */}
+      <Section label="F. Additional Notes">
         <textarea
           value={additionalNotes}
           onChange={(e) => {

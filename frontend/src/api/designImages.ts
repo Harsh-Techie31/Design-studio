@@ -289,6 +289,7 @@ export interface VisualizationGenerateParams {
   model_avatar: string;
   background: string;
   lighting: string;
+  aspect_ratio: string;
   additional_notes: string;
   num_outputs: number;
   note: string;

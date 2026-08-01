@@ -33,6 +33,7 @@ class VisualizationGenerateRequest(BaseModel):
     model_avatar: str = "Model A"  # "Model A" (male) or "Model B" (female)
     background: str = "Plain studio"
     lighting: str = "Soft"
+    aspect_ratio: str = "1:1"
     additional_notes: str = ""
     num_outputs: int = 1
     note: str = ""
@@ -53,11 +54,13 @@ def _build_visualization_prompt(
     model_avatar: str,
     background: str,
     lighting: str,
+    aspect_ratio: str,
     additional_notes: str,
 ) -> str:
     model_desc = model_description(model_avatar)
     framing = category_framing_logic(category_code)
     user_notes = f" Additional styling notes: {additional_notes}" if additional_notes else ""
+    aspect_ratio_text = f" Use {aspect_ratio} aspect ratio for the output image."
 
     return (
         "**Visualization Rules:**\n"
@@ -70,7 +73,7 @@ def _build_visualization_prompt(
         f"4. **Garment & Material:** The model is wearing a perfectly fitted {category_display}. It must wear "
         "the exact fabric texture, print pattern, and colors directly mapped from the provided 2D render input image.\n"
         f"5. **Environment:** {background} background, {lighting} lighting. No distracting shadows, props, "
-        f"or background clutter.{user_notes}"
+        f"or background clutter.{aspect_ratio_text}{user_notes}"
     )
 
 
@@ -83,6 +86,7 @@ async def _generate_visualization_image(
     render_b64: str,
     render_mime: str,
     temperature: float = 0.5,
+    aspect_ratio: str = "1:1",
 ) -> Optional[bytes]:
     parts = [
         {"text": prompt},
@@ -257,6 +261,7 @@ async def generate_visualization(
         model_avatar=body.model_avatar,
         background=body.background,
         lighting=body.lighting,
+        aspect_ratio=body.aspect_ratio,
         additional_notes=body.additional_notes,
     )
     logger.info("[VIS] Prompt built (%d chars): %s...", len(prompt), prompt[:300])
@@ -275,6 +280,7 @@ async def generate_visualization(
                 img_bytes = await _generate_visualization_image(
                     api_key, prompt, render_b64, render_mime,
                     temperature=0.5 + (0.1 * idx),
+                    aspect_ratio=body.aspect_ratio,
                 )
                 if img_bytes:
                     generated_images.append({"bytes": img_bytes, "source": "ai"})
