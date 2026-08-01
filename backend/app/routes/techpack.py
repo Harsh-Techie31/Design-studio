@@ -99,14 +99,6 @@ def _draw_techpack(
         sy = 95 + (310 - sketch_img.height) // 2
         canvas.paste(sketch_img, (sx, sy))
 
-        # Callout annotations
-        label_y = 95
-        for i, (field, value) in enumerate(list(construction.items())[:4]):
-            y_pos = label_y + 30 + i * 55
-            if y_pos < 380:
-                draw.line([(sx + sketch_img.width // 2, y_pos), (sx + sketch_img.width + 15, y_pos - 10)], fill=muted, width=1)
-                draw.text((sx + sketch_img.width + 20, y_pos - 14), f"{field}: {value}", fill=accent, font=font)
-
     # ─── 3. FABRICS & CONSTRUCTION (middle: 380-780, y:60-420) ──
     draw.rectangle([(380, 60), (780, 420)], fill=(255, 255, 255), outline=border, width=2)
     draw.text((395, 70), "FABRICS & CONSTRUCTION", fill=accent, font=font)
