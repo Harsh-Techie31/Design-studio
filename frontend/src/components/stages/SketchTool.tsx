@@ -218,57 +218,64 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating }: 
 
       {/* 5. Moodboard Reference */}
       <Section label="5. Moodboard Reference" hint="Up to 3">
-        {hasMoodboard ? (
-          <div className="flex flex-wrap gap-1.5">
-            {moodboardImages.slice(0, 7).map((img, i) => {
-              const isSelected = selectedMoodboards.includes(i);
-              return (
-                <button
-                  key={i}
-                  onClick={() => handleMoodboardToggle(i)}
-                  className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-all ${
-                    isSelected
-                      ? "border-brass bg-brass/10 text-brass"
-                      : "border-line bg-ink-soft text-muted hover:border-brass/30"
-                  }`}
-                >
-                  <span
-                    className="h-3 w-3 rounded-full border border-white/20"
-                    style={{ backgroundColor: season.moodboard.analysis.palette[i % 5] }}
-                  />
-                  <span className="max-w-[80px] truncate">
-                    {img.url.split("/").pop()?.slice(0, 12) || `#${i + 1}`}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="rounded-lg border border-dashed border-line bg-ink-soft p-4 text-center">
-            <i className="ti ti-photo-off text-lg text-muted" />
-            <p className="mt-1 text-sm text-muted">
-              No moodboard yet. Add one in the season overview.
-            </p>
-          </div>
-        )}
+        <div className="relative">
+          <div className="pointer-events-none opacity-40">
+            {hasMoodboard ? (
+              <div className="flex flex-wrap gap-1.5">
+                {moodboardImages.slice(0, 7).map((img, i) => {
+                  const isSelected = selectedMoodboards.includes(i);
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => handleMoodboardToggle(i)}
+                      className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-all ${
+                        isSelected
+                          ? "border-brass bg-brass/10 text-brass"
+                          : "border-line bg-ink-soft text-muted hover:border-brass/30"
+                      }`}
+                    >
+                      <span
+                        className="h-3 w-3 rounded-full border border-white/20"
+                        style={{ backgroundColor: season.moodboard.analysis.palette[i % 5] }}
+                      />
+                      <span className="max-w-[80px] truncate">
+                        {img.url.split("/").pop()?.slice(0, 12) || `#${i + 1}`}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="rounded-lg border border-dashed border-line bg-ink-soft p-4 text-center">
+                <i className="ti ti-photo-off text-lg text-muted" />
+                <p className="mt-1 text-sm text-muted">
+                  No moodboard yet. Add one in the season overview.
+                </p>
+              </div>
+            )}
 
-        {/* Mood Influence Slider */}
-        {hasMoodboard && (
-          <div className="mt-3 rounded-lg border border-line bg-ink-soft p-3">
-            <div className="mb-1 flex justify-between">
-              <span className="text-[11px] uppercase tracking-wide text-muted">Mood Influence</span>
-              <span className="text-[12px] font-bold text-brass">{moodInfluence}%</span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={moodInfluence}
-              onChange={(e) => setMoodInfluence(parseInt(e.target.value))}
-              className="w-full accent-brass"
-            />
+            {/* Mood Influence Slider */}
+            {hasMoodboard && (
+              <div className="mt-3 rounded-lg border border-line bg-ink-soft p-3">
+                <div className="mb-1 flex justify-between">
+                  <span className="text-[11px] uppercase tracking-wide text-muted">Mood Influence</span>
+                  <span className="text-[12px] font-bold text-brass">{moodInfluence}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={moodInfluence}
+                  onChange={(e) => setMoodInfluence(parseInt(e.target.value))}
+                  className="w-full accent-brass"
+                />
+              </div>
+            )}
           </div>
-        )}
+          <span className="absolute right-0 top-0 rounded-full bg-line px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted">
+            Coming Soon
+          </span>
+        </div>
       </Section>
 
       {/* 6. View */}
