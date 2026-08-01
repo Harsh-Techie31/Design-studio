@@ -40,7 +40,6 @@ export function SeasonDetailPage() {
   const [open, setOpen] = useState(() => searchParams.get("new") === "1");
   const [category, setCategory] = useState<GarmentCategory | null>(null);
   const [moodboardOpen, setMoodboardOpen] = useState(false);
-  const [briefExpanded, setBriefExpanded] = useState(false);
   const [tab, setTab] = useState<SeasonTab>("overview");
   const [tabImages, setTabImages] = useState<DesignImage[]>([]);
   const [tabLoading, setTabLoading] = useState(false);
@@ -422,18 +421,8 @@ export function SeasonDetailPage() {
 
                   {brief && (
                     <div className="sm:max-w-xs">
-                      <button
-                        onClick={() => setBriefExpanded(!briefExpanded)}
-                        className="flex items-center gap-1.5 text-xs uppercase tracking-wide text-muted hover:text-bone-dim transition-colors"
-                      >
-                        <i
-                          className={`ti ti-chevron-right transition-transform ${briefExpanded ? "rotate-90" : ""}`}
-                        />
-                        Creative Brief
-                      </button>
-                      {briefExpanded && (
-                        <p className="mt-2 text-sm leading-relaxed text-bone-dim">{brief}</p>
-                      )}
+                      <span className="text-xs uppercase tracking-wide text-muted">Creative Brief</span>
+                      <p className="mt-2 text-sm leading-relaxed text-bone-dim">{brief}</p>
                     </div>
                   )}
                 </div>
