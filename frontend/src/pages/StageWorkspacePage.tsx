@@ -124,28 +124,6 @@ export function StageWorkspacePage() {
     fetchImages();
   };
 
-  const handleExport = () => {
-    const likedImages = images.filter((img) => img.liked);
-    likedImages.forEach((img, i) => {
-      setTimeout(async () => {
-        try {
-          const resp = await fetch(img.url);
-          const blob = await resp.blob();
-          const blobUrl = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = blobUrl;
-          a.download = `${img.image_code}.png`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(blobUrl);
-        } catch {
-          window.open(img.url, "_blank");
-        }
-      }, i * 200);
-    });
-  };
-
   const handlePrintStateChange = useCallback((newState: Partial<PrintState>) => {
     setPrintState((prev) => ({ ...prev, ...newState }));
   }, []);
@@ -327,7 +305,7 @@ export function StageWorkspacePage() {
               nextStageLabel={getNextStageLabel()}
               canvasPreview={printCanvasPreview}
               isFinalStage={currentStage === "photoshoot"}
-              onExport={handleExport}
+              onMakeNewGarment={() => navigate(`/seasons/${seasonId}?new=1`)}
               pendingCount={pendingCount}
             />
           )}

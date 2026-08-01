@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { NavBar } from "../components/NavBar";
 import { MoodboardTile } from "../components/MoodboardTile";
 import { PaletteSwatches } from "../components/PaletteSwatches";
@@ -36,7 +36,8 @@ export function SeasonDetailPage() {
     loading: studioLoading,
   } = useStudio();
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+  const [open, setOpen] = useState(() => searchParams.get("new") === "1");
   const [category, setCategory] = useState<GarmentCategory | null>(null);
   const [moodboardOpen, setMoodboardOpen] = useState(false);
   const [briefExpanded, setBriefExpanded] = useState(false);

@@ -29,7 +29,7 @@ interface StageOutputPanelProps {
   nextStageLabel?: string;
   canvasPreview?: React.ReactNode;
   isFinalStage?: boolean;
-  onExport?: () => void;
+  onMakeNewGarment?: () => void;
   pendingCount?: number;
 }
 
@@ -46,7 +46,7 @@ export function StageOutputPanel({
   nextStageLabel,
   canvasPreview,
   isFinalStage,
-  onExport,
+  onMakeNewGarment,
   pendingCount = 0,
 }: StageOutputPanelProps) {
   const [filter, setFilter] = useState<FilterType>("all");
@@ -355,16 +355,11 @@ export function StageOutputPanel({
             )}
           </p>
           <button
-            onClick={onExport}
-            disabled={!hasLiked}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
-              hasLiked
-                ? "bg-brass text-ink hover:bg-brass-soft"
-                : "cursor-not-allowed bg-line text-muted"
-            }`}
+            onClick={onMakeNewGarment}
+            className="flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider bg-brass text-ink hover:bg-brass-soft transition-all"
           >
-            <i className="ti ti-download text-xs" />
-            Export Selected
+            <i className="ti ti-plus text-xs" />
+            Make New Garment
           </button>
         </div>
       ) : (

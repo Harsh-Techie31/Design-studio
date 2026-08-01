@@ -27,7 +27,7 @@ interface PatternOutputPanelProps {
   onNextStage?: () => void;
   nextStageLabel?: string;
   isFinalStage?: boolean;
-  onExport?: () => void;
+  onMakeNewGarment?: () => void;
 }
 
 export function PatternOutputPanel({
@@ -38,7 +38,7 @@ export function PatternOutputPanel({
   onNextStage,
   nextStageLabel,
   isFinalStage,
-  onExport,
+  onMakeNewGarment,
 }: PatternOutputPanelProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -191,16 +191,11 @@ export function PatternOutputPanel({
           </p>
           {isFinalStage ? (
             <button
-              onClick={onExport}
-              disabled={!hasLiked}
-              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
-                hasLiked
-                  ? "bg-brass text-ink hover:bg-brass-soft"
-                  : "cursor-not-allowed bg-line text-muted"
-              }`}
+              onClick={onMakeNewGarment}
+              className="flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider bg-brass text-ink hover:bg-brass-soft transition-all"
             >
-              <i className="ti ti-download text-xs" />
-              Export Selected
+              <i className="ti ti-plus text-xs" />
+              Make New Garment
             </button>
           ) : (
             <button
