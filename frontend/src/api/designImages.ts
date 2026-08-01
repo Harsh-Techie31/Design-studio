@@ -238,7 +238,6 @@ export interface PatternGenerateParams {
   pattern_markings: string[];
   additional_notes: string;
   num_outputs: number;
-  note: string;
 }
 
 export interface PatternGenerateResponse {

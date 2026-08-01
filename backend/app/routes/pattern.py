@@ -36,7 +36,6 @@ class PatternGenerateRequest(BaseModel):
     pattern_markings: list[str] = ["Notches", "Drill holes", "Grain arrows", "Fold lines"]
     additional_notes: str = ""
     num_outputs: int = 1
-    note: str = ""
 
 
 # ─── Helpers ─────────────────────────────────────────────────────────
@@ -702,7 +701,6 @@ async def generate_pattern(
         imagekit_file_id=ik_file_id,
         file_size_bytes=len(img_bytes),
         file_format="png",
-        note=body.note,
         created_at=now,
         updated_at=now,
     )
