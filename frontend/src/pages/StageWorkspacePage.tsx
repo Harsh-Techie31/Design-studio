@@ -127,12 +127,22 @@ export function StageWorkspacePage() {
   const handleExport = () => {
     const likedImages = images.filter((img) => img.liked);
     likedImages.forEach((img, i) => {
-      setTimeout(() => {
-        const a = document.createElement("a");
-        a.href = img.url;
-        a.download = `${img.image_code}.png`;
-        a.click();
-      }, i * 200); // stagger so the browser doesn't block simultaneous downloads
+      setTimeout(async () => {
+        try {
+          const resp = await fetch(img.url);
+          const blob = await resp.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = blobUrl;
+          a.download = `${img.image_code}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(blobUrl);
+        } catch {
+          window.open(img.url, "_blank");
+        }
+      }, i * 200);
     });
   };
 

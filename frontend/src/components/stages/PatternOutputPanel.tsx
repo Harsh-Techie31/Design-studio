@@ -2,6 +2,23 @@ import { useState } from "react";
 import { toggleLike } from "../../api/designImages";
 import type { DesignImage } from "../../types";
 
+async function downloadImage(url: string, filename: string) {
+  try {
+    const resp = await fetch(url);
+    const blob = await resp.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobUrl);
+  } catch {
+    window.open(url, "_blank");
+  }
+}
+
 interface PatternOutputPanelProps {
   images: DesignImage[];
   imageType?: string;
@@ -123,7 +140,10 @@ export function PatternOutputPanel({
                       <i className={`ti ti-heart-filled mr-1 ${selected.liked ? "fill-current" : ""}`} />
                       {selected.liked ? "Liked" : "Like"}
                     </button>
-                    <button className="rounded-lg bg-ink px-3 py-1.5 text-[11px] text-muted hover:text-bone-dim">
+                    <button
+                      onClick={() => downloadImage(selected.url, `${selected.image_code}.png`)}
+                      className="rounded-lg bg-ink px-3 py-1.5 text-[11px] text-muted hover:text-bone-dim"
+                    >
                       <i className="ti ti-download mr-1" />
                       Download
                     </button>

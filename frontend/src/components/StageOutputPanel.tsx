@@ -1,6 +1,23 @@
 import { useState } from "react";
 import type { DesignImage } from "../types";
 
+async function downloadImage(url: string, filename: string) {
+  try {
+    const resp = await fetch(url);
+    const blob = await resp.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(blobUrl);
+  } catch {
+    window.open(url, "_blank");
+  }
+}
+
 interface StageOutputPanelProps {
   images: DesignImage[];
   loading: boolean;
@@ -302,10 +319,7 @@ export function StageOutputPanel({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      const a = document.createElement("a");
-                      a.href = img.url;
-                      a.download = `${img.image_code}.png`;
-                      a.click();
+                      downloadImage(img.url, `${img.image_code}.png`);
                     }}
                     className="rounded-md bg-ink/80 p-1.5 text-muted hover:text-bone"
                     title="Download"
@@ -537,10 +551,7 @@ function OutputCard({
         )}
         <button
           onClick={() => {
-            const a = document.createElement("a");
-            a.href = image.url;
-            a.download = `${image.image_code}.png`;
-            a.click();
+            downloadImage(image.url, `${image.image_code}.png`);
           }}
           className="rounded p-1 text-muted hover:text-bone"
           title="Download"
