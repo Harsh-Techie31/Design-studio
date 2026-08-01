@@ -363,7 +363,6 @@ export interface PhotoshootGenerateParams {
   custom_pose: string;
   additional_notes: string;
   num_outputs: number;
-  note: string;
 }
 
 export interface PhotoshootGenerateResponse {

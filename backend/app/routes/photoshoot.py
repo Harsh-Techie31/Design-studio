@@ -39,7 +39,6 @@ class PhotoshootGenerateRequest(BaseModel):
     custom_pose: str = ""
     additional_notes: str = ""
     num_outputs: int = 1
-    note: str = ""
 
 
 NEGATIVE_PROMPT = (
@@ -193,10 +192,10 @@ async def generate_photoshoot(
     """
     logger.info("=" * 60)
     logger.info("[SHOOT] POST /api/garments/%s/nodes/photoshoot/generate", garment_id)
-    logger.info("[SHOOT] Request body: viz_image=%s, moodboard_influence=%s, shot_type=%s, location=%s, time=%s, mood=%s, pose=%s, custom_pose=%s, num_outputs=%d, note=%s",
+    logger.info("[SHOOT] Request body: viz_image=%s, moodboard_influence=%s, shot_type=%s, location=%s, time=%s, mood=%s, pose=%s, custom_pose=%s, num_outputs=%d",
                 body.visualization_image_url, body.moodboard_influence, body.shot_type,
                 body.location, body.time_of_day, body.mood, body.pose,
-                body.custom_pose or "(none)", body.num_outputs, body.note or "(none)")
+                body.custom_pose or "(none)", body.num_outputs)
 
     garment = await Garment.get(garment_id)
     if not garment:
@@ -416,7 +415,6 @@ async def generate_photoshoot(
             imagekit_file_id=ik_file_id,
             file_size_bytes=len(img_data["bytes"]),
             file_format="png",
-            note=body.note,
             created_at=now,
             updated_at=now,
         )
