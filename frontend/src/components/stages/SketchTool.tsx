@@ -281,7 +281,7 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating }: 
       {/* 6. View */}
       <Section label="6. View Layout" required>
         <div className="flex gap-2">
-          {["Front only", "Front and back"].map((v) => (
+          {["Front only", "Front and back", "Back only"].map((v) => (
             <Chip key={v} active={view === v} onClick={() => setView(v)}>
               {v}
             </Chip>

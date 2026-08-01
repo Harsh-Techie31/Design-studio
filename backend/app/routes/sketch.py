@@ -495,6 +495,11 @@ def draw_flat_garment_sketch(
         draw.text((w + 30 + w // 2 - 15, 15), "BACK", fill=(80, 80, 80), font=font)
 
         return combined
+    elif view == "Back only":
+        back_img = draw_single_view(is_back=True)
+        padded = Image.new("RGB", (w + 40, h + 40), (253, 252, 250))
+        padded.paste(back_img, (20, 20))
+        return padded
     else:
         front_img = draw_single_view(is_back=False)
         padded = Image.new("RGB", (w + 40, h + 40), (253, 252, 250))
@@ -537,10 +542,12 @@ async def _generate_with_gemini(
             "Explicitly write the text label 'FRONT' directly below the left garment, "
             "and write the text label 'BACK' directly below the right garment."
         )
-    elif view == "Back":
+    elif view == "Back only":
         layout_instructions = (
-            "Centered Back view only. "
-            "Explicitly write the text label 'BACK' directly below the garment."
+            "CRITICAL: Draw ONLY the BACK view of the garment. Show the back neckline, back yoke, "
+            "back seams, and any back details. Do NOT include any front elements. "
+            "The garment must be facing away from the viewer. "
+            "Write the text label 'BACK' directly below the garment."
         )
     else:
         layout_instructions = (
@@ -568,6 +575,9 @@ async def _generate_with_gemini(
                 "3D, shadows, shading, human body, mannequin, skin, hands, realistic, photographic, "
                 "colors, gradients, messy lines, hangers, background clutter, wrinkles, folds with volume"
             )
+
+            if view == "Back only":
+                negative_prompt += ", front view, front details, front neckline, front placket, front pockets"
 
             payload = {
                 "contents": [{"role": "user", "parts": [{"text": prompt}, {"text": f"Avoid: {negative_prompt}"}]}],
@@ -733,7 +743,7 @@ async def generate_sketch(
     for idx, img_data in enumerate(generated_images):
         count_str = f"{idx + 1:02d}"
         img_code = f"{code}_{count_str}"
-        img_view = "front_and_back" if view == "Front and back" else "front"
+        img_view = "front_and_back" if view == "Front and back" else "back" if view == "Back only" else "front"
 
         # Upload to ImageKit
         file_name = f"{img_code}.png"
