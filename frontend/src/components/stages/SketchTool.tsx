@@ -1,12 +1,13 @@
 import { useState, useRef } from "react";
 import type { Garment, Season } from "../../types";
-import { generateSketch, type SketchGenerateResponse } from "../../api/designImages";
+import { generateSketch, type SketchGenerateResponse, uploadImageToLibrary } from "../../api/designImages";
 
 interface SketchToolProps {
   garment: Garment;
   season: Season;
   onGenerated: (response: SketchGenerateResponse) => void;
   onStartGenerating?: (count: number) => void;
+  onUploadStatus?: (uploading: boolean) => void;
 }
 
 const SILHOUETTES: Record<string, string[]> = {
@@ -48,7 +49,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   JUMP: "Jumpsuit",
 };
 
-export function SketchTool({ garment, season, onGenerated, onStartGenerating }: SketchToolProps) {
+export function SketchTool({ garment, season, onGenerated, onStartGenerating, onUploadStatus }: SketchToolProps) {
   const category = garment.category || "PANT";
 
   const [gender, setGender] = useState<string | null>(null);
@@ -61,6 +62,7 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating }: 
   const [numOutputs, setNumOutputs] = useState(1);
   const [note, setNote] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -135,15 +137,30 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating }: 
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 5 * 1024 * 1024) {
       setError("File exceeds 5MB limit");
       return;
     }
-    // TODO: Upload to backend and create DesignImage
     setError(null);
+    setIsUploading(true);
+    onUploadStatus?.(true);
+    try {
+      await uploadImageToLibrary({
+        file,
+        season_id: season.id,
+        garment_id: garment.id,
+        image_type: "sketch",
+      });
+    } catch (err: any) {
+      setError(err.message || "Upload failed");
+    } finally {
+      setIsUploading(false);
+      onUploadStatus?.(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
   };
 
   const promptLength = promptText.length;
@@ -152,6 +169,32 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating }: 
 
   return (
     <aside className="flex h-full w-full flex-col overflow-y-auto bg-surface p-6 lg:w-[480px]">
+      {/* Upload your own sketch */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileUpload}
+        accept="image/*"
+        className="hidden"
+      />
+      <button
+        onClick={() => fileInputRef.current?.click()}
+        disabled={isUploading}
+        className="mb-5 flex w-full items-center justify-center gap-2 rounded-lg border border-brass/50 bg-transparent py-2.5 text-sm text-brass transition-colors hover:bg-brass/10 disabled:opacity-50"
+      >
+        {isUploading ? (
+          <>
+            <i className="ti ti-loader-2 animate-spin" />
+            <span>Uploading...</span>
+          </>
+        ) : (
+          <>
+            <i className="ti ti-upload" />
+            <span>Upload your own sketch</span>
+          </>
+        )}
+      </button>
+
       {/* 1. Category (read-only) */}
       <Section label="1. Category" hint="From garment">
         <div className="inline-flex items-center gap-2 rounded-lg border border-brass/30 bg-brass/10 px-3 py-1.5">
@@ -349,28 +392,6 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating }: 
             </>
           )}
         </button>
-
-        <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-line" />
-          <span className="text-[11px] uppercase text-muted">or</span>
-          <div className="h-px flex-1 bg-line" />
-        </div>
-
-        <input
-          type="file"
-          ref={fileInputRef}
-          onChange={handleFileUpload}
-          accept="image/*"
-          className="hidden"
-        />
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-ink-soft py-3 text-sm text-muted transition-colors hover:border-brass/30 hover:text-brass"
-        >
-          <i className="ti ti-upload" />
-          <span>Upload your own sketch</span>
-        </button>
-        <span className="text-center text-[11px] text-muted">JPG, PNG, max 5MB</span>
       </div>
     </aside>
   );

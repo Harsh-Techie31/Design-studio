@@ -104,6 +104,15 @@ export function StageWorkspacePage() {
     setPendingCount(count);
   };
 
+  const handleUploadStatus = (uploading: boolean) => {
+    if (uploading) {
+      setPendingCount(1);
+    } else {
+      setPendingCount(0);
+      fetchImages();
+    }
+  };
+
   const handleGenerated = (response: any) => {
     console.log("[STAGE] Generation complete — re-fetching images. Response:", {
       runCode: response?.run?.code,
@@ -203,6 +212,7 @@ export function StageWorkspacePage() {
             season={season}
             onGenerated={handleGenerated}
             onStartGenerating={handleStartGenerating}
+            onUploadStatus={handleUploadStatus}
           />
         )}
 
