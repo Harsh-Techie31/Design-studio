@@ -30,6 +30,7 @@ export function SeasonDetailPage() {
     getSeason,
     getGarmentsForSeason,
     createGarment,
+    deleteGarment,
     setMoodboardImages,
     analyzeMoodboard,
     loading: studioLoading,
@@ -42,6 +43,7 @@ export function SeasonDetailPage() {
   const [tab, setTab] = useState<SeasonTab>("overview");
   const [tabImages, setTabImages] = useState<DesignImage[]>([]);
   const [tabLoading, setTabLoading] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
 
   const season = getSeason(seasonId ?? "");
 
@@ -220,7 +222,14 @@ export function SeasonDetailPage() {
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {garments.map((garment) => (
-            <GarmentCard key={garment.id} garment={garment} />
+            <GarmentCard
+              key={garment.id}
+              garment={garment}
+              onDelete={(id) => {
+                const g = garments.find((g) => g.id === id);
+                if (g) setPendingDelete({ id: g.id, name: g.name });
+              }}
+            />
           ))}
         </div>
       )}
@@ -505,6 +514,30 @@ export function SeasonDetailPage() {
         onClose={() => setMoodboardOpen(false)}
         onSave={handleMoodboardSave}
       />
+
+      <Modal open={!!pendingDelete} onClose={() => setPendingDelete(null)} title="Delete Garment">
+        <p className="text-sm text-bone-dim">
+          Are you sure you want to delete <span className="font-medium text-bone">{pendingDelete?.name}</span>? This will remove all its pipeline runs and generated images. This action cannot be undone.
+        </p>
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            onClick={() => setPendingDelete(null)}
+            className="rounded-lg border border-line px-4 py-2 text-sm text-bone transition-colors hover:bg-surface-hi"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={async () => {
+              if (!pendingDelete) return;
+              await deleteGarment(pendingDelete.id);
+              setPendingDelete(null);
+            }}
+            className="rounded-lg bg-red-500/20 px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/30"
+          >
+            Delete
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -22,6 +22,7 @@ interface StudioContextValue {
   getGarment: (id: string) => Garment | undefined;
   createSeason: (code: string) => Promise<Season>;
   createGarment: (seasonId: string, category: GarmentCategory) => Promise<Garment>;
+  deleteGarment: (garmentId: string) => Promise<void>;
   setMoodboardImages: (seasonId: string, images: MoodboardImage[], name?: string) => Promise<void>;
   analyzeMoodboard: (seasonId: string) => Promise<void>;
   deleteSeason: (seasonId: string) => Promise<void>;
@@ -94,6 +95,14 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       const garment = await garmentsApi.createGarment(seasonId, category);
       setGarments((prev) => [garment, ...prev]);
       return garment;
+    },
+    [],
+  );
+
+  const deleteGarment = useCallback(
+    async (garmentId: string) => {
+      await garmentsApi.deleteGarment(garmentId);
+      setGarments((prev) => prev.filter((g) => g.id !== garmentId));
     },
     [],
   );
@@ -202,12 +211,13 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       getGarment,
       createSeason,
       createGarment,
+      deleteGarment,
       setMoodboardImages,
       analyzeMoodboard,
       deleteSeason,
       refreshSeasons,
     }),
-    [seasons, garments, loading, error, getSeason, getGarmentsForSeason, getGarment, createSeason, createGarment, setMoodboardImages, analyzeMoodboard, deleteSeason, refreshSeasons],
+    [seasons, garments, loading, error, getSeason, getGarmentsForSeason, getGarment, createSeason, createGarment, deleteGarment, setMoodboardImages, analyzeMoodboard, deleteSeason, refreshSeasons],
   );
 
   return <StudioContext.Provider value={value}>{children}</StudioContext.Provider>;
