@@ -34,13 +34,24 @@ export function GarmentDetailPage() {
   const seed = seedFromId(garment.id);
   const palette = season.moodboard.analysis.palette;
   const [bestImage, setBestImage] = useState<string | null>(null);
+  const [imageCounts, setImageCounts] = useState<Record<string, number>>({});
 
   useEffect(() => {
     let cancelled = false;
-    const fetchBestImage = async () => {
+    const fetchData = async () => {
       try {
         const allImages = await listImagesForGarment(garment.id);
-        if (cancelled || allImages.length === 0) return;
+        if (cancelled) return;
+
+        // Count images per node_key
+        const counts: Record<string, number> = {};
+        for (const img of allImages) {
+          const key = img.node_key;
+          counts[key] = (counts[key] || 0) + 1;
+        }
+        setImageCounts(counts);
+
+        // Find best image for thumbnail
         for (const key of ["photoshoot", "render", "sketch"]) {
           const match = allImages.find((img) => img.node_key === key);
           if (match?.url) {
@@ -50,9 +61,16 @@ export function GarmentDetailPage() {
         }
       } catch {}
     };
-    fetchBestImage();
+    fetchData();
     return () => { cancelled = true; };
   }, [garment.id]);
+
+  // Build live summaries from image counts
+  const liveSummary = (key: string) => {
+    const count = imageCounts[key] || 0;
+    if (count === 0) return undefined;
+    return { run_count: count, liked_count: 0, has_processing: false, has_failed: false, last_run_at: null };
+  };
 
   return (
     <div className="min-h-screen bg-ink text-bone">
@@ -94,7 +112,7 @@ export function GarmentDetailPage() {
             <NodeCard
               key={def.key}
               def={def}
-              summary={garment.node_summary[def.key]}
+              summary={liveSummary(def.key) ?? garment.node_summary[def.key]}
               onOpen={() =>
                 navigate(`/seasons/${season.id}/garments/${garment.id}/stage/${def.key}`)
               }

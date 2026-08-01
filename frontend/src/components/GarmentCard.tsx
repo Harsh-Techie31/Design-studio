@@ -21,12 +21,7 @@ export function GarmentCard({
 }) {
   const seed = seedFromId(garment.id);
   const [bestImage, setBestImage] = useState<string | null>(null);
-
-  // Count how many stages have been used (run_count > 0)
-  const usedCount = NODE_DEFS.filter((d) => {
-    const summary = garment.node_summary?.[d.key];
-    return summary && summary.run_count > 0;
-  }).length;
+  const [usedCount, setUsedCount] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -34,9 +29,14 @@ export function GarmentCard({
     const fetchBestImage = async () => {
       try {
         const allImages = await listImagesForGarment(garment.id);
-        if (cancelled || allImages.length === 0) return;
+        if (cancelled) return;
+
+        // Count unique stages that have at least one image
+        const stagesWithImages = new Set(allImages.map((img) => img.node_key));
+        setUsedCount(stagesWithImages.size);
 
         // Priority: photoshoot > render > sketch, pick most recent of each type
+        if (allImages.length === 0) return;
         for (const priority of IMAGE_PRIORITY) {
           const match = allImages.find((img) => img.node_key === priority.nodeKey);
           if (match?.url) {
