@@ -69,19 +69,29 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating }: 
   const hasMoodboard = moodboardImages.length > 0;
 
   const handleDescriptorToggle = (desc: string) => {
-    setSelectedDescriptors((prev) => {
-      const isNowActive = !prev.includes(desc);
-      if (isNowActive) {
-        setPromptText((pt) => {
-          const trimmed = pt.trim();
-          if (trimmed === "") return desc;
-          if (trimmed.endsWith(",")) return `${trimmed} ${desc}`;
-          return `${trimmed}, ${desc}`;
-        });
-        return [...prev, desc];
-      }
-      return prev.filter((d) => d !== desc);
-    });
+    const isCurrentlyActive = selectedDescriptors.includes(desc);
+
+    if (!isCurrentlyActive) {
+      setSelectedDescriptors((prev) => [...prev, desc]);
+      setPromptText((pt) => {
+        const trimmed = pt.trim();
+        if (trimmed === "") return desc;
+        return `${trimmed}, ${desc}`;
+      });
+    } else {
+      setSelectedDescriptors((prev) => prev.filter((d) => d !== desc));
+      setPromptText((pt) => {
+        let result = pt;
+        while (result.includes(desc)) {
+          result = result.replace(desc, "");
+        }
+        return result
+          .replace(/,\s*,/g, ",")
+          .replace(/^,\s*/, "")
+          .replace(/,\s*$/, "")
+          .trim();
+      });
+    }
   };
 
   const handleMoodboardToggle = (index: number) => {

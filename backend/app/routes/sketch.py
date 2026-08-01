@@ -530,6 +530,7 @@ async def _generate_with_gemini(
     prompt_text: str,
     view: str,
     num_outputs: int,
+    note: str = "",
 ) -> list[str]:
     """Call Gemini API to generate sketch images. Returns list of data URLs."""
     desc_str = ", ".join(descriptors) if descriptors else "Standard design"
@@ -557,6 +558,8 @@ async def _generate_with_gemini(
 
     # Build user guidelines from prompt_text
     guidelines = f" Additional notes: {prompt_text}." if prompt_text else ""
+    if note:
+        guidelines += f" User note: {note}."
 
     async with httpx.AsyncClient(timeout=60.0) as client:
         for idx in range(num_outputs):
@@ -713,7 +716,7 @@ async def generate_sketch(
         try:
             gemini_urls = await _generate_with_gemini(
                 api_key, garment.category.value, gender, silhouette,
-                descriptors, prompt_text, view, num_outputs,
+                descriptors, prompt_text, view, num_outputs, note,
             )
             for data_url in gemini_urls:
                 # Decode base64 data URL to bytes
