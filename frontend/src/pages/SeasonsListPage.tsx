@@ -10,9 +10,10 @@ function normalizeCode(raw: string): string {
 }
 
 export function SeasonsListPage() {
-  const { seasons, garments, loading, createSeason } = useStudio();
+  const { seasons, garments, loading, createSeason, deleteSeason } = useStudio();
   const [open, setOpen] = useState(false);
   const [code, setCode] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; code: string } | null>(null);
   const navigate = useNavigate();
 
   async function handleCreate(e: React.FormEvent) {
@@ -70,6 +71,10 @@ export function SeasonsListPage() {
                 key={season.id}
                 season={season}
                 garmentCount={garments.filter((g) => g.season_id === season.id).length}
+                onDelete={(id) => {
+                  const s = seasons.find((s) => s.id === id);
+                  if (s) setPendingDelete({ id: s.id, code: s.code ?? "Untitled" });
+                }}
               />
             ))}
           </div>
@@ -102,6 +107,30 @@ export function SeasonsListPage() {
             Create Season
           </button>
         </form>
+      </Modal>
+
+      <Modal open={!!pendingDelete} onClose={() => setPendingDelete(null)} title="Delete Season">
+        <p className="text-sm text-bone-dim">
+          Are you sure you want to delete <span className="font-medium text-bone">{pendingDelete?.code}</span> and all its garments? This action cannot be undone.
+        </p>
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            onClick={() => setPendingDelete(null)}
+            className="rounded-lg border border-line px-4 py-2 text-sm text-bone transition-colors hover:bg-surface-hi"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={async () => {
+              if (!pendingDelete) return;
+              await deleteSeason(pendingDelete.id);
+              setPendingDelete(null);
+            }}
+            className="rounded-lg bg-red-500/20 px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/30"
+          >
+            Delete
+          </button>
+        </div>
       </Modal>
     </div>
   );

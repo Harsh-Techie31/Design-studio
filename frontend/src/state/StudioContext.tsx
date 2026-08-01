@@ -24,6 +24,7 @@ interface StudioContextValue {
   createGarment: (seasonId: string, category: GarmentCategory) => Promise<Garment>;
   setMoodboardImages: (seasonId: string, images: MoodboardImage[], name?: string) => Promise<void>;
   analyzeMoodboard: (seasonId: string) => Promise<void>;
+  deleteSeason: (seasonId: string) => Promise<void>;
   refreshSeasons: () => Promise<void>;
 }
 
@@ -181,6 +182,15 @@ export function StudioProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const deleteSeason = useCallback(
+    async (seasonId: string) => {
+      await seasonsApi.deleteSeason(seasonId);
+      setSeasons((prev) => prev.filter((s) => s.id !== seasonId));
+      setGarments((prev) => prev.filter((g) => g.season_id !== seasonId));
+    },
+    [],
+  );
+
   const value = useMemo<StudioContextValue>(
     () => ({
       seasons,
@@ -194,9 +204,10 @@ export function StudioProvider({ children }: { children: ReactNode }) {
       createGarment,
       setMoodboardImages,
       analyzeMoodboard,
+      deleteSeason,
       refreshSeasons,
     }),
-    [seasons, garments, loading, error, getSeason, getGarmentsForSeason, getGarment, createSeason, createGarment, setMoodboardImages, analyzeMoodboard, refreshSeasons],
+    [seasons, garments, loading, error, getSeason, getGarmentsForSeason, getGarment, createSeason, createGarment, setMoodboardImages, analyzeMoodboard, deleteSeason, refreshSeasons],
   );
 
   return <StudioContext.Provider value={value}>{children}</StudioContext.Provider>;

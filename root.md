@@ -1,4 +1,4 @@
-# Design Studio — Project Analysis - v2
+# Design Studio — Project Analysis - v3
 
 An AI-assisted fashion design tool where designers build **Seasons** (12-image moodboards with AI-extracted style profiles) and create **Garments** inside them, each moving through a 7-stage fashion pipeline from sketch to photoshoot.
 
@@ -37,14 +37,16 @@ python scripts/seed_db.py
 
 | Layer | Technology |
 |-------|------------|
-| Frontend | React 19, TypeScript 6, Vite 8, Tailwind CSS v4 |
+| Frontend | React 19.2.7, TypeScript 6.0.2, Vite 8.1.1, Tailwind CSS v4.3.3 |
 | Backend | Python 3.11+, FastAPI, Uvicorn |
-| Database | MongoDB Atlas (Motor 3.6 + Beanie 1.28 ODM) |
-| Image Storage | ImageKit CDN (`imagekitio` SDK) |
+| Database | MongoDB Atlas (Motor 3.6.1 + Beanie 1.28 ODM) |
+| Image Storage | ImageKit CDN (`imagekitio` v5.8.0 SDK) |
 | AI | Google Gemini (`gemini-2.5-flash` text + `gemini-2.5-flash-image` generation) |
 | Image Processing | Pillow (PIL) — procedural fallback engines |
-| Linting | oxlint (Rust-based) |
-| Deployment | Railway (Procfile + railway.toml) |
+| Icons | Tabler Icons v3.11.0 (CDN) |
+| Fonts | Cormorant Garamond (serif), Inter (sans), JetBrains Mono (mono) |
+| Linting | oxlint v1.71.0 (Rust-based) |
+| Deployment | Railway (backend), Vercel (frontend SPA) |
 
 ---
 
@@ -69,26 +71,26 @@ designStudio/
 │   │   │   ├── NavBar.tsx            # Sticky header with breadcrumbs
 │   │   │   ├── Modal.tsx             # Generic overlay dialog
 │   │   │   ├── SeasonCard.tsx        # Season card with palette dots
-│   │   │   ├── GarmentCard.tsx       # Garment card with progress bar
+│   │   │   ├── GarmentCard.tsx       # Garment card with smart thumbnail + progress bar
 │   │   │   ├── NodeCard.tsx          # Pipeline node button (3 states)
 │   │   │   ├── PaletteSwatches.tsx   # Circular color swatch row
 │   │   │   ├── KeywordChips.tsx      # Uppercase pill labels
 │   │   │   ├── MoodboardTile.tsx     # Smart img/placeholder wrapper
 │   │   │   ├── PlaceholderTile.tsx   # Seed-based procedural gradient art
-│   │   │   ├── StartMoodboardModal.tsx  # Upload flow with async save + name input
+│   │   │   ├── StartMoodboardModal.tsx  # Upload flow with async save + name input + sample guides
 │   │   │   ├── ImagePickerModal.tsx  # Library + upload tabs for picking images
-│   │   │   ├── StageOutputPanel.tsx  # Output grid with filtering, lightbox, export (511 lines)
-│   │   │   ├── StageProgressBar.tsx  # Horizontal progress bar with stage navigation
+│   │   │   ├── StageOutputPanel.tsx  # Output grid with filtering, lightbox, export, canvas preview (560 lines)
+│   │   │   ├── StageProgressBar.tsx  # Horizontal progress bar with stage navigation + checkmarks
 │   │   │   └── stages/
-│   │   │       ├── SketchTool.tsx       # Stage 1: Sketch generation (414 lines)
-│   │   │       ├── PrintTool.tsx        # Stage 2: Fabric/print pattern (505 lines)
-│   │   │       ├── RenderTool.tsx       # Stage 3: First render (517 lines)
-│   │   │       ├── TechPackTool.tsx     # Stage 4: Tech pack (553 lines)
-│   │   │       ├── TechPackOutputPanel.tsx  # Custom output layout for tech packs
-│   │   │       ├── PatternTool.tsx      # Stage 5: Pattern (334 lines)
-│   │   │       ├── PatternOutputPanel.tsx   # Custom output layout for patterns
-│   │   │       ├── VisualizationTool.tsx    # Stage 6: 3D visualization (272 lines)
-│   │   │       └── PhotoshootTool.tsx       # Stage 7: Photoshoot (342 lines)
+│   │   │       ├── SketchTool.tsx       # Stage 1: Sketch generation (416 lines)
+│   │   │       ├── PrintTool.tsx        # Stage 2: Fabric/print pattern (507 lines)
+│   │   │       ├── RenderTool.tsx       # Stage 3: First render (519 lines)
+│   │   │       ├── TechPackTool.tsx     # Stage 4: Tech pack (556 lines)
+│   │   │       ├── TechPackOutputPanel.tsx  # Custom output layout for tech packs (218 lines)
+│   │   │       ├── PatternTool.tsx      # Stage 5: Pattern (336 lines)
+│   │   │       ├── PatternOutputPanel.tsx   # Custom output layout for patterns (200 lines)
+│   │   │       ├── VisualizationTool.tsx    # Stage 6: 3D visualization (294 lines)
+│   │   │       └── PhotoshootTool.tsx       # Stage 7: Photoshoot (365 lines)
 │   │   ├── pages/
 │   │   │   ├── LandingPage.tsx       # Marketing hero page
 │   │   │   ├── SeasonsListPage.tsx   # Season grid + create modal
@@ -107,6 +109,7 @@ designStudio/
 │   │   ├── favicon.svg
 │   │   └── icons.svg
 │   ├── vite.config.ts                # Proxy /api → localhost:8000
+│   ├── vercel.json                   # SPA rewrite rule for deployment
 │   ├── package.json
 │   └── tsconfig*.json
 ├── backend/
@@ -125,25 +128,25 @@ designStudio/
 │   │   │   ├── seasons.py            # CRUD + cascade delete
 │   │   │   ├── garments.py           # CRUD + _update_node_summary()
 │   │   │   ├── moodboard.py          # Upload/delete images + analyze endpoint
-│   │   │   ├── node_runs.py          # CRUD + like toggle + stub outputs
+│   │   │   ├── node_runs.py          # CRUD + like toggle + stub outputs + version bumping
 │   │   │   ├── design_images.py      # Image library CRUD + query + upload + aggregation (303 lines)
 │   │   │   ├── sketch.py             # Stage 1: AI sketch generation + PIL fallback (824 lines)
 │   │   │   ├── print.py              # Stage 2: Fabric print generation (334 lines)
 │   │   │   ├── render.py             # Stage 3: Two-step AI render (497 lines)
 │   │   │   ├── techpack.py           # Stage 4: PIL tech pack assembly (476 lines)
 │   │   │   ├── pattern.py            # Stage 5: Hybrid AI + PIL pattern (736 lines)
-│   │   │   ├── visualization.py      # Stage 6: 3D visualization on model (363 lines)
-│   │   │   └── photoshoot.py         # Stage 7: Final photoshoot render (419 lines)
+│   │   │   ├── visualization.py      # Stage 6: 3D visualization on model (397 lines)
+│   │   │   └── photoshoot.py         # Stage 7: Final photoshoot render (460 lines)
 │   │   ├── schemas/
 │   │   │   ├── season.py             # SeasonCreate/Update/Response
 │   │   │   ├── garment.py            # GarmentCreate/Update/Response
 │   │   │   ├── node_run.py           # NodeRunCreate/Response/LikeToggle
 │   │   │   └── moodboard.py          # MoodboardImageResponse
 │   │   ├── services/
-│   │   │   ├── imagekit.py           # ImageKit upload/delete (sync SDK)
+│   │   │   ├── imagekit.py           # ImageKit upload/delete (sync SDK, lazy singleton)
 │   │   │   ├── gemini.py             # Gemini Vision API (base64 inlineData, max 5 images)
-│   │   │   ├── avatar_reference.py   # Model personas + framing logic for vis/photoshoot
-│   │   │   └── generation_helpers.py # fetch_image_bytes + placeholder builder
+│   │   │   ├── avatar_reference.py   # Model personas + framing logic for vis/photoshoot (60 lines)
+│   │   │   └── generation_helpers.py # fetch_image_bytes + placeholder builder (48 lines)
 │   │   └── data/
 │   │       └── techpack_config.py    # Construction options, measurements, BOM per category (171 lines)
 │   ├── scripts/
@@ -194,30 +197,30 @@ designStudio/
 | `NavBar` | Sticky header with breadcrumbs + optional right-side action slot |
 | `Modal` | Generic overlay dialog — backdrop blur, close-on-outside-click, configurable max-width |
 | `SeasonCard` | Card link to season: 2×2 placeholder grid, name, garment count, palette dots |
-| `GarmentCard` | Card link to garment: placeholder tile, name, progress bar (done/8 nodes) |
+| `GarmentCard` | Card link to garment: **smart thumbnail** (auto-fetches best image: photoshoot > render > sketch), name, progress bar (done/7 nodes) |
 | `NodeCard` | Pipeline node button: number label, status badge (Not started/In progress/Done), hint |
 | `PaletteSwatches` | Row of circular color swatches with tooltips, `sm`/`md` sizes |
 | `KeywordChips` | Flex-wrap row of uppercase pill-shaped keyword labels |
 | `MoodboardTile` | Smart wrapper: `<img>` for real URLs, `PlaceholderTile` for `mood-placeholder:*` URIs |
-| `PlaceholderTile` | Seed-based procedural gradient art (radial + linear gradient + hatched overlay) |
-| `StartMoodboardModal` | Full upload flow: drag-drop zone, moodboard name input, async save with spinner |
-| `ImagePickerModal` | Pick images from library or upload new ones (2 tabs) |
-| `StageOutputPanel` | Output grid with filtering (all/liked/unliked/starred), lightbox viewer, download, proceed-to-next-stage bar, export for final stage (511 lines) |
-| `StageProgressBar` | Horizontal progress bar with clickable stage navigation |
+| `PlaceholderTile` | Seed-based procedural gradient art (radial + linear gradient + hatched overlay), optional `hue` override |
+| `StartMoodboardModal` | Full upload flow: drag-drop zone, moodboard name input, async save with spinner, **recommended/avoid sample image guides** |
+| `ImagePickerModal` | Pick images from library or upload new ones (2 tabs: "Upload from PC" + "From Library"), auto-uploads to image library |
+| `StageOutputPanel` | Output grid with filtering (all/liked/unliked/starred), lightbox viewer, download, proceed-to-next-stage bar, export for final stage, **canvas preview mode for print stage** (560 lines) |
+| `StageProgressBar` | Horizontal progress bar with clickable stage navigation, **checkmark icons for completed stages** |
 
 **Stage Tool Components (`components/stages/`):**
 
 | Stage | Component | Lines | Features |
 |-------|-----------|-------|----------|
-| 1 | `SketchTool` | 414 | Gender, silhouette, descriptors, prompt, moodboard refs, mood influence, view, multi-output |
-| 2 | `PrintTool` | 505 | Canvas preview, repeat controls (block/half-drop/brick/mirror), scale, rotation, 10 fabric types, 1K/2K export |
-| 3 | `RenderTool` | 517 | Sketch picker, gender, up to 3 fabric slots with placement chips, scale sliders, per-fabric prompts |
-| 4 | `TechPackTool` | 553 | Construction options per category, stitch/seam selection, BOM fields, measurements grid, construction notes |
-| 4 | `TechPackOutputPanel` | 140 | Custom thumbnail strip + large preview layout |
-| 5 | `PatternTool` | 334 | Body measurements grid, construction details, pattern settings (fabric, seam/hem, grain, ease, markings) |
-| 5 | `PatternOutputPanel` | 111 | Custom thumbnail strip + large preview layout |
-| 6 | `VisualizationTool` | 272 | Model avatar selection, background/lighting environment options |
-| 7 | `PhotoshootTool` | 342 | Moodboard influence toggle, shot type, location, time of day, mood, pose |
+| 1 | `SketchTool` | 416 | Gender, silhouette, descriptors, prompt, moodboard refs, mood influence, view, multi-output, upload own sketch option |
+| 2 | `PrintTool` | 507 | Canvas preview, repeat controls (block/half-drop/brick/mirror), scale, rotation, 10 fabric types, 1K/2K export, **real-time sliders** |
+| 3 | `RenderTool` | 519 | Sketch picker, gender, up to 3 fabric slots with placement chips (11 options), scale sliders, per-fabric prompts, **trims section (coming soon)** |
+| 4 | `TechPackTool` | 556 | Construction options per category, stitch/seam selection, BOM fields, measurements grid, construction notes, **auto-pulled references from render lineage** |
+| 4 | `TechPackOutputPanel` | 218 | Custom thumbnail strip + large preview layout |
+| 5 | `PatternTool` | 336 | Body measurements grid, construction details, pattern settings (fabric, seam/hem, grain, ease, markings), **AI pre-filled measurements** |
+| 5 | `PatternOutputPanel` | 200 | Custom thumbnail strip + large preview layout |
+| 6 | `VisualizationTool` | 294 | Model avatar selection (2 personas), background/lighting environment options, **category-aware framing logic** |
+| 7 | `PhotoshootTool` | 365 | Moodboard influence toggle, shot type, location, time of day, mood, pose, **custom pose text input** |
 
 ### State Management — `StudioContext.tsx`
 
@@ -262,7 +265,7 @@ React Context with real API calls. No external state library.
 
 Frontend types match backend models 1:1 — no translation layer. API responses map directly to frontend state.
 
-**Key types:** `Season`, `Garment`, `NodeRun`, `DesignImage`, `MoodboardImage`, `MoodboardAnalysis`, `MoodboardData`, `NodeSummary`, `NodeDef`, `GarmentCategory`, `CategoryDef`, `ImageType`, `ImageView`, `InputImageRef`
+**Key types:** `Season`, `Garment`, `NodeRun`, `DesignImage`, `MoodboardImage`, `MoodboardAnalysis`, `MoodboardData`, `NodeSummary`, `NodeDef`, `GarmentCategory`, `CategoryDef`, `ImageType`, `ImageView`, `InputImageRef`, `PrintState`, `RenderState`, `TechPackState`
 
 **Utility functions:**
 - `nodeStatusFromSummary(summary)` → `"empty" | "active" | "done"`
@@ -326,6 +329,8 @@ Frontend types match backend models 1:1 — no translation layer. API responses 
 | `POST` | `/api/images/upload` | Upload image to library (ImageKit + DesignImage record) |
 
 #### Stage Generation (7 endpoints)
+All stage endpoints accept `X-Gemini-API-Key` header for client-side AI key override.
+
 | Method | Path | Description |
 |--------|------|-------------|
 | `POST` | `/api/garments/{id}/nodes/sketch/generate` | Generate sketch (Form data: gender, silhouette, descriptors, prompt, refs) |
@@ -527,25 +532,28 @@ GarmentDetailPage → clicks NodeCard → navigates to StageWorkspacePage
   │  ├─ Fetches upstream images via ImagePickerModal (from DesignImage library)
   │  ├─ User configures parameters
   │  └─ Clicks "Generate" → POST /api/garments/{id}/nodes/{node_key}/generate
+  │     (sends X-Gemini-API-Key header for client-side key override)
   │
-  ├─ Backend Pipeline:
+  ├─ Backend Pipeline (consistent across all 7 stages):
   │  ├─ Creates NodeRun document (pending → processing)
   │  ├─ Resolves input images (lineage chain via input_images)
   │  ├─ Calls Gemini AI (gemini-2.5-flash for text, gemini-2.5-flash-image for images)
+  │  ├─ If AI fails → falls back to PIL/placeholder generation
   │  ├─ Uploads generated images to ImageKit
-  │  ├─ Creates DesignImage documents with full lineage
+  │  ├─ Creates DesignImage documents with full lineage (input_images chain)
   │  ├─ Updates NodeRun (complete, output_image_ids)
   │  ├─ Updates node_summary on Garment (denormalized cache)
   │  └─ If earlier stage re-edited → bumps garment current_version
   │
-  ├─ Right Panel: StageOutputPanel
+  ├─ Right Panel: StageOutputPanel (or TechPackOutputPanel/PatternOutputPanel)
   │  ├─ Fetches images via listImagesForGarment(garmentId, {node_key})
   │  ├─ Filtering: All / Liked / Unliked / Starred with counts
-  │  ├─ Lightbox viewer for full-screen preview
+  │  ├─ Lightbox viewer for full-size preview
   │  ├─ Like/Star/Note/Download per image
+  │  ├─ Canvas preview mode (print stage only)
   │  └─ "Proceed to Next Stage" bar (or "Export" for final stage)
   │
-  └─ StageProgressBar: Click any stage to navigate directly
+  └─ StageProgressBar: Click any stage to navigate directly (checkmark for done)
 ```
 
 ---
@@ -554,26 +562,26 @@ GarmentDetailPage → clicks NodeCard → navigates to StageWorkspacePage
 
 | Area | Status | Notes |
 |------|--------|-------|
-| Frontend UI/UX | ✅ Complete | 5 pages, 13+ components, dark theme |
+| Frontend UI/UX | ✅ Complete | 5 pages, 22 components, dark theme |
 | Frontend ↔ Backend | ✅ Wired | Real API calls via StudioContext |
-| Backend CRUD API | ✅ Complete | ~30 endpoints, all tested |
+| Backend CRUD API | ✅ Complete | 31 endpoints, all tested |
 | MongoDB + Beanie | ✅ Working | Atlas, 4 collections |
 | ImageKit Uploads | ✅ Working | Real uploads to CDN |
 | Gemini AI Analysis | ✅ Working | Extracts palette/keywords/brief |
-| StartMoodboardModal | ✅ Complete | Async save with loading states + name input |
-| SeasonDetailPage | ✅ Complete | 8-tab image browser, analysis spinner, expandable brief |
-| Image Library (DesignImage) | ✅ Complete | Centralized CRUD + query + upload + aggregation |
-| Sketch Generation (Stage 1) | ✅ Complete | Gemini AI + full PIL procedural fallback |
-| Print Pattern (Stage 2) | ✅ Complete | Gemini AI + canvas passthrough fallback |
+| StartMoodboardModal | ✅ Complete | Async save with loading states + name input + sample guides |
+| SeasonDetailPage | ✅ Complete | 8-tab image browser, analysis spinner, expandable brief, delete images |
+| Image Library (DesignImage) | ✅ Complete | Centralized CRUD + query + upload + aggregation + star/like/notes |
+| Sketch Generation (Stage 1) | ✅ Complete | Gemini AI + full PIL procedural fallback + upload own sketch option |
+| Print Pattern (Stage 2) | ✅ Complete | Gemini AI + canvas passthrough fallback + real-time canvas preview |
 | First Render (Stage 3) | ✅ Complete | Two-step Gemini AI (text + image) + sketch passthrough |
-| Tech Pack (Stage 4) | ✅ Complete | PIL assembly with full document layout |
-| Pattern (Stage 5) | ✅ Complete | Hybrid AI (pattern pieces) + PIL (info panel) |
-| 3D Visualization (Stage 6) | ✅ Complete | Gemini AI + placeholder fallback |
-| Photoshoot (Stage 7) | ✅ Complete | Gemini AI + moodboard influence + placeholder fallback |
+| Tech Pack (Stage 4) | ✅ Complete | PIL assembly with full document layout + auto-pulled references |
+| Pattern (Stage 5) | ✅ Complete | Hybrid AI (pattern pieces) + PIL (info panel) + AI pre-filled measurements |
+| 3D Visualization (Stage 6) | ✅ Complete | Gemini AI + placeholder fallback + category-aware framing |
+| Photoshoot (Stage 7) | ✅ Complete | Gemini AI + moodboard influence + placeholder fallback + custom pose |
 | Versioning System | ✅ Complete | Auto-bumps version when earlier stages re-edited |
 | Image Lineage Tracking | ✅ Complete | InputImageRef chain across stages |
 | Category-Specific Configs | ✅ Complete | Construction, measurements, BOM per garment category |
-| Stage Workspace UI | ✅ Complete | Full-screen tool + output panel with filtering/lightbox/export |
+| Stage Workspace UI | ✅ Complete | Full-screen tool + output panel with filtering/lightbox/export/canvas preview |
 | Auth System | ⚠️ Configured | JWT + bcrypt in deps, no login endpoint or middleware |
 | Pinterest Import | ⚠️ Simulated | Creates placeholder tiles, not real import |
 | Delete Season/Garment UI | ⚠️ API only | Backend supports it, no frontend buttons |
@@ -586,11 +594,11 @@ GarmentDetailPage → clicks NodeCard → navigates to StageWorkspacePage
 ┌──────────────────────────────────────────────────────────┐
 │                Frontend (React 19)                        │
 │                                                          │
-│  Pages (5)                   Components (13+9)           │
+│  Pages (5)                   Components (22)             │
 │  ┌──────────────┐           ┌──────────────────────┐     │
 │  │ Landing      │           │ NavBar, Modal        │     │
 │  │ SeasonsList  │───────────│ SeasonCard           │     │
-│  │ SeasonDetail │           │ GarmentCard          │     │
+│  │ SeasonDetail │           │ GarmentCard (smart)  │     │
 │  │ GarmentDetail│           │ NodeCard             │     │
 │  │ StageWorkspc │           │ PaletteSwatches      │     │
 │  └──────────────┘           │ KeywordChips         │     │
@@ -601,12 +609,14 @@ GarmentDetailPage → clicks NodeCard → navigates to StageWorkspacePage
 │         │                   │ StageOutputPanel     │     │
 │         │                   │ StageProgressBar     │     │
 │         │                   │ ─────────────────── │     │
-│         │                   │ stages/              │     │
+│         │                   │ stages/ (9 tools)    │     │
 │         │                   │  SketchTool          │     │
 │         │                   │  PrintTool           │     │
 │         │                   │  RenderTool          │     │
 │         │                   │  TechPackTool        │     │
+│         │                   │  TechPackOutputPanel │     │
 │         │                   │  PatternTool         │     │
+│         │                   │  PatternOutputPanel  │     │
 │         │                   │  VisualizationTool   │     │
 │         │                   │  PhotoshootTool      │     │
 │         │                   └──────────────────────┘     │
@@ -622,11 +632,11 @@ GarmentDetailPage → clicks NodeCard → navigates to StageWorkspacePage
 ┌─────────────────┼────────────────────────────────────────┐
 │            Backend (FastAPI)                              │
 │                 │                                        │
-│  Routes (30+)   │    Services                            │
+│  Routes (31)    │    Services                            │
 │  ┌──────────────┴──────────────────┐                    │
 │  │ CRUD: seasons, garments,        │  ┌──────────┐     │
 │  │       moodboard, node_runs      │──│ ImageKit │     │
-│  │ Images: design_images (9 CRUD)  │  │ (upload) │     │
+│  │ Images: design_images (10 CRUD) │  │ (upload) │     │
 │  │ Stages: sketch, print, render,  │  └──────────┘     │
 │  │   techpack, pattern, vis, shoot │                    │
 │  └──────────────┬──────────────────┘  ┌──────────┐     │
@@ -648,6 +658,23 @@ GarmentDetailPage → clicks NodeCard → navigates to StageWorkspacePage
 
 ---
 
+## Deployment
+
+| Service | Platform | URL |
+|---------|----------|-----|
+| Backend | Railway | `https://design-studio-production-2400.up.railway.app` |
+| Frontend | Vercel | SPA rewrite configured in `vercel.json` |
+
+### Backend (Railway)
+- `Procfile`: `web: uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- `railway.toml`: Nixpacks builder, auto-restart on failure (5 retries)
+
+### Frontend (Vercel)
+- `vercel.json`: SPA rewrite rule `/(.*) -> /index.html`
+- Dev proxy: `/api` → `http://localhost:8000`
+
+---
+
 ## Key Decisions
 
 1. **Types match 1:1** — Frontend TS interfaces mirror backend Pydantic models exactly. No translation layer.
@@ -664,6 +691,9 @@ GarmentDetailPage → clicks NodeCard → navigates to StageWorkspacePage
 12. **Category-driven configuration** — Construction options, measurements, framing logic all vary by garment category.
 13. **Auth not wired** — JWT/bcrypt in deps but no login endpoint or middleware. Single fixed user.
 14. **Pinterest import simulated** — Creates `mood-placeholder:*` URIs, not real Pinterest API.
+15. **Client-side API key passthrough** — Frontend can override server AI key per request via `X-Gemini-API-Key` header.
+16. **Smart thumbnails** — GarmentCard fetches best available image (photoshoot > render > sketch) for card display.
+17. **Consistent AI generation pattern** — All 7 stages follow identical flow: NodeRun → Gemini → fallback → ImageKit → DesignImage → lineage → summary update.
 
 ---
 
@@ -686,7 +716,7 @@ Each garment moves through these stages sequentially:
 ## Things to Know
 
 - **`mockData.ts` is legacy** — App fetches real data from backend. `MOCK_SEASONS` and `MOCK_GARMENTS` are unused, but `NODE_DEFS` is actively imported by multiple components.
-- **`icons.svg` sprite is unused** — Leftover from Vite template.
+- **`icons.svg` sprite is unused** — Leftover from Vite template. Tabler Icons loaded via CDN instead.
 - **Backend logging** — `logging.basicConfig()` in `main.py`, routes log with `logging.getLogger("moodboard")`, `logging.getLogger("gemini")`.
 - **`imagekitio` init** — v5.8 takes only `private_key`, NOT `public_key` (broke in earlier versions).
 - **Beanie version pinning** — Must use `beanie==1.28.0`, `motor==3.6.1`, `pymongo==4.9.2`. Beanie 2.x breaks with Motor 3.7+.
@@ -696,5 +726,11 @@ Each garment moves through these stages sequentially:
 - **Node key `print` replaces `fabric`** — The original "fabric" node was renamed to "print" to better describe the task (upload motif + create seamless pattern).
 - **`todo.md` is the active task list** — 25 gap items (6 critical, 7 high, 7 medium, 3 low) comparing current code to the designed prototype in `read_only/`.
 - **`read_only/` is the source of truth** — Contains the HTML prototype (`design_studio_flow.html`), handover spec (`handover_for_harsh.md`), and standalone tool prototypes for stages 1-5.
-- **Deployment** — Railway-ready with `Procfile` and `railway.toml`.
+- **Deployment** — Railway (backend: `design-studio-production-2400.up.railway.app`), Vercel (frontend: SPA rewrite configured in `vercel.json`).
 - **Code duplication** — Versioning logic and NodeRun creation pattern is duplicated across all 7 stage routes.
+- **AI generation pattern** — All 7 stages follow the same pattern: accept API key via `X-Gemini-API-Key` header (fallback to server `AI_KEY`), create NodeRun, call Gemini, fall back to PIL, upload to ImageKit, create DesignImage with lineage, update NodeRun + node_summary.
+- **SCHEMA.md is outdated** — Documents 3 collections but actual codebase has 4 (`design_images` missing). Also missing `category`, `style_number`, `current_version` fields on Garment, and `version`, `code`, `output_image_ids` on NodeRun.
+- **Smart thumbnail on GarmentCard** — Fetches best image from the garment's image library (priority: photoshoot > render > sketch) for the card thumbnail.
+- **Canvas preview in StageOutputPanel** — Print stage output panel shows a real-time canvas preview alongside the image grid.
+- **Google Fonts** — Three fonts loaded: Cormorant Garamond (serif display), Inter (sans body), JetBrains Mono (mono code).
+- **No external state library** — Pure React Context + useState, no Redux/Zustand/TanStack Query.
