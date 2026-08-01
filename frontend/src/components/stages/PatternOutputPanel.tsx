@@ -98,7 +98,10 @@ export function PatternOutputPanel({
             {selected ? (
               <>
                 {/* Image — constrained to fill available space */}
-                <div className="flex flex-1 items-center justify-center overflow-hidden p-4">
+                <div className="relative flex flex-1 items-center justify-center overflow-hidden p-4">
+                  <span className="absolute right-6 top-6 z-10 rounded-full bg-red-500/90 px-3 py-1 text-[11px] font-bold uppercase text-white shadow-lg">
+                    Dummy Data
+                  </span>
                   <img
                     src={selected.url}
                     alt={selected.image_code}
