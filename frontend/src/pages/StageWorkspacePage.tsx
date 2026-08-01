@@ -84,8 +84,21 @@ export function StageWorkspacePage() {
 
   const handleToggleLike = async (imageId: string) => {
     try {
-      const updated = await toggleLike(imageId);
-      setImages((prev) => prev.map((img) => (img.id === imageId ? updated : img)));
+      const target = images.find((img) => img.id === imageId);
+      if (!target) return;
+
+      if (target.liked) {
+        const updated = await toggleLike(imageId);
+        setImages((prev) => prev.map((img) => (img.id === imageId ? updated : img)));
+      } else {
+        const currentlyLiked = images.find((img) => img.liked);
+        if (currentlyLiked) {
+          const unliked = await toggleLike(currentlyLiked.id);
+          setImages((prev) => prev.map((img) => (img.id === currentlyLiked.id ? unliked : img)));
+        }
+        const updated = await toggleLike(imageId);
+        setImages((prev) => prev.map((img) => (img.id === imageId ? updated : img)));
+      }
     } catch (e) {
       console.error("Failed to toggle like:", e);
     }
