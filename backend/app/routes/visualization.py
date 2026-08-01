@@ -36,7 +36,6 @@ class VisualizationGenerateRequest(BaseModel):
     aspect_ratio: str = "1:1"
     additional_notes: str = ""
     num_outputs: int = 1
-    note: str = ""
 
 
 NEGATIVE_PROMPT = (
@@ -157,8 +156,8 @@ async def generate_visualization(
     """
     logger.info("=" * 60)
     logger.info("[VIS] POST /api/garments/%s/nodes/visualization/generate", garment_id)
-    logger.info("[VIS] Request body: render_image_url=%s, model_avatar=%s, background=%s, lighting=%s, num_outputs=%d, note=%s",
-                body.render_image_url, body.model_avatar, body.background, body.lighting, body.num_outputs, body.note or "(none)")
+    logger.info("[VIS] Request body: render_image_url=%s, model_avatar=%s, background=%s, lighting=%s, num_outputs=%d",
+                body.render_image_url, body.model_avatar, body.background, body.lighting, body.num_outputs)
 
     garment = await Garment.get(garment_id)
     if not garment:
@@ -359,7 +358,6 @@ async def generate_visualization(
             imagekit_file_id=ik_file_id,
             file_size_bytes=len(img_data["bytes"]),
             file_format="png",
-            note=body.note,
             created_at=now,
             updated_at=now,
         )

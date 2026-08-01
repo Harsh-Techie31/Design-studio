@@ -292,7 +292,6 @@ export interface VisualizationGenerateParams {
   aspect_ratio: string;
   additional_notes: string;
   num_outputs: number;
-  note: string;
 }
 
 export interface VisualizationGenerateResponse {
