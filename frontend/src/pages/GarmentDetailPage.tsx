@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { NavBar } from "../components/NavBar";
 import { NodeCard } from "../components/NodeCard";
@@ -6,6 +7,7 @@ import { PlaceholderTile } from "../components/PlaceholderTile";
 import { useStudio } from "../state/StudioContext";
 import { NODE_DEFS } from "../data/mockData";
 import { seedFromId } from "../types";
+import { listImagesForGarment } from "../api/designImages";
 
 export function GarmentDetailPage() {
   const { seasonId, garmentId } = useParams<{ seasonId: string; garmentId: string }>();
@@ -31,6 +33,26 @@ export function GarmentDetailPage() {
 
   const seed = seedFromId(garment.id);
   const palette = season.moodboard.analysis.palette;
+  const [bestImage, setBestImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchBestImage = async () => {
+      try {
+        const allImages = await listImagesForGarment(garment.id);
+        if (cancelled || allImages.length === 0) return;
+        for (const key of ["photoshoot", "render", "sketch"]) {
+          const match = allImages.find((img) => img.node_key === key);
+          if (match?.url) {
+            setBestImage(match.url);
+            return;
+          }
+        }
+      } catch {}
+    };
+    fetchBestImage();
+    return () => { cancelled = true; };
+  }, [garment.id]);
 
   return (
     <div className="min-h-screen bg-ink text-bone">
@@ -45,7 +67,15 @@ export function GarmentDetailPage() {
       <main className="mx-auto max-w-6xl px-6 py-14">
         <div className="mb-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-5">
-            <PlaceholderTile seed={seed} className="h-20 w-20 rounded-xl" />
+            {bestImage ? (
+              <img
+                src={bestImage}
+                alt={garment.name}
+                className="h-20 w-20 rounded-xl object-cover"
+              />
+            ) : (
+              <PlaceholderTile seed={seed} className="h-20 w-20 rounded-xl" />
+            )}
             <div>
               <h1 className="font-display text-4xl text-bone">{garment.name}</h1>
               <p className="mt-1 text-sm text-bone-dim">
