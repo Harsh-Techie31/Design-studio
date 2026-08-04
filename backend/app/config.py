@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     jwt_secret: str = "change-me"
 
     ai_key: str = ""
+    removebg_api_key: str = ""
 
     vertex_base_url: str = "https://aiplatform.googleapis.com/v1/publishers/google/models"
 

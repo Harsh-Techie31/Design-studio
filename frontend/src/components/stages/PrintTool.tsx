@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { API_BASE } from "../../api/client";
+import { removeMotifBackground } from "../../api/designImages";
 import type { Garment, Season, DesignImage } from "../../types";
 
 export interface PrintState {
   motifImage: string | null;
+  processedMotifImage: string | null;
   motifFile: File | null;
   scale: number;
   rotation: number;
@@ -13,6 +15,7 @@ export interface PrintState {
   fabricType: string;
   bgColor: string;
   canvasSize: 1024 | 2048;
+  isRemovingBg: boolean;
 }
 
 interface PrintToolProps {
@@ -47,6 +50,7 @@ const FABRIC_TYPES = [
 export function PrintTool({ garment, season, onGenerated, onStateChange, canvasRef, onStartGenerating }: PrintToolProps) {
   // Motif state
   const [motifImage, setMotifImage] = useState<string | null>(null);
+  const [processedMotifImage, setProcessedMotifImage] = useState<string | null>(null);
   const [motifFile, setMotifFile] = useState<File | null>(null);
 
   // Real-time controls
@@ -63,6 +67,7 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
 
   // UI state
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isRemovingBg, setIsRemovingBg] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState("");
 
@@ -75,6 +80,7 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
   useEffect(() => {
     onStateChange?.({
       motifImage,
+      processedMotifImage,
       motifFile,
       scale,
       rotation,
@@ -84,9 +90,11 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
       fabricType,
       bgColor,
       canvasSize,
+      isRemovingBg,
     });
   }, [
     motifImage,
+    processedMotifImage,
     motifFile,
     scale,
     rotation,
@@ -96,6 +104,7 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
     fabricType,
     bgColor,
     canvasSize,
+    isRemovingBg,
     onStateChange,
   ]);
 
@@ -109,18 +118,41 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
       return;
     }
     if (!file.type.startsWith("image/")) {
-      setError("Please upload an image file");
+      setError("Please upload an image file (JPG, PNG, or WebP)");
+      return;
+    }
+    if (file.type === "image/svg+xml") {
+      setError("SVG files are not supported. Please use JPG, PNG, or WebP");
       return;
     }
 
     setError(null);
     setMotifFile(file);
+    setProcessedMotifImage(null);
 
     const reader = new FileReader();
     reader.onload = (ev) => {
       setMotifImage(ev.target?.result as string);
     };
     reader.readAsDataURL(file);
+  };
+
+  // ─── Remove background ───────────────────────────────────────────
+
+  const handleRemoveBackground = async () => {
+    if (!motifImage) return;
+    setError(null);
+    setIsRemovingBg(true);
+    try {
+      const result = await removeMotifBackground(motifImage);
+      if (result.image) {
+        setProcessedMotifImage(result.image);
+      }
+    } catch {
+      setError("Motif not suitable for background removal. Continuing with original image.");
+    } finally {
+      setIsRemovingBg(false);
+    }
   };
 
   // ─── Export canvas to base64 ──────────────────────────────────────
@@ -192,7 +224,7 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
           type="file"
           ref={fileInputRef}
           onChange={handleFileUpload}
-          accept="image/*"
+          accept="image/jpeg,image/png,image/webp"
           className="hidden"
         />
         {motifImage ? (
@@ -223,6 +255,29 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
           </button>
         )}
       </Section>
+
+      {/* Remove Background */}
+      {motifImage && (
+        <div className="mb-6 border-t border-line pt-5">
+          <button
+            onClick={handleRemoveBackground}
+            disabled={isRemovingBg}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-line bg-ink-soft px-4 py-2.5 text-sm text-muted transition-all hover:border-brass/40 hover:text-bone disabled:opacity-50"
+          >
+            {isRemovingBg ? (
+              <>
+                <i className="ti ti-loader-2 animate-spin" />
+                <span>Removing background...</span>
+              </>
+            ) : (
+              <>
+                <i className="ti ti-eraser" />
+                <span>Remove Background</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* 2. Real-time Controls */}
       <Section label="2. Pattern Controls" hint="Real-time">

@@ -41,6 +41,7 @@ export function StageWorkspacePage() {
   // Print canvas state
   const [printState, setPrintState] = useState<PrintState>({
     motifImage: null,
+    processedMotifImage: null,
     motifFile: null,
     scale: 1.0,
     rotation: 0,
@@ -50,6 +51,7 @@ export function StageWorkspacePage() {
     fabricType: "cotton",
     bgColor: "#ffffff",
     canvasSize: 1024,
+    isRemovingBg: false,
   });
 
   // Render state
@@ -164,7 +166,17 @@ export function StageWorkspacePage() {
 
   // Canvas preview for print stage
   const printCanvasPreview = currentStage === "print" ? (
-    <PrintCanvasPreview state={printState} canvasRef={canvasRef} />
+    <div className="relative">
+      <PrintCanvasPreview state={printState} canvasRef={canvasRef} />
+      {printState.isRemovingBg && (
+        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-ink/60 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-2">
+            <i className="ti ti-loader-2 animate-spin text-2xl text-brass" />
+            <span className="text-xs text-muted">Removing background...</span>
+          </div>
+        </div>
+      )}
+    </div>
   ) : undefined;
 
   if (!season || !garment) {
@@ -337,9 +349,11 @@ function PrintCanvasPreview({
   state: PrintState;
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
 }) {
+  const activeImage = state.processedMotifImage || state.motifImage;
+
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || !state.motifImage) return;
+    if (!canvas || !activeImage) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -409,9 +423,9 @@ function PrintCanvasPreview({
         }
       }
     };
-    img.src = state.motifImage;
+    img.src = activeImage;
   }, [
-    state.motifImage,
+    activeImage,
     state.scale,
     state.rotation,
     state.spacingX,
@@ -421,7 +435,7 @@ function PrintCanvasPreview({
     canvasRef,
   ]);
 
-  if (!state.motifImage) {
+  if (!activeImage) {
     return (
       <div className="flex flex-col items-center gap-3 text-center">
         <i className="ti ti-photo text-4xl text-muted" />

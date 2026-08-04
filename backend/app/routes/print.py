@@ -21,6 +21,13 @@ logger = logging.getLogger("print_studio")
 router = APIRouter(tags=["print"])
 
 
+# ─── Request models ──────────────────────────────────────────────────
+
+
+class RemoveBackgroundRequest(BaseModel):
+    image: str  # base64 data URL
+
+
 # ─── Request model ──────────────────────────────────────────────────
 
 
@@ -37,6 +44,78 @@ class PrintGenerateRequest(BaseModel):
     rotation: float = 0.0
     note: str = ""
     moodboard_palette: list[str] = []
+
+
+# ─── Remove Background endpoint ─────────────────────────────────────
+
+
+@router.post("/api/motif/remove-background")
+async def remove_background(body: RemoveBackgroundRequest):
+    """
+    Remove the background from a motif image using remove.bg API.
+    Returns the processed image as a base64 data URL.
+    """
+    api_key = settings.removebg_api_key
+    if not api_key:
+        raise HTTPException(status_code=500, detail="remove.bg API key not configured")
+
+    # Extract base64 data
+    if body.image.startswith("data:"):
+        header, b64data = body.image.split(",", 1)
+        # Detect mime type from header
+        mime = header.split(":")[1].split(";")[0] if ":" in header else "image/png"
+    else:
+        b64data = body.image
+        mime = "image/png"
+
+    image_bytes = base64.b64decode(b64data)
+    logger.info(f"remove-bg: decoded {len(image_bytes)} bytes, first 8: {image_bytes[:8].hex()}")
+
+    # Validate file signature — remove.bg rejects non-image files
+    valid_signatures = [
+        b'\x89PNG',   # PNG
+        b'\xff\xd8\xff',  # JPEG
+        b'RIFF',      # WebP (RIFF container)
+    ]
+    if not any(image_bytes[:len(sig)] == sig for sig in valid_signatures):
+        raise HTTPException(
+            status_code=400,
+            detail="File is not a valid image (JPG, PNG, or WebP). Please upload an image file."
+        )
+
+    image_file = io.BytesIO(image_bytes)
+
+    # Call remove.bg API — use multipart file upload for reliability
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        try:
+            resp = await client.post(
+                "https://api.remove.bg/v1.0/removebg",
+                headers={"X-Api-Key": api_key},
+                files={"image_file": ("motif.png", image_file, "image/png")},
+                data={"size": "auto"},
+            )
+        except httpx.RequestError as e:
+            logger.error(f"remove.bg request failed: {e}")
+            raise HTTPException(status_code=502, detail="Failed to connect to remove.bg API")
+
+    if resp.status_code != 200:
+        error_detail = resp.text[:500]
+        logger.error(f"remove.bg returned status {resp.status_code}: {error_detail}")
+        try:
+            err = resp.json()
+            msg = err.get("errors", [{}])[0].get("title", "Background removal failed")
+        except Exception:
+            msg = f"Background removal failed (status {resp.status_code})"
+        raise HTTPException(status_code=resp.status_code, detail=msg)
+
+    # Encode result as base64 data URL
+    result_b64 = base64.b64encode(resp.content).decode()
+    result_url = f"data:image/png;base64,{result_b64}"
+
+    return {
+        "success": True,
+        "image": result_url,
+    }
 
 
 # ─── Gemini prompt builder ──────────────────────────────────────────

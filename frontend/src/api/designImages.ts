@@ -88,6 +88,25 @@ export async function getImageCountsForSeason(
   return request(`/images/season/${seasonId}/counts`);
 }
 
+// ─── Motif background removal ───────────────────────────────────────
+
+export async function removeMotifBackground(
+  imageBase64: string
+): Promise<{ success: boolean; image: string }> {
+  const res = await fetch(`${API_BASE}/api/motif/remove-background`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ image: imageBase64 }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Background removal failed" }));
+    throw new Error(err.detail || "Background removal failed");
+  }
+
+  return res.json();
+}
+
 // ─── Sketch generation ─────────────────────────────────────────────
 
 export interface SketchGenerateParams {
