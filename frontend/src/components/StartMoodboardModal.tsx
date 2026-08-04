@@ -199,11 +199,11 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
             <i className="ti ti-check text-xs" />
           </span>
-          <div className="min-w-[170px]">
+          <div className="shrink-0">
             <p className="text-sm font-medium text-bone">Recommended</p>
             <p className="text-xs text-muted">One cohesive style & mood</p>
           </div>
-          <div className="grid flex-1 grid-cols-4 gap-2">
+          <div className="grid flex-1 grid-cols-4 gap-1.5 sm:grid-cols-6">
             {RECOMMENDED_MOODBOARD_SAMPLES.map((src, i) => (
               <div key={i} className="aspect-square overflow-hidden rounded-md">
                 <img src={src} alt="" className="h-full w-full object-cover" />
@@ -215,11 +215,11 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500/15 text-red-400">
             <i className="ti ti-x text-xs" />
           </span>
-          <div className="min-w-[170px]">
+          <div className="shrink-0">
             <p className="text-sm font-medium text-bone">Avoid</p>
             <p className="text-xs text-muted">Mixed styles, inconsistent tone</p>
           </div>
-          <div className="grid flex-1 grid-cols-4 gap-2">
+          <div className="grid flex-1 grid-cols-4 gap-1.5 sm:grid-cols-6">
             {AVOID_MOODBOARD_SAMPLES.map((src, i) => (
               <div
                 key={i}
@@ -233,25 +233,27 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
       </div>
 
       {images.length > 0 && (
-        <div className="mt-5 grid grid-cols-4 gap-2 sm:grid-cols-6">
-          {images.map((img, i) => (
-            <div key={i} className="group relative aspect-square overflow-hidden rounded-lg">
-              {img.url.startsWith("mood-placeholder:") ? (
-                <PlaceholderTile seed={i + 1} index={i} className="h-full w-full" />
-              ) : (
-                <img src={img.url} alt="" className="h-full w-full object-cover" />
-              )}
-              {!saving && (
-                <button
-                  onClick={() => removeAt(i)}
-                  aria-label="Remove image"
-                  className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-xs text-bone opacity-0 transition-opacity group-hover:opacity-100"
-                >
-                  <i className="ti ti-x" />
-                </button>
-              )}
-            </div>
-          ))}
+        <div className="mt-5 max-h-[240px] overflow-y-auto pr-1">
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+            {images.map((img, i) => (
+              <div key={i} className="group relative aspect-square overflow-hidden rounded-lg">
+                {img.url.startsWith("mood-placeholder:") ? (
+                  <PlaceholderTile seed={i + 1} index={i} className="h-full w-full" />
+                ) : (
+                  <img src={img.url} alt="" className="h-full w-full object-cover" />
+                )}
+                {!saving && (
+                  <button
+                    onClick={() => removeAt(i)}
+                    aria-label="Remove image"
+                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-xs text-bone opacity-0 transition-opacity group-hover:opacity-100"
+                  >
+                    <i className="ti ti-x" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

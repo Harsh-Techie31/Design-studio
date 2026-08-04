@@ -22,10 +22,10 @@ export function Modal({
       onClick={onClose}
     >
       <div
-        className={`w-full ${maxWidthClass} rounded-xl border border-line bg-surface p-6 shadow-2xl`}
+        className={`flex max-h-[90vh] w-full flex-col ${maxWidthClass} rounded-xl border border-line bg-surface shadow-2xl`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center justify-between px-6 pt-6 pb-0">
           <h2 className="font-display text-2xl text-bone">{title}</h2>
           <button
             onClick={onClose}
@@ -35,7 +35,7 @@ export function Modal({
             <i className="ti ti-x" />
           </button>
         </div>
-        {children}
+        <div className="overflow-y-auto px-6 pt-4 pb-6">{children}</div>
       </div>
     </div>
   );
