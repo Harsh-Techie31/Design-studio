@@ -6,7 +6,7 @@ export const NODE_DEFS: NodeDef[] = [
   { key: "render", number: 3, label: "Render", hint: "Combine sketch + fabric into a colored flat render" },
   { key: "techPack", number: 4, label: "Tech Pack", hint: "Construction spec, measurements, BOM" },
   { key: "pattern", number: 5, label: "Pattern", hint: "Technical flat pattern" },
-  { key: "visualization", number: 6, label: "3D Visualization", hint: "3D mockup of the garment" },
+  { key: "visualization", number: 6, label: "Mockup", hint: "3D mockup of the garment" },
   { key: "photoshoot", number: 7, label: "Photoshoot", hint: "Final photoshoot render on model" },
 ];
 

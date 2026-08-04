@@ -301,7 +301,7 @@ export async function generatePattern(
   return res.json();
 }
 
-// ─── 3D Visualization generation ────────────────────────────────────
+// ─── Mockup generation ─────────────────────────────────────────────
 
 export interface VisualizationGenerateParams {
   render_image_url: string;

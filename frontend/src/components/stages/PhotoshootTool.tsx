@@ -77,7 +77,7 @@ export function PhotoshootTool({ garment, season, onGenerated, onStartGenerating
   const handleGenerate = async () => {
     onStartGenerating?.(numOutputs);
     if (!vizImage) {
-      setError("Please select a 3D visualization first");
+      setError("Please select a mockup first");
       return;
     }
     setError(null);
@@ -141,13 +141,13 @@ export function PhotoshootTool({ garment, season, onGenerated, onStartGenerating
         </div>
       </Section>
 
-      {/* Section B: 3D Visualization Reference */}
-      <Section label="B. 3D Visualization Reference" required>
+      {/* Section B: Mockup Reference */}
+      <Section label="B. Mockup Reference" required>
         {vizImage ? (
           <div className="relative">
             <img
               src={vizImage.url}
-              alt="Selected 3D visualization"
+              alt="Selected mockup"
               className="h-32 w-full rounded-lg border border-line object-contain"
             />
             <button
@@ -158,7 +158,7 @@ export function PhotoshootTool({ garment, season, onGenerated, onStartGenerating
             </button>
             <div className="mt-1.5 font-mono text-[11px] text-muted">{vizImage.image_code}</div>
             <button onClick={() => setVizPickerOpen(true)} className="mt-1 text-[11px] text-brass hover:text-brass-soft">
-              Switch visualization
+              Switch mockup
             </button>
           </div>
         ) : (
@@ -167,7 +167,7 @@ export function PhotoshootTool({ garment, season, onGenerated, onStartGenerating
             className="flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed border-line bg-ink-soft p-6 transition-colors hover:border-brass/30"
           >
             <i className="ti ti-cube text-2xl text-muted" />
-            <span className="text-sm text-muted">Choose 3D Visualization</span>
+            <span className="text-sm text-muted">Choose Mockup</span>
             <span className="text-[11px] text-muted">Pick from library</span>
           </button>
         )}
@@ -304,7 +304,7 @@ export function PhotoshootTool({ garment, season, onGenerated, onStartGenerating
         }}
         seasonId={season.id}
         imageType="3d"
-        title="Choose 3D Visualization"
+        title="Choose Mockup"
       />
     </aside>
   );

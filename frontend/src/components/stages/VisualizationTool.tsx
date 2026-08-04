@@ -206,7 +206,7 @@ export function VisualizationTool({ garment, season, onGenerated, onStartGenerat
             if (e.target.value.length <= 200) setAdditionalNotes(e.target.value);
           }}
           maxLength={200}
-          placeholder="Any special notes for the 3D visualization..."
+          placeholder="Any special notes for the mockup..."
           className="w-full min-h-[60px] rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none resize-none"
         />
         <div className={`text-right text-[11px] mt-1 ${additionalNotes.length > 180 ? "text-brass" : "text-muted"}`}>
@@ -247,12 +247,12 @@ export function VisualizationTool({ garment, season, onGenerated, onStartGenerat
           {isGenerating ? (
             <>
               <i className="ti ti-loader-2 animate-spin" />
-              <span>Generating Visualization...</span>
+              <span>Generating Mockup...</span>
             </>
           ) : (
             <>
               <i className="ti ti-sparkles" />
-              <span>Generate 3D Visualization</span>
+              <span>Generate Mockup</span>
             </>
           )}
         </button>
