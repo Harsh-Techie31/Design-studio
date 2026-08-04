@@ -163,10 +163,6 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating, on
     }
   };
 
-  const promptLength = promptText.length;
-  const isPromptGold = promptLength >= 180;
-  const isPromptOver = promptLength > 200;
-
   return (
     <aside className="flex h-full w-full flex-col overflow-y-auto bg-surface p-6 lg:w-[480px]">
       {/* Upload your own sketch */}
@@ -238,34 +234,6 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating, on
               {desc}
             </Chip>
           ))}
-        </div>
-        <div className="relative">
-          <textarea
-            value={promptText}
-            onChange={(e) => {
-              if (e.target.value.length <= 220) setPromptText(e.target.value);
-            }}
-            maxLength={220}
-            placeholder="E.g. Double breasted waist with tailored fit details..."
-            className={`w-full resize-none rounded-lg border bg-ink-soft p-3 text-sm text-bone placeholder:text-muted focus:outline-none ${
-              isPromptOver
-                ? "border-red-500"
-                : isPromptGold
-                ? "border-amber-500"
-                : "border-line focus:border-brass/60"
-            }`}
-            rows={3}
-          />
-          <div className="mt-1 flex justify-between px-1">
-            <span className="text-[11px] text-muted">Appends to prompt</span>
-            <span
-              className={`text-[11px] font-mono ${
-                isPromptOver ? "text-red-500" : isPromptGold ? "text-amber-500" : "text-muted"
-              }`}
-            >
-              {promptLength}/200
-            </span>
-          </div>
         </div>
       </Section>
 
