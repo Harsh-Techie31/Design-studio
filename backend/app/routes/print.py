@@ -126,16 +126,24 @@ def _build_gemini_prompt(
     background_color: str,
     **_,
 ) -> str:
-    prompt = (
-        f"Transform the provided pattern into a photorealistic, high-quality seamless fabric texture. "
-        f"Material: {fabric_type} with its authentic weave, sheen, and micro-textural characteristics. "
-        f"Base Color: {background_color}. "
-        f"Visual Style: 1:1 aspect ratio macro studio photography of a perfectly flat fabric swatch. "
-        f"Lighting & Geometry: Even, flat studio illumination with absolutely zero shadows, zero drape, and zero folds. "
-        f"STRICT INSTRUCTIONS: The output MUST tile perfectly both horizontally and vertically with no visible seams. "
-        f"Do not alter the scale or geometry of the underlying print. Completely fill the frame with the flat fabric texture."
-    )
-    return prompt
+    lines = [
+        "Transform the provided pattern into a photorealistic, high-quality seamless fabric texture.",
+    ]
+
+    if fabric_type and fabric_type != "none":
+        lines.append(
+            f"Material: {fabric_type} with its authentic weave, sheen, and micro-textural characteristics."
+        )
+
+    lines.extend([
+        f"Base Color: {background_color}.",
+        "Visual Style: 1:1 aspect ratio macro studio photography of a perfectly flat fabric swatch.",
+        "Lighting & Geometry: Even, flat studio illumination with absolutely zero shadows, zero drape, and zero folds.",
+        "STRICT INSTRUCTIONS: The output MUST tile perfectly both horizontally and vertically with no visible seams.",
+        "Do not alter the scale or geometry of the underlying print. Completely fill the frame with the flat fabric texture.",
+    ])
+
+    return " ".join(lines)
 
 
 NEGATIVE_PROMPT = (

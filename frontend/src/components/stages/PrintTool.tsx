@@ -35,6 +35,7 @@ const REPEAT_TYPES = [
 ];
 
 const FABRIC_TYPES = [
+  { value: "none", label: "None", desc: "No fabric texture" },
   { value: "cotton", label: "Cotton", desc: "Classic woven, breathable" },
   { value: "silk", label: "Silk", desc: "Luxurious, natural sheen" },
   { value: "linen", label: "Linen", desc: "Textured, relaxed" },
