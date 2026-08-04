@@ -116,7 +116,7 @@ export function PatternOutputPanel({
               <>
                 {/* Image — constrained to fill available space */}
                 <div className="relative flex flex-1 items-center justify-center overflow-hidden p-4">
-                  <span className="absolute right-6 top-6 z-10 rounded-full bg-red-500/90 px-3 py-1 text-[11px] font-bold uppercase text-white shadow-lg">
+                  <span className="absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-red-500/50 px-6 py-3 text-3xl font-bold uppercase text-white shadow-lg pointer-events-none">
                     Dummy Data
                   </span>
                   <img
