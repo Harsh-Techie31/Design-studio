@@ -370,8 +370,8 @@ function PrintCanvasPreview({
 
       const tileW = Math.max(10, img.width * state.scale);
       const tileH = Math.max(10, img.height * state.scale);
-      const cellW = tileW + state.spacingX;
-      const cellH = tileH + state.spacingY;
+      const cellW = Math.max(1, tileW + state.spacingX);
+      const cellH = Math.max(1, tileH + state.spacingY);
 
       const cols = Math.ceil(displaySize / cellW) + 2;
       const rows = Math.ceil(displaySize / cellH) + 2;

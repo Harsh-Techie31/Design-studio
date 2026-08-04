@@ -276,7 +276,7 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
           label="H-Gap"
           value={spacingX}
           onChange={setSpacingX}
-          min={0}
+          min={-100}
           max={100}
           step={1}
           displayValue={`${spacingX}px`}
@@ -287,7 +287,7 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
           label="V-Gap"
           value={spacingY}
           onChange={setSpacingY}
-          min={0}
+          min={-100}
           max={100}
           step={1}
           displayValue={`${spacingY}px`}
