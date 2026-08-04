@@ -142,7 +142,7 @@ async def _generate_photoshoot_image(
                 "responseModalities": ["TEXT", "IMAGE"],
             },
         }
-        url = f"{settings.vertex_base_url}/gemini-2.5-flash-image:generateContent?key={api_key}"
+        url = f"{settings.vertex_base_url}/gemini-3.1-flash-image:generateContent?key={api_key}"
         resp = await client.post(url, json=payload)
 
         if resp.status_code != 200:
@@ -338,7 +338,7 @@ async def generate_photoshoot(
                 else:
                     logger.warning("[SHOOT] Gemini output %d: no image returned", idx + 1)
             if generated_images:
-                run.ai.model = "gemini-2.5-flash-image"
+                run.ai.model = "gemini-3.1-flash-image"
                 run.ai.prompt = prompt
                 logger.info("[SHOOT] Gemini generation complete: %d images", len(generated_images))
         except Exception as e:

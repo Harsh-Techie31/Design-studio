@@ -278,7 +278,7 @@ async def _generate_pattern_image(
                 "responseModalities": ["TEXT", "IMAGE"],
             },
         }
-        url = f"{settings.vertex_base_url}/gemini-2.5-flash-image:generateContent?key={api_key}"
+        url = f"{settings.vertex_base_url}/gemini-3.1-flash-image:generateContent?key={api_key}"
         resp = await client.post(url, json=payload)
 
         if resp.status_code != 200:
@@ -599,7 +599,7 @@ async def generate_pattern(
                 api_key, prompt, techpack_b64, techpack_mime,
             )
             if ai_image_bytes:
-                run.ai.model = "gemini-2.5-flash-image"
+                run.ai.model = "gemini-3.1-flash-image"
                 run.ai.prompt = prompt
                 logger.info("AI pattern generation succeeded")
         except Exception as e:

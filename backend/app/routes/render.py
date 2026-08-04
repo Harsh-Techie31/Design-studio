@@ -200,7 +200,7 @@ async def _generate_image(
                 "responseModalities": ["TEXT", "IMAGE"],
             },
         }
-        url = f"{settings.vertex_base_url}/gemini-2.5-flash-image:generateContent?key={api_key}"
+        url = f"{settings.vertex_base_url}/gemini-3.1-flash-image:generateContent?key={api_key}"
         resp = await client.post(url, json=payload)
 
         if resp.status_code != 200:
@@ -383,7 +383,7 @@ async def generate_render(
                 except Exception as e:
                     logger.error(f"Gemini image generation failed on iteration {idx}: {e}")
 
-            run.ai.model = "gemini-2.5-flash-image"
+            run.ai.model = "gemini-3.1-flash-image"
         except Exception as e:
             logger.error(f"Gemini render generation failed: {e}")
 

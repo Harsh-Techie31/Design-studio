@@ -192,7 +192,7 @@ async def _generate_with_gemini(
             },
         }
 
-        url = f"{settings.vertex_base_url}/gemini-2.5-flash-image:generateContent?key={api_key}"
+        url = f"{settings.vertex_base_url}/gemini-3.1-flash-image:generateContent?key={api_key}"
 
         logger.info("Calling Gemini 2.5 Flash Image for pattern generation...")
         resp = await client.post(url, json=payload)
@@ -312,7 +312,7 @@ async def generate_print(
             img_bytes = await _generate_with_gemini(api_key, body.canvas_image, prompt)
             if img_bytes:
                 source = "ai"
-                run.ai.model = "gemini-2.5-flash-image"
+                run.ai.model = "gemini-3.1-flash-image"
                 run.ai.prompt = prompt
                 logger.info(f"NEW PROMPT | {prompt[:200]}")
         except Exception as e:
