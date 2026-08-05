@@ -194,8 +194,8 @@ export function PhotoshootTool({ garment, season, onGenerated, onStartGenerating
             }`}
           >
             <span
-              className={`inline-block h-3.5 w-3.5 transform rounded-full bg-ink transition-transform ${
-                moodboardReady && moodboardInfluence ? "translate-x-4.5" : "translate-x-1"
+              className={`inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform ${
+                moodboardReady && moodboardInfluence ? "" : ""
               }`}
               style={{ transform: moodboardReady && moodboardInfluence ? "translateX(18px)" : "translateX(2px)" }}
             />
