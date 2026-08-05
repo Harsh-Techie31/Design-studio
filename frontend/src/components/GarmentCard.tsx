@@ -60,7 +60,7 @@ export function GarmentCard({
   return (
     <Link
       to={`/seasons/${garment.season_id}/garments/${garment.id}`}
-      className="group relative block overflow-hidden border border-line bg-surface transition-all hover:border-vermillion/40 hover:bg-surface-hi"
+      className="group relative block overflow-hidden border border-line bg-surface transition-all hover:border-accent/40 hover:bg-surface-hi"
     >
       {bestImage ? (
         <div className="aspect-[4/3] w-full overflow-hidden bg-ink-soft">
@@ -76,7 +76,7 @@ export function GarmentCard({
 
       <div className="p-4">
         <div className="flex items-start justify-between">
-          <h3 className="font-display text-base font-semibold tracking-tight text-bone transition-colors group-hover:text-vermillion">
+          <h3 className="font-display text-base font-semibold tracking-tight text-bone transition-colors group-hover:text-accent">
             {garment.name}
           </h3>
           <span className="font-mono text-[10px] text-muted">
@@ -85,7 +85,7 @@ export function GarmentCard({
         </div>
         <div className="mt-2.5 h-0.5 w-full overflow-hidden bg-line-soft">
           <div
-            className="h-full bg-vermillion transition-all duration-500"
+            className="h-full bg-accent transition-all duration-500"
             style={{ width: `${(usedCount / NODE_DEFS.length) * 100}%` }}
           />
         </div>
@@ -93,7 +93,7 @@ export function GarmentCard({
       {onDelete && (
         <button
           onClick={handleDelete}
-          className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center bg-ink/80 text-muted transition-all hover:bg-vermillion/20 hover:text-vermillion"
+          className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center bg-ink/80 text-muted transition-all hover:bg-accent/20 hover:text-accent"
           title="Delete garment"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

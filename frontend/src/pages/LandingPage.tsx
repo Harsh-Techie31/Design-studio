@@ -28,7 +28,7 @@ export function LandingPage() {
         </span>
         <Link
           to="/seasons"
-          className="border border-line px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-bone-dim transition-colors hover:border-vermillion hover:text-vermillion"
+          className="border border-line px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-bone-dim transition-colors hover:border-accent hover:text-accent"
         >
           Enter Studio
         </Link>
@@ -44,7 +44,7 @@ export function LandingPage() {
 
         <div className="relative mx-auto flex min-h-[calc(100svh-60px)] max-w-7xl flex-col justify-center px-8">
           <div className="max-w-3xl">
-            <span className="mb-8 inline-block border border-vermillion/40 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.25em] text-vermillion">
+            <span className="mb-8 inline-block border border-accent/40 px-3 py-1 font-mono text-[10px] uppercase tracking-[0.25em] text-accent">
               AI Fashion Studio
             </span>
             <h1 className="font-display text-5xl font-bold leading-[1.05] tracking-tight text-bone sm:text-7xl lg:text-8xl">
@@ -61,13 +61,13 @@ export function LandingPage() {
             <div className="mt-10 flex items-center gap-4">
               <Link
                 to="/seasons"
-                className="bg-vermillion px-7 py-3.5 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-vermillion-soft"
+                className="bg-accent px-7 py-3.5 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-accent-soft"
               >
                 Enter the Studio
               </Link>
               <a
                 href="#how-it-works"
-                className="border border-line px-7 py-3.5 font-mono text-xs uppercase tracking-wider text-bone-dim transition-colors hover:border-vermillion hover:text-vermillion"
+                className="border border-line px-7 py-3.5 font-mono text-xs uppercase tracking-wider text-bone-dim transition-colors hover:border-accent hover:text-accent"
               >
                 How it works
               </a>
@@ -80,7 +80,7 @@ export function LandingPage() {
         <div className="grid gap-0 sm:grid-cols-3">
           {FEATURES.map((f) => (
             <div key={f.title} className="border-l border-line bg-surface p-8 first:border-l-0">
-              <span className="font-mono text-[11px] font-medium text-vermillion">{f.number}</span>
+              <span className="font-mono text-[11px] font-medium text-accent">{f.number}</span>
               <h3 className="mt-3 font-display text-xl font-semibold tracking-tight text-bone">{f.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-bone-dim">{f.body}</p>
             </div>

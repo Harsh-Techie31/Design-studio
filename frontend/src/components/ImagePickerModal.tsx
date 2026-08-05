@@ -91,7 +91,7 @@ export function ImagePickerModal({
           onClick={() => setTab("upload")}
           className={`-mb-px border-b-2 px-4 py-2.5 text-sm transition-colors ${
             tab === "upload"
-              ? "border-vermillion text-bone"
+              ? "border-accent text-bone"
               : "border-transparent text-muted hover:text-bone-dim"
           }`}
         >
@@ -102,7 +102,7 @@ export function ImagePickerModal({
           onClick={() => setTab("library")}
           className={`-mb-px border-b-2 px-4 py-2.5 text-sm transition-colors ${
             tab === "library"
-              ? "border-vermillion text-bone"
+              ? "border-accent text-bone"
               : "border-transparent text-muted hover:text-bone-dim"
           }`}
         >
@@ -124,13 +124,13 @@ export function ImagePickerModal({
           />
           <label
             htmlFor={`image-upload-${imageType}`}
-            className={`flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed border-line p-10 text-center transition-colors hover:border-vermillion/50 ${
+            className={`flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed border-line p-10 text-center transition-colors hover:border-accent/50 ${
               uploading ? "pointer-events-none opacity-60" : ""
             }`}
           >
             {uploading ? (
               <>
-                <i className="ti ti-loader-2 animate-spin text-2xl text-vermillion" />
+                <i className="ti ti-loader-2 animate-spin text-2xl text-accent" />
                 <span className="text-sm text-bone-dim">Uploading to library...</span>
               </>
             ) : (
@@ -151,7 +151,7 @@ export function ImagePickerModal({
         <div className="max-h-96 overflow-y-auto">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <i className="ti ti-loader-2 animate-spin text-xl text-vermillion" />
+              <i className="ti ti-loader-2 animate-spin text-xl text-accent" />
             </div>
           ) : libraryImages.length === 0 ? (
             <div className="rounded-xl border border-dashed border-line py-12 text-center text-sm text-bone-dim">
@@ -177,7 +177,7 @@ export function ImagePickerModal({
                           onClick={() => setSelectedId(img.id)}
                           className={`group relative overflow-hidden rounded-xl border-2 transition-all ${
                             selectedId === img.id
-                              ? "border-vermillion ring-2 ring-vermillion/30"
+                              ? "border-accent ring-2 ring-accent/30"
                               : "border-amber-400/60 hover:border-amber-400"
                           }`}
                         >
@@ -195,8 +195,8 @@ export function ImagePickerModal({
                             </span>
                           </div>
                           {selectedId === img.id && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-vermillion/10">
-                              <i className="ti ti-check rounded-full bg-vermillion p-1.5 text-ink" />
+                            <div className="absolute inset-0 flex items-center justify-center bg-accent/10">
+                              <i className="ti ti-check rounded-full bg-accent p-1.5 text-ink" />
                             </div>
                           )}
                         </button>
@@ -218,10 +218,10 @@ export function ImagePickerModal({
                           onClick={() => setSelectedId(img.id)}
                           className={`group relative overflow-hidden rounded-xl border-2 transition-all ${
                             selectedId === img.id
-                              ? "border-vermillion ring-2 ring-vermillion/30"
+                              ? "border-accent ring-2 ring-accent/30"
                               : img.liked
                                 ? "border-green-500/60 hover:border-green-500"
-                                : "border-line hover:border-vermillion/30"
+                                : "border-line hover:border-accent/30"
                           }`}
                         >
                           <div className="aspect-square bg-ink-soft">
@@ -243,8 +243,8 @@ export function ImagePickerModal({
                             </div>
                           )}
                           {selectedId === img.id && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-vermillion/10">
-                              <i className="ti ti-check rounded-full bg-vermillion p-1.5 text-ink" />
+                            <div className="absolute inset-0 flex items-center justify-center bg-accent/10">
+                              <i className="ti ti-check rounded-full bg-accent p-1.5 text-ink" />
                             </div>
                           )}
                         </button>
@@ -263,7 +263,7 @@ export function ImagePickerModal({
         <div className="mt-4 flex justify-end">
           <button
             onClick={handleSelectFromLibrary}
-            className="rounded-full bg-vermillion px-5 py-2 text-sm font-medium text-ink transition-colors hover:bg-vermillion-soft"
+            className="rounded-full bg-accent px-5 py-2 text-sm font-medium text-ink transition-colors hover:bg-accent-soft"
           >
             Use Selected
           </button>

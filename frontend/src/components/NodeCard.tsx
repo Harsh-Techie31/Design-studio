@@ -3,8 +3,8 @@ import { nodeStatusFromSummary, type NodeSummary } from "../types";
 
 const STATUS_META: Record<string, { label: string; className: string }> = {
   empty: { label: "Empty", className: "bg-line-soft text-muted" },
-  active: { label: "Active", className: "bg-vermillion/15 text-vermillion" },
-  done: { label: "Done", className: "bg-vermillion text-ink" },
+  active: { label: "Active", className: "bg-accent/15 text-accent" },
+  done: { label: "Done", className: "bg-accent text-ink" },
 };
 
 interface NodeCardProps {
@@ -31,7 +31,7 @@ export function NodeCard({ def, summary, onOpen }: NodeCardProps) {
           {meta.label}
         </span>
       </div>
-      <h3 className="font-display text-lg font-semibold tracking-tight text-bone transition-colors group-hover:text-vermillion">
+      <h3 className="font-display text-lg font-semibold tracking-tight text-bone transition-colors group-hover:text-accent">
         {def.label}
       </h3>
       <p className="text-xs leading-relaxed text-muted">{def.hint}</p>

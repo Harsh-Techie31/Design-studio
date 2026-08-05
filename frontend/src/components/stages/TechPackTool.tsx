@@ -260,7 +260,7 @@ export function TechPackTool({
               </div>
               <button
                 onClick={() => setRenderPickerOpen(true)}
-                className="mt-1 text-[11px] text-vermillion hover:text-vermillion-soft"
+                className="mt-1 text-[11px] text-accent hover:text-accent-soft"
               >
                 Switch render
               </button>
@@ -268,7 +268,7 @@ export function TechPackTool({
           ) : (
             <button
               onClick={() => setRenderPickerOpen(true)}
-              className="flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed border-line bg-ink-soft p-6 transition-colors hover:border-vermillion/30"
+              className="flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed border-line bg-ink-soft p-6 transition-colors hover:border-accent/30"
             >
               <i className="ti ti-photo text-2xl text-muted" />
               <span className="text-sm text-muted">Select a render</span>
@@ -297,7 +297,7 @@ export function TechPackTool({
                         {ref.image_code.split("_").slice(-2).join("_")}
                       </div>
                     </div>
-                    <div className="absolute left-0.5 top-0.5 rounded bg-vermillion/80 px-1 py-px text-[7px] font-bold text-ink">
+                    <div className="absolute left-0.5 top-0.5 rounded bg-accent/80 px-1 py-px text-[7px] font-bold text-ink">
                       {stageLabel}
                     </div>
                   </div>
@@ -334,8 +334,8 @@ export function TechPackTool({
                   onClick={() => handleConstructionChange(cf.field, opt)}
                   className={`rounded-full px-2.5 py-1 text-[11px] transition-all ${
                     construction[cf.field] === opt
-                      ? "bg-vermillion/20 text-vermillion border border-vermillion/40"
-                      : "bg-ink text-muted border border-line hover:border-vermillion/20"
+                      ? "bg-accent/20 text-accent border border-accent/40"
+                      : "bg-ink text-muted border border-line hover:border-accent/20"
                   }`}
                 >
                   {opt}
@@ -359,8 +359,8 @@ export function TechPackTool({
                 onClick={() => setStitchType(opt)}
                 className={`rounded-full px-2.5 py-1 text-[11px] transition-all ${
                   stitchType === opt
-                    ? "bg-vermillion/20 text-vermillion border border-vermillion/40"
-                    : "bg-ink text-muted border border-line hover:border-vermillion/20"
+                    ? "bg-accent/20 text-accent border border-accent/40"
+                    : "bg-ink text-muted border border-line hover:border-accent/20"
                 }`}
               >
                 {opt}
@@ -379,8 +379,8 @@ export function TechPackTool({
                 onClick={() => setSeamType(opt)}
                 className={`rounded-full px-2.5 py-1 text-[11px] transition-all ${
                   seamType === opt
-                    ? "bg-vermillion/20 text-vermillion border border-vermillion/40"
-                    : "bg-ink text-muted border border-line hover:border-vermillion/20"
+                    ? "bg-accent/20 text-accent border border-accent/40"
+                    : "bg-ink text-muted border border-line hover:border-accent/20"
                 }`}
               >
                 {opt}
@@ -398,7 +398,7 @@ export function TechPackTool({
               <div className="mb-1 flex items-center gap-1.5">
                 <span className="text-[11px] text-muted">{bf.key}</span>
                 {bf.autoFilled && (
-                  <span className="rounded-full bg-vermillion/10 px-1.5 py-0.5 text-[8px] text-vermillion">
+                  <span className="rounded-full bg-accent/10 px-1.5 py-0.5 text-[8px] text-accent">
                     auto-filled
                   </span>
                 )}
@@ -407,7 +407,7 @@ export function TechPackTool({
                 value={bom[bf.key] || ""}
                 onChange={(e) => handleBomChange(bf.key, e.target.value)}
                 placeholder={bf.placeholder}
-                className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-vermillion/60 focus:outline-none"
+                className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-accent/60 focus:outline-none"
               />
             </div>
           ))}
@@ -424,7 +424,7 @@ export function TechPackTool({
                 type="number"
                 value={measurements[field] || ""}
                 onChange={(e) => handleMeasurementChange(field, parseInt(e.target.value) || 0)}
-                className="w-14 rounded border border-line bg-ink px-1.5 py-0.5 text-right font-mono text-[11px] text-vermillion focus:border-vermillion/60 focus:outline-none"
+                className="w-14 rounded border border-line bg-ink px-1.5 py-0.5 text-right font-mono text-[11px] text-accent focus:border-accent/60 focus:outline-none"
               />
               <span className="text-[9px] text-muted">cm</span>
             </div>
@@ -441,9 +441,9 @@ export function TechPackTool({
           }}
           maxLength={200}
           placeholder="Double needle topstitch at 6mm, bar tack at stress points, etc."
-          className="w-full min-h-[60px] rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-vermillion/60 focus:outline-none resize-none"
+          className="w-full min-h-[60px] rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-accent/60 focus:outline-none resize-none"
         />
-        <div className={`text-right text-[11px] mt-1 ${constructionNotes.length > 180 ? "text-vermillion" : "text-muted"}`}>
+        <div className={`text-right text-[11px] mt-1 ${constructionNotes.length > 180 ? "text-accent" : "text-muted"}`}>
           {constructionNotes.length}/200
         </div>
         <div className="mt-3">
@@ -452,7 +452,7 @@ export function TechPackTool({
             value={note}
             onChange={(e) => setNote(e.target.value.slice(0, 250))}
             placeholder="Optional note..."
-            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-vermillion/60 focus:outline-none"
+            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-accent/60 focus:outline-none"
           />
         </div>
       </Section>
@@ -476,7 +476,7 @@ export function TechPackTool({
                 onClick={() => setNumOutputs(n)}
                 className={`rounded px-3 py-1 text-sm transition-all ${
                   numOutputs === n
-                    ? "bg-vermillion text-ink font-semibold"
+                    ? "bg-accent text-ink font-semibold"
                     : "bg-ink-soft text-muted hover:text-bone-dim"
                 }`}
               >
@@ -493,7 +493,7 @@ export function TechPackTool({
           className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold uppercase tracking-wider transition-all ${
             !selectedRender
               ? "cursor-not-allowed bg-line text-muted"
-              : "bg-vermillion text-ink hover:bg-vermillion-soft"
+              : "bg-accent text-ink hover:bg-accent-soft"
           }`}
         >
           {isGenerating ? (
@@ -537,7 +537,7 @@ function Section({
   return (
     <div className="mb-6 border-t border-line pt-5 first:border-0 first:pt-0">
       <div className="mb-3 flex items-center gap-2">
-        <label className="text-[13px] font-semibold uppercase tracking-widest text-vermillion">
+        <label className="text-[13px] font-semibold uppercase tracking-widest text-accent">
           {label}
         </label>
         {hint && <span className="text-[11px] text-muted">{hint}</span>}

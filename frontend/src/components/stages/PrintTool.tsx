@@ -248,7 +248,7 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
         ) : (
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed border-line bg-ink-soft p-6 transition-colors hover:border-vermillion/30"
+            className="flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed border-line bg-ink-soft p-6 transition-colors hover:border-accent/30"
           >
             <i className="ti ti-upload text-2xl text-muted" />
             <span className="text-sm text-muted">Click to upload motif</span>
@@ -263,7 +263,7 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
           <button
             onClick={handleRemoveBackground}
             disabled={isRemovingBg}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-line bg-ink-soft px-4 py-2.5 text-sm text-muted transition-all hover:border-vermillion/40 hover:text-bone disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-line bg-ink-soft px-4 py-2.5 text-sm text-muted transition-all hover:border-accent/40 hover:text-bone disabled:opacity-50"
           >
             {isRemovingBg ? (
               <>
@@ -294,8 +294,8 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
                 onClick={() => setRepeatType(rt.value)}
                 className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-all ${
                   repeatType === rt.value
-                    ? "border-vermillion bg-vermillion/15 font-semibold text-vermillion"
-                    : "border-line bg-ink-soft text-muted hover:border-vermillion/30"
+                    ? "border-accent bg-accent/15 font-semibold text-accent"
+                    : "border-line bg-ink-soft text-muted hover:border-accent/30"
                 }`}
               >
                 <i className={`ti ${rt.icon} text-sm`} />
@@ -360,7 +360,7 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
           <select
             value={fabricType}
             onChange={(e) => setFabricType(e.target.value)}
-            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone focus:border-vermillion/60 focus:outline-none"
+            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone focus:border-accent/60 focus:outline-none"
           >
             {FABRIC_TYPES.map((ft) => (
               <option key={ft.value} value={ft.value}>
@@ -396,7 +396,7 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
               type="text"
               value={bgColor}
               onChange={(e) => setBgColor(e.target.value)}
-              className="flex-1 rounded-lg border border-line bg-ink-soft px-3 py-2 font-mono text-sm text-bone focus:border-vermillion/60 focus:outline-none"
+              className="flex-1 rounded-lg border border-line bg-ink-soft px-3 py-2 font-mono text-sm text-bone focus:border-accent/60 focus:outline-none"
               placeholder="#ffffff"
             />
           </div>
@@ -414,8 +414,8 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
                     onClick={() => setBgColor(color)}
                     className={`h-7 w-7 rounded-lg border-2 transition-all ${
                       bgColor === color
-                        ? "border-vermillion scale-110"
-                        : "border-line hover:border-vermillion/30"
+                        ? "border-accent scale-110"
+                        : "border-line hover:border-accent/30"
                     }`}
                     style={{ backgroundColor: color }}
                     title={color}
@@ -441,8 +441,8 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
                 onClick={() => setCanvasSize(opt.value)}
                 className={`flex flex-1 flex-col items-center rounded-lg border px-3 py-2 transition-all ${
                   canvasSize === opt.value
-                    ? "border-vermillion bg-vermillion/15 font-semibold text-vermillion"
-                    : "border-line bg-ink-soft text-muted hover:border-vermillion/30"
+                    ? "border-accent bg-accent/15 font-semibold text-accent"
+                    : "border-line bg-ink-soft text-muted hover:border-accent/30"
                 }`}
               >
                 <span className="text-sm font-bold">{opt.label}</span>
@@ -459,7 +459,7 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
             value={note}
             onChange={(e) => setNote(e.target.value.slice(0, 250))}
             placeholder="Optional note..."
-            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-vermillion/60 focus:outline-none"
+            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-accent/60 focus:outline-none"
           />
         </div>
       </Section>
@@ -479,7 +479,7 @@ export function PrintTool({ garment, season, onGenerated, onStateChange, canvasR
           className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold uppercase tracking-wider transition-all ${
             !motifImage
               ? "cursor-not-allowed bg-line text-muted"
-              : "bg-vermillion text-ink hover:bg-vermillion-soft"
+              : "bg-accent text-ink hover:bg-accent-soft"
           }`}
         >
           {isGenerating ? (
@@ -515,7 +515,7 @@ function Section({
   return (
     <div className="mb-6 border-t border-line pt-5 first:border-0 first:pt-0">
       <div className="mb-3 flex items-center gap-2">
-        <label className="text-[13px] font-semibold uppercase tracking-widest text-vermillion">
+        <label className="text-[13px] font-semibold uppercase tracking-widest text-accent">
           {label}
           {required && <span className="ml-0.5 text-red-500">*</span>}
         </label>
@@ -547,7 +547,7 @@ function SliderControl({
     <div className="mb-3">
       <div className="mb-1 flex justify-between">
         <span className="text-[11px] uppercase tracking-wide text-muted">{label}</span>
-        <span className="text-[11px] font-mono font-bold text-vermillion">{displayValue}</span>
+        <span className="text-[11px] font-mono font-bold text-accent">{displayValue}</span>
       </div>
       <input
         type="range"
@@ -556,7 +556,7 @@ function SliderControl({
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full accent-vermillion"
+        className="w-full accent-accent"
       />
     </div>
   );

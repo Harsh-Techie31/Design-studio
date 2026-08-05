@@ -171,7 +171,7 @@ export function StageWorkspacePage() {
       {printState.isRemovingBg && (
         <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-ink/60 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-2">
-            <i className="ti ti-loader-2 animate-spin text-2xl text-vermillion" />
+            <i className="ti ti-loader-2 animate-spin text-2xl text-accent" />
             <span className="font-mono text-xs text-muted">Removing background...</span>
           </div>
         </div>
@@ -185,7 +185,7 @@ export function StageWorkspacePage() {
         <NavBar />
         <main className="mx-auto max-w-6xl px-6 py-24 text-center">
           <p className="text-bone-dim">Garment not found.</p>
-          <Link to="/seasons" className="mt-4 inline-block font-mono text-xs uppercase tracking-wider text-vermillion hover:text-vermillion-soft">
+          <Link to="/seasons" className="mt-4 inline-block font-mono text-xs uppercase tracking-wider text-accent hover:text-accent-soft">
             Back to Seasons
           </Link>
         </main>

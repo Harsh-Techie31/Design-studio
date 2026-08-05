@@ -32,7 +32,7 @@ export function SeasonsListPage() {
         action={
           <button
             onClick={() => setOpen(true)}
-            className="bg-vermillion px-5 py-2 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-vermillion-soft"
+            className="bg-accent px-5 py-2 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-accent-soft"
           >
             + New Season
           </button>
@@ -97,13 +97,13 @@ export function SeasonsListPage() {
               onChange={(e) => setCode(normalizeCode(e.target.value))}
               placeholder="e.g. SS27, AW27, RESORT27"
               maxLength={12}
-              className="w-full border border-line bg-ink px-3.5 py-2.5 font-mono text-sm text-bone placeholder:text-muted focus:border-vermillion focus:outline-none"
+              className="w-full border border-line bg-ink px-3.5 py-2.5 font-mono text-sm text-bone placeholder:text-muted focus:border-accent focus:outline-none"
             />
           </div>
           <button
             type="submit"
             disabled={!code}
-            className="mt-1 bg-vermillion px-5 py-2.5 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-vermillion-soft disabled:cursor-not-allowed disabled:opacity-40"
+            className="mt-1 bg-accent px-5 py-2.5 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
           >
             Create Season
           </button>
@@ -134,7 +134,7 @@ export function SeasonsListPage() {
               }
             }}
             disabled={deleting}
-            className="flex items-center gap-2 bg-vermillion/20 px-4 py-2 text-sm font-medium text-vermillion transition-colors hover:bg-vermillion/30 disabled:opacity-40"
+            className="flex items-center gap-2 bg-accent/20 px-4 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent/30 disabled:opacity-40"
           >
             {deleting && <i className="ti ti-loader-2 animate-spin text-xs" />}
             {deleting ? "Cleaning up..." : "Delete"}

@@ -23,7 +23,7 @@ export function GarmentDetailPage() {
         <NavBar />
         <main className="mx-auto max-w-7xl px-8 py-24 text-center">
           <p className="text-bone-dim">Garment not found.</p>
-          <Link to="/seasons" className="mt-4 inline-block font-mono text-xs uppercase tracking-wider text-vermillion hover:text-vermillion-soft">
+          <Link to="/seasons" className="mt-4 inline-block font-mono text-xs uppercase tracking-wider text-accent hover:text-accent-soft">
             Back to Seasons
           </Link>
         </main>
@@ -95,7 +95,7 @@ export function GarmentDetailPage() {
               <h1 className="font-display text-3xl font-bold tracking-tight text-bone">{garment.name}</h1>
               <p className="mt-1 text-sm text-bone-dim">
                 Inspired by{" "}
-                <Link to={`/seasons/${season.id}`} className="font-mono text-xs uppercase tracking-wider text-vermillion hover:text-vermillion-soft">
+                <Link to={`/seasons/${season.id}`} className="font-mono text-xs uppercase tracking-wider text-accent hover:text-accent-soft">
                   {season.moodboard.name ?? season.code}
                 </Link>
               </p>

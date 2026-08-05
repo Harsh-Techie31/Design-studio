@@ -116,7 +116,7 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
         <button
           onClick={handleSave}
           disabled={images.length === 0 || !name.trim() || saving}
-          className="flex w-full items-center justify-center gap-2.5 rounded-full bg-vermillion px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-vermillion-soft disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex w-full items-center justify-center gap-2.5 rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
         >
           {saving ? (
             <>
@@ -144,7 +144,7 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
           placeholder="e.g. Ash and Ember"
           disabled={saving}
           className={`w-full rounded-lg border bg-ink-soft px-3.5 py-2.5 text-bone placeholder:text-muted focus:outline-none disabled:opacity-50 ${
-            nameError ? "border-red-500 focus:border-red-500" : "border-line focus:border-vermillion/60"
+            nameError ? "border-red-500 focus:border-red-500" : "border-line focus:border-accent/60"
           }`}
         />
       </div>
@@ -155,7 +155,7 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
-          className={`mb-4 rounded-lg transition-colors ${isDragging ? "bg-vermillion/5 ring-1 ring-vermillion/30" : ""}`}
+          className={`mb-4 rounded-lg transition-colors ${isDragging ? "bg-accent/5 ring-1 ring-accent/30" : ""}`}
         >
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
             {images.map((img, i) => (
@@ -180,7 +180,7 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
             {remaining > 0 && (
               <button
                 onClick={() => inputRef.current?.click()}
-                className="flex aspect-square items-center justify-center rounded-lg border-2 border-dashed border-line bg-surface text-2xl text-muted transition-colors hover:border-vermillion/50 hover:text-bone"
+                className="flex aspect-square items-center justify-center rounded-lg border-2 border-dashed border-line bg-surface text-2xl text-muted transition-colors hover:border-accent/50 hover:text-bone"
               >
                 <i className="ti ti-plus" />
               </button>
@@ -202,7 +202,7 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
             onClick={() => !saving && remaining > 0 && inputRef.current?.click()}
             className={`flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-8 text-center transition-colors ${
               remaining > 0 && !saving ? "cursor-pointer" : "cursor-default opacity-50"
-            } ${isDragging ? "border-vermillion bg-vermillion/5" : "border-line bg-surface hover:border-vermillion/50"}`}
+            } ${isDragging ? "border-accent bg-accent/5" : "border-line bg-surface hover:border-accent/50"}`}
           >
             <span className="text-2xl text-muted">
               <i className="ti ti-upload" />
@@ -225,7 +225,7 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
             onClick={() => !saving && remaining > 0 && setPinterestOpen((v) => !v)}
             className={`flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-8 text-center transition-colors ${
               remaining > 0 && !saving ? "cursor-pointer" : "cursor-default opacity-50"
-            } ${pinterestOpen ? "border-vermillion bg-vermillion/5" : "border-line bg-surface hover:border-vermillion/50"}`}
+            } ${pinterestOpen ? "border-accent bg-accent/5" : "border-line bg-surface hover:border-accent/50"}`}
           >
             <span className="text-2xl text-muted">
               <i className="ti ti-map-pin" />
@@ -258,12 +258,12 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
               value={pinterestUrl}
               onChange={(e) => setPinterestUrl(e.target.value)}
               placeholder="Paste a Pinterest board URL"
-              className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-vermillion/60 focus:outline-none"
+              className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-accent/60 focus:outline-none"
             />
             <button
               onClick={handlePinterestImport}
               disabled={!pinterestUrl.trim()}
-              className="whitespace-nowrap rounded-lg bg-vermillion px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-vermillion-soft disabled:cursor-not-allowed disabled:opacity-40"
+              className="whitespace-nowrap rounded-lg bg-accent px-4 py-2 text-sm font-medium text-ink transition-colors hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
             >
               Import
             </button>

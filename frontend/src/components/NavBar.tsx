@@ -18,7 +18,7 @@ export function NavBar({ crumbs = [], action }: NavBarProps) {
         <div className="flex items-center gap-3 text-sm">
           <Link
             to="/"
-            className="font-mono text-xs font-medium uppercase tracking-widest text-bone transition-colors hover:text-vermillion"
+            className="font-mono text-xs font-medium uppercase tracking-widest text-bone transition-colors hover:text-accent"
           >
             DS
           </Link>
@@ -28,7 +28,7 @@ export function NavBar({ crumbs = [], action }: NavBarProps) {
               {c.to ? (
                 <Link
                   to={c.to}
-                  className="font-mono text-xs uppercase tracking-wider text-bone-dim transition-colors hover:text-vermillion"
+                  className="font-mono text-xs uppercase tracking-wider text-bone-dim transition-colors hover:text-accent"
                 >
                   {c.label}
                 </Link>

@@ -32,7 +32,7 @@ export function Modal({
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-muted transition-colors hover:text-vermillion"
+            className="text-muted transition-colors hover:text-accent"
           >
             <i className="ti ti-x" />
           </button>

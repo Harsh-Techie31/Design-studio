@@ -64,7 +64,7 @@ export function PatternOutputPanel({
   return (
     <div className="flex h-full flex-col bg-surface">
       <div className="flex items-center justify-between border-b border-line px-4 py-3">
-        <h3 className="text-xs font-bold uppercase tracking-widest text-vermillion">
+        <h3 className="text-xs font-bold uppercase tracking-widest text-accent">
           Pattern Output
         </h3>
         <span className="rounded-full bg-ink-soft px-2.5 py-1 text-[10px] font-mono text-muted">
@@ -83,7 +83,7 @@ export function PatternOutputPanel({
           {/* Thumbnail strip (left) */}
           <div className="w-[88px] flex flex-col border-r border-line bg-ink overflow-y-auto py-2 px-1.5 gap-2">
             {Array.from({ length: pendingCount }).map((_, i) => (
-              <div key={`pending-${i}`} className="w-full animate-pulse rounded-lg border border-dashed border-vermillion/30 bg-ink-soft/50">
+              <div key={`pending-${i}`} className="w-full animate-pulse rounded-lg border border-dashed border-accent/30 bg-ink-soft/50">
                 <div className="aspect-[3/4] w-full bg-line/30" />
               </div>
             ))}
@@ -93,8 +93,8 @@ export function PatternOutputPanel({
                 onClick={() => setSelectedId(img.id)}
                 className={`group relative w-full overflow-hidden rounded-lg border transition-all ${
                   selectedId === img.id
-                    ? "border-vermillion shadow-[0_0_12px_rgba(224,60,49,0.25)]"
-                    : "border-line hover:border-vermillion/30"
+                    ? "border-accent shadow-[0_0_12px_rgba(45,212,191,0.25)]"
+                    : "border-line hover:border-accent/30"
                 }`}
               >
                 <img src={img.url} alt={img.image_code} className="aspect-[3/4] w-full object-cover" />
@@ -152,8 +152,8 @@ export function PatternOutputPanel({
               </>
             ) : pendingCount > 0 ? (
               <div className="flex flex-1 flex-col items-center justify-center gap-3 animate-pulse">
-                <div className="aspect-[3/4] w-48 rounded-lg border border-dashed border-vermillion/30 bg-line/20" />
-                <div className="flex items-center gap-2 text-vermillion/60">
+                <div className="aspect-[3/4] w-48 rounded-lg border border-dashed border-accent/30 bg-line/20" />
+                <div className="flex items-center gap-2 text-accent/60">
                   <i className="ti ti-loader-2 animate-spin text-sm" />
                   <span className="text-xs">Generating pattern...</span>
                 </div>
@@ -191,7 +191,7 @@ export function PatternOutputPanel({
           {isFinalStage ? (
             <button
               onClick={onMakeNewGarment}
-              className="flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider bg-vermillion text-ink hover:bg-vermillion-soft transition-all"
+              className="flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider bg-accent text-ink hover:bg-accent-soft transition-all"
             >
               <i className="ti ti-plus text-xs" />
               Make New Garment
@@ -202,7 +202,7 @@ export function PatternOutputPanel({
               disabled={!hasLiked}
               className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-wider transition-all ${
                 hasLiked
-                  ? "bg-vermillion text-ink hover:bg-vermillion-soft"
+                  ? "bg-accent text-ink hover:bg-accent-soft"
                   : "cursor-not-allowed bg-line text-muted"
               }`}
             >

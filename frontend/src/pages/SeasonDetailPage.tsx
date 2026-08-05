@@ -53,7 +53,7 @@ export function SeasonDetailPage() {
       <div className="min-h-screen bg-ink text-bone">
         <NavBar />
         <main className="mx-auto max-w-7xl px-8 py-24 text-center">
-          <i className="ti ti-loader-2 animate-spin text-2xl text-vermillion" />
+          <i className="ti ti-loader-2 animate-spin text-2xl text-accent" />
         </main>
       </div>
     );
@@ -65,7 +65,7 @@ export function SeasonDetailPage() {
         <NavBar />
         <main className="mx-auto max-w-7xl px-8 py-24 text-center">
           <p className="text-bone-dim">Season not found.</p>
-          <Link to="/seasons" className="mt-4 inline-block font-mono text-xs uppercase tracking-wider text-vermillion hover:text-vermillion-soft">
+          <Link to="/seasons" className="mt-4 inline-block font-mono text-xs uppercase tracking-wider text-accent hover:text-accent-soft">
             Back to Seasons
           </Link>
         </main>
@@ -147,7 +147,7 @@ export function SeasonDetailPage() {
     if (tabLoading) {
       return (
         <div className="flex items-center justify-center py-16">
-          <i className="ti ti-loader-2 animate-spin text-xl text-vermillion" />
+          <i className="ti ti-loader-2 animate-spin text-xl text-accent" />
         </div>
       );
     }
@@ -179,7 +179,7 @@ export function SeasonDetailPage() {
         </div>
         <button
           onClick={() => handleDeleteImage(img.id)}
-          className="absolute right-1.5 top-1.5 bg-vermillion p-1.5 text-white opacity-0 transition-opacity hover:bg-vermillion-soft group-hover:opacity-100"
+          className="absolute right-1.5 top-1.5 bg-accent p-1.5 text-white opacity-0 transition-opacity hover:bg-accent-soft group-hover:opacity-100"
           title="Delete image"
         >
           <i className="ti ti-trash text-xs" />
@@ -253,27 +253,22 @@ export function SeasonDetailPage() {
   };
 
   const garmentsSection = (
-    <section className="mt-16 first:mt-0">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h2 className="font-display text-xl font-semibold tracking-tight text-bone">Garments</h2>
-          <p className="mt-1 text-sm text-bone-dim">
-            Everything you build here draws on this season's mood.
-          </p>
-        </div>
+    <section className="first:mt-0">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="font-display text-lg font-semibold tracking-tight text-bone">Garments</h2>
         <button
           onClick={() => setOpen(true)}
-          className="bg-vermillion px-5 py-2 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-vermillion-soft"
+          className="bg-accent px-4 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wider text-ink transition-colors hover:bg-accent-soft"
         >
           + New Garment
         </button>
       </div>
 
       {studioLoading ? (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="border border-line bg-surface overflow-hidden animate-pulse">
-              <div className="h-48 bg-line/30" />
+              <div className="h-40 bg-line/30" />
               <div className="p-4 space-y-3">
                 <div className="h-5 w-32 bg-line/30" />
                 <div className="h-3 w-24 bg-line/20" />
@@ -282,11 +277,11 @@ export function SeasonDetailPage() {
           ))}
         </div>
       ) : garments.length === 0 ? (
-        <div className="border border-dashed border-line py-20 text-center text-bone-dim">
-          No garments yet in this season.
+        <div className="border border-dashed border-line py-14 text-center text-sm text-bone-dim">
+          No garments yet. Create your first garment to start the pipeline.
         </div>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {garments.map((garment) => (
             <GarmentCard
               key={garment.id}
@@ -306,20 +301,20 @@ export function SeasonDetailPage() {
     <div className="min-h-screen bg-ink text-bone">
       <NavBar crumbs={[{ label: "Seasons", to: "/seasons" }, { label: season.code ?? "Untitled" }]} />
 
-      <main className="mx-auto max-w-7xl px-8 py-10">
-        <div className="mb-6 flex items-center justify-between px-0">
+      <main className="mx-auto max-w-7xl px-8 py-6">
+        <div className="mb-4 flex items-center justify-between px-0">
           <h1 className="font-display text-3xl font-bold tracking-tight text-bone">{season.code ?? "Untitled"}</h1>
           <span className="font-mono text-[11px] text-muted">{season.created_at.slice(0, 10)}</span>
         </div>
 
-        <div className="mb-10 flex gap-0 border-b border-line">
+        <div className="mb-6 flex gap-0 border-b border-line">
           {SEASON_TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`-mb-px border-b-2 px-4 py-3 font-mono text-xs uppercase tracking-wider transition-colors ${
+              className={`-mb-px border-b-2 px-4 py-2.5 font-mono text-xs uppercase tracking-wider transition-colors ${
                 tab === t.key
-                  ? "border-vermillion text-bone"
+                  ? "border-accent text-bone"
                   : "border-transparent text-muted hover:text-bone-dim"
               }`}
             >
@@ -331,11 +326,11 @@ export function SeasonDetailPage() {
         {tab === "overview" && (
         <>
         <section>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-display text-base font-semibold tracking-tight text-bone-dim">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-display text-sm font-semibold tracking-tight text-bone-dim">
               Moodboard
               {season.moodboard.name && (
-                <span className="ml-2 font-normal text-vermillion"> — {season.moodboard.name}</span>
+                <span className="ml-2 font-normal text-accent"> — {season.moodboard.name}</span>
               )}
             </h2>
             {moodboardImages.length > 0 && (
@@ -346,20 +341,20 @@ export function SeasonDetailPage() {
           </div>
 
           {moodboardImages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-4 border border-dashed border-line py-20 text-center">
+            <div className="flex flex-col items-center justify-center gap-4 border border-dashed border-line py-16 text-center">
               <p className="text-sm text-bone-dim">
                 No moodboard yet — import up to 12 images to set the mood for this season.
               </p>
               <button
                 onClick={() => setMoodboardOpen(true)}
-                className="bg-vermillion px-5 py-2 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-vermillion-soft"
+                className="bg-accent px-5 py-2 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-accent-soft"
               >
                 Start Moodboard
               </button>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-4 gap-px sm:grid-cols-6">
+              <div className="grid grid-cols-6 gap-px sm:grid-cols-8 lg:grid-cols-12">
                 {moodboardImages.map((img, i) => (
                   <MoodboardTile
                     key={i}
@@ -372,24 +367,24 @@ export function SeasonDetailPage() {
               </div>
 
               {status === "analyzing" && (
-                <div className="mt-4 flex items-center gap-3 border border-vermillion/20 bg-vermillion/[0.03] px-5 py-4">
-                  <i className="ti ti-loader-2 animate-spin text-lg text-vermillion" />
+                <div className="mt-4 flex items-center gap-3 border border-accent/20 bg-accent/[0.03] px-5 py-4">
+                  <i className="ti ti-loader-2 animate-spin text-lg text-accent" />
                   <span className="text-sm text-bone-dim">Analyzing your mood…</span>
                 </div>
               )}
 
               {status === "failed" && (
-                <div className="mt-6 border border-vermillion/20 bg-vermillion/[0.04] px-5 py-4">
+                <div className="mt-6 border border-accent/20 bg-accent/[0.04] px-5 py-4">
                   <div className="flex items-start gap-3">
-                    <i className="ti ti-alert-triangle mt-0.5 text-base text-vermillion/80" />
+                    <i className="ti ti-alert-triangle mt-0.5 text-base text-accent/80" />
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-vermillion">Analysis failed</p>
-                      <p className="mt-1 text-xs text-vermillion/60">
+                      <p className="text-sm font-medium text-accent">Analysis failed</p>
+                      <p className="mt-1 text-xs text-accent/60">
                         {season.moodboard.analysis.error ?? "Something went wrong. Please try again."}
                       </p>
                       <button
                         onClick={() => analyzeMoodboard(season!.id)}
-                        className="mt-3 inline-flex items-center gap-1.5 border border-vermillion/20 bg-vermillion/10 px-3 py-1.5 text-xs font-medium text-vermillion transition-colors hover:bg-vermillion/20"
+                        className="mt-3 inline-flex items-center gap-1.5 border border-accent/20 bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
                       >
                         <i className="ti ti-refresh text-[11px]" />
                         Retry analysis
@@ -400,17 +395,17 @@ export function SeasonDetailPage() {
               )}
 
               {(palette.length > 0 || keywords.length > 0) && (
-                <div className="mt-6 flex flex-col gap-5 bg-surface p-5 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-10">
+                <div className="mt-4 flex flex-col gap-4 bg-surface p-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-8">
                     {palette.length > 0 && (
                       <div>
-                        <p className="mb-2 font-mono text-[11px] uppercase tracking-wider text-muted">Palette</p>
+                        <p className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-muted">Palette</p>
                         <PaletteSwatches colors={palette} />
                       </div>
                     )}
                     {keywords.length > 0 && (
                       <div>
-                        <p className="mb-2 font-mono text-[11px] uppercase tracking-wider text-muted">Mood</p>
+                        <p className="mb-1.5 font-mono text-[10px] uppercase tracking-wider text-muted">Mood</p>
                         <KeywordChips keywords={keywords} />
                       </div>
                     )}
@@ -418,8 +413,8 @@ export function SeasonDetailPage() {
 
                   {brief && (
                     <div className="sm:max-w-xs">
-                      <span className="font-mono text-[11px] uppercase tracking-wider text-muted">Creative Brief</span>
-                      <p className="mt-2 text-sm leading-relaxed text-bone-dim">{brief}</p>
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-muted">Creative Brief</span>
+                      <p className="mt-1 text-xs leading-relaxed text-bone-dim">{brief}</p>
                     </div>
                   )}
                 </div>
@@ -428,7 +423,7 @@ export function SeasonDetailPage() {
           )}
         </section>
 
-        <div className="mt-16">{garmentsSection}</div>
+        <div className="mt-10">{garmentsSection}</div>
         </>
         )}
 
@@ -540,8 +535,8 @@ export function SeasonDetailPage() {
                   onClick={() => setCategory(c.code)}
                   className={`border px-4 py-2.5 text-left text-sm transition-colors ${
                     category === c.code
-                      ? "border-vermillion bg-vermillion/10 text-vermillion"
-                      : "border-line bg-ink text-bone-dim hover:border-vermillion/40"
+                      ? "border-accent bg-accent/10 text-accent"
+                      : "border-line bg-ink text-bone-dim hover:border-accent/40"
                   }`}
                 >
                   {c.label}
@@ -555,7 +550,7 @@ export function SeasonDetailPage() {
           <button
             type="submit"
             disabled={!category}
-            className="mt-1 bg-vermillion px-5 py-2.5 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-vermillion-soft disabled:cursor-not-allowed disabled:opacity-40"
+            className="mt-1 bg-accent px-5 py-2.5 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
           >
             Create Garment
           </button>
@@ -592,7 +587,7 @@ export function SeasonDetailPage() {
               }
             }}
             disabled={deleting}
-            className="flex items-center gap-2 bg-vermillion/20 px-4 py-2 text-sm font-medium text-vermillion transition-colors hover:bg-vermillion/30 disabled:opacity-40"
+            className="flex items-center gap-2 bg-accent/20 px-4 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent/30 disabled:opacity-40"
           >
             {deleting && <i className="ti ti-loader-2 animate-spin text-xs" />}
             {deleting ? "Cleaning up..." : "Delete"}

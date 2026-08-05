@@ -34,7 +34,7 @@ export function StageProgressBar({
                 }
                 className={`flex items-center gap-2 px-3 py-2 text-xs font-medium transition-all ${
                   isActive
-                    ? "bg-vermillion/15 text-vermillion"
+                    ? "bg-accent/15 text-accent"
                     : isDone
                     ? "text-bone hover:bg-ink-soft"
                     : isStarted
@@ -45,9 +45,9 @@ export function StageProgressBar({
                 <span
                   className={`flex h-5 w-5 items-center justify-center text-[10px] font-bold font-mono ${
                     isActive
-                      ? "bg-vermillion text-ink"
+                      ? "bg-accent text-ink"
                       : isDone
-                      ? "bg-vermillion/30 text-vermillion"
+                      ? "bg-accent/30 text-accent"
                       : isStarted
                       ? "bg-line text-bone-dim"
                       : "bg-ink-soft text-muted"

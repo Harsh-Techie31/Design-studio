@@ -74,7 +74,7 @@ export function StageOutputPanel({
     return (
       <div className="flex h-full items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <i className="ti ti-loader-2 animate-spin text-2xl text-vermillion" />
+          <i className="ti ti-loader-2 animate-spin text-2xl text-accent" />
           <span className="font-mono text-xs text-bone-dim">Loading outputs...</span>
         </div>
       </div>
@@ -87,7 +87,7 @@ export function StageOutputPanel({
       <div className="flex h-full flex-row overflow-hidden">
         <div className="flex flex-1 flex-col border-r border-line">
           <div className="flex items-center border-b border-line px-4 py-2">
-            <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-vermillion">
+            <span className="font-mono text-[11px] font-semibold uppercase tracking-widest text-accent">
               Live Preview
             </span>
           </div>
@@ -104,7 +104,7 @@ export function StageOutputPanel({
                 onClick={() => setFilter(f.key)}
                 className={`px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wider transition-colors ${
                   filter === f.key
-                    ? "bg-vermillion/15 text-vermillion"
+                    ? "bg-accent/15 text-accent"
                     : "text-muted hover:text-bone-dim"
                 }`}
               >
@@ -157,7 +157,7 @@ export function StageOutputPanel({
                 disabled={!hasLiked}
                 className={`flex items-center gap-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider transition-all ${
                   hasLiked
-                    ? "bg-vermillion text-ink hover:bg-vermillion-soft"
+                    ? "bg-accent text-ink hover:bg-accent-soft"
                     : "cursor-not-allowed bg-line text-muted"
                 }`}
               >
@@ -222,7 +222,7 @@ export function StageOutputPanel({
             onClick={() => setFilter(f.key)}
             className={`px-3 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wider transition-colors ${
               filter === f.key
-                ? "bg-vermillion/15 text-vermillion"
+                ? "bg-accent/15 text-accent"
                 : "text-muted hover:text-bone-dim"
             }`}
           >
@@ -318,7 +318,7 @@ export function StageOutputPanel({
 
                 {img.note && (
                   <div className="absolute left-2 top-2">
-                    <i className="ti ti-message text-[10px] text-vermillion" />
+                    <i className="ti ti-message text-[10px] text-accent" />
                   </div>
                 )}
               </div>
@@ -342,7 +342,7 @@ export function StageOutputPanel({
           </p>
           <button
             onClick={onMakeNewGarment}
-            className="flex items-center gap-2 bg-vermillion px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-ink transition-all hover:bg-vermillion-soft"
+            className="flex items-center gap-2 bg-accent px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-ink transition-all hover:bg-accent-soft"
           >
             <i className="ti ti-plus text-[11px]" />
             Make New Garment
@@ -366,7 +366,7 @@ export function StageOutputPanel({
               disabled={!hasLiked}
               className={`flex items-center gap-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider transition-all ${
                 hasLiked
-                  ? "bg-vermillion text-ink hover:bg-vermillion-soft"
+                  ? "bg-accent text-ink hover:bg-accent-soft"
                   : "cursor-not-allowed bg-line text-muted"
               }`}
             >
@@ -425,7 +425,7 @@ export function StageOutputPanel({
 
 function SkeletonCard() {
   return (
-    <div className="group relative overflow-hidden border border-vermillion/20 border-dashed bg-ink-soft/50 animate-pulse">
+    <div className="group relative overflow-hidden border border-accent/20 border-dashed bg-ink-soft/50 animate-pulse">
       <div className="flex cursor-pointer items-center gap-3 p-2">
         <div className="h-16 w-16 bg-line/50" />
         <div className="flex-1 space-y-2">
@@ -437,7 +437,7 @@ function SkeletonCard() {
         <div className="h-5 w-5 bg-line/30" />
         <div className="h-5 w-5 bg-line/30" />
         <div className="h-5 w-5 bg-line/30" />
-        <div className="ml-auto flex items-center gap-1 text-vermillion/60">
+        <div className="ml-auto flex items-center gap-1 text-accent/60">
           <i className="ti ti-loader-2 animate-spin text-xs" />
           <span className="font-mono text-[9px]">Generating...</span>
         </div>
@@ -448,9 +448,9 @@ function SkeletonCard() {
 
 function SkeletonGridCard() {
   return (
-    <div className="overflow-hidden border border-vermillion/20 border-dashed bg-ink-soft/50 animate-pulse">
+    <div className="overflow-hidden border border-accent/20 border-dashed bg-ink-soft/50 animate-pulse">
       <div className="aspect-[4/3] flex items-center justify-center bg-line/20">
-        <i className="ti ti-loader-2 animate-spin text-2xl text-vermillion/40" />
+        <i className="ti ti-loader-2 animate-spin text-2xl text-accent/40" />
       </div>
       <div className="flex items-center justify-between px-2.5 py-1.5">
         <div className="h-2.5 w-20 bg-line/40" />
