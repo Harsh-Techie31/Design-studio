@@ -173,7 +173,7 @@ export function PatternOutputPanel({
               likedCount > 0 ? (
                 <>
                   <i className="ti ti-check mr-1.5 text-green-400" />
-                  <span className="font-medium text-green-400">{likedCount}</span> selected
+                  <span className="text-green-400">{likedCount}</span> selected
                   {likedCount !== 1 ? "s" : ""} ready for export
                 </>
               ) : (
@@ -181,7 +181,7 @@ export function PatternOutputPanel({
               )
             ) : hasLiked ? (
               <>
-                <span className="font-medium text-green-400">{likedCount}</span> image
+                <span className="text-green-400">{likedCount}</span> image
                 {likedCount !== 1 ? "s" : ""} selected
               </>
             ) : (

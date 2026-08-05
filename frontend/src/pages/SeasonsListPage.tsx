@@ -111,7 +111,7 @@ export function SeasonsListPage() {
 
       <Modal open={!!pendingDelete} onClose={() => setPendingDelete(null)} title="Delete Season">
         <p className="text-sm text-bone-dim">
-          Are you sure you want to delete <span className="font-medium text-bone">{pendingDelete?.code}</span> and all its garments? This action cannot be undone.
+          Are you sure you want to delete <span className="text-bone">{pendingDelete?.code}</span> and all its garments? This action cannot be undone.
         </p>
         <div className="mt-6 flex justify-end gap-3">
           <button

@@ -263,7 +263,7 @@ export function SeasonDetailPage() {
         </div>
         <button
           onClick={() => setOpen(true)}
-          className="rounded-full bg-brass px-5 py-2 text-sm font-medium text-ink transition-colors hover:bg-brass-soft"
+          className="rounded-full bg-brass px-5 py-2 text-sm font-semibold text-ink transition-colors hover:bg-brass-soft"
         >
           + New Garment
         </button>
@@ -573,7 +573,7 @@ export function SeasonDetailPage() {
 
       <Modal open={!!pendingDelete} onClose={() => setPendingDelete(null)} title="Delete Garment">
         <p className="text-sm text-bone-dim">
-          Are you sure you want to delete <span className="font-medium text-bone">{pendingDelete?.name}</span>? This will remove all its pipeline runs and generated images. This action cannot be undone.
+          Are you sure you want to delete <span className="text-bone">{pendingDelete?.name}</span>? This will remove all its pipeline runs and generated images. This action cannot be undone.
         </p>
         <div className="mt-6 flex justify-end gap-3">
           <button

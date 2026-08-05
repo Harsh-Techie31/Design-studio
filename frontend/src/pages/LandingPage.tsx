@@ -53,7 +53,7 @@ export function LandingPage() {
           <div className="mt-10 flex items-center gap-4">
             <Link
               to="/seasons"
-              className="rounded-full bg-brass px-7 py-3 text-sm font-medium text-ink transition-colors hover:bg-brass-soft"
+              className="rounded-full bg-brass px-7 py-3 text-sm font-semibold text-ink transition-colors hover:bg-brass-soft"
             >
               Enter the Studio
             </Link>
