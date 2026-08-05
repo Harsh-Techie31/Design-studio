@@ -3,6 +3,8 @@ import io
 import json
 import logging
 import random
+
+from pymongo.errors import DuplicateKeyError
 import time
 from typing import Optional
 
@@ -754,55 +756,68 @@ async def generate_sketch(
     design_images = []
 
     for idx, img_data in enumerate(generated_images):
-        count_str = f"{idx + 1:02d}"
-        img_code = f"{code}_{count_str}"
+        count = idx + 1
+        img_code = f"{code}_{count:02d}"
         img_view = "front_and_back" if view == "Front and back" else "back" if view == "Back only" else "front"
 
-        # Upload to ImageKit
-        file_name = f"{img_code}.png"
-        folder = f"/design-studio/{garment.season_id}/{garment_id}/sketches/"
-        try:
-            ik_result = await _upload_to_imagekit(img_data["bytes"], folder=folder, file_name=file_name)
-            img_url = ik_result["url"]
-            ik_file_id = ik_result["file_id"]
-            logger.info(f"ImageKit upload OK: {img_code} → {img_url[:60]}...")
-        except Exception as e:
-            logger.error(f"ImageKit upload failed for {img_code}: {e}")
-            raise HTTPException(status_code=500, detail="Image upload to CDN failed. Please try again.")
+        while True:
+            # Upload to ImageKit
+            file_name = f"{img_code}.png"
+            folder = f"/design-studio/{garment.season_id}/{garment_id}/sketches/"
+            try:
+                ik_result = await _upload_to_imagekit(img_data["bytes"], folder=folder, file_name=file_name)
+                img_url = ik_result["url"]
+                ik_file_id = ik_result["file_id"]
+                logger.info(f"ImageKit upload OK: {img_code} → {img_url[:60]}...")
+            except Exception as e:
+                logger.error(f"ImageKit upload failed for {img_code}: {e}")
+                raise HTTPException(status_code=500, detail="Image upload to CDN failed. Please try again.")
 
-        design_img = DesignImage(
-            image_code=img_code,
-            index=idx,
-            season_id=garment.season_id,
-            garment_id=garment_id,
-            node_key=NodeKey.SKETCH,
-            run_id=str(run.id),
-            version=version,
-            image_type="sketch",
-            view=img_view,
-            liked=False,
-            starred=False,
-            input_images=input_refs,
-            source=img_data["source"],
-            ai_model=run.ai.model,
-            ai_prompt=prompt_text,
-            params={
-                "gender": gender,
-                "silhouette": silhouette,
-                "descriptors": descriptors,
-                "mood_influence": mood_influence,
-                "moodboard_refs": moodboard_refs,
-                "view": view,
-            },
-            url=img_url,
-            imagekit_file_id=ik_file_id,
-            file_size_bytes=len(img_data["bytes"]),
-            file_format="png",
-            note=note,
-            created_at=now,
-            updated_at=now,
-        )
-        await design_img.insert()
+            design_img = DesignImage(
+                image_code=img_code,
+                index=idx,
+                season_id=garment.season_id,
+                garment_id=garment_id,
+                node_key=NodeKey.SKETCH,
+                run_id=str(run.id),
+                version=version,
+                image_type="sketch",
+                view=img_view,
+                liked=False,
+                starred=False,
+                input_images=input_refs,
+                source=img_data["source"],
+                ai_model=run.ai.model,
+                ai_prompt=prompt_text,
+                params={
+                    "gender": gender,
+                    "silhouette": silhouette,
+                    "descriptors": descriptors,
+                    "mood_influence": mood_influence,
+                    "moodboard_refs": moodboard_refs,
+                    "view": view,
+                },
+                url=img_url,
+                imagekit_file_id=ik_file_id,
+                file_size_bytes=len(img_data["bytes"]),
+                file_format="png",
+                note=note,
+                created_at=now,
+                updated_at=now,
+            )
+            try:
+                await design_img.insert()
+                break
+            except DuplicateKeyError:
+                count += 1
+                img_code = f"{code}_{count:02d}"
+                logger.warning(f"Duplicate image_code, retrying with {img_code}")
+                try:
+                    from app.services.imagekit import delete_image
+                    await delete_image(ik_file_id)
+                except Exception:
+                    pass
+
         output_image_ids.append(str(design_img.id))
         design_images.append(design_img)
 

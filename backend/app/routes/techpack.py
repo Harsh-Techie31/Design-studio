@@ -3,6 +3,8 @@ import io
 import logging
 from typing import Optional
 
+from pymongo.errors import DuplicateKeyError
+
 import httpx
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel
@@ -393,58 +395,72 @@ async def generate_techpack(
         raise HTTPException(status_code=500, detail="Failed to generate tech pack")
 
     # ─── Upload to ImageKit ───
-    img_code = f"{code}_01"
-    file_name = f"{img_code}.png"
-    folder = f"/design-studio/{garment.season_id}/{garment_id}/techpacks/"
+    count = 1
+    img_code = f"{code}_{count:02d}"
 
-    try:
-        ik_result = await _upload_to_imagekit(img_bytes, folder=folder, file_name=file_name)
-        img_url = ik_result["url"]
-        ik_file_id = ik_result["file_id"]
-        logger.info(f"ImageKit upload OK: {img_code} -> {img_url[:60]}...")
-    except Exception as e:
-        logger.error(f"ImageKit upload failed for {img_code}: {e}")
-        raise HTTPException(status_code=500, detail="Image upload to CDN failed. Please try again.")
+    while True:
+        file_name = f"{img_code}.png"
+        folder = f"/design-studio/{garment.season_id}/{garment_id}/techpacks/"
 
-    # ─── Save DesignImage ───
-    input_refs = []
-    if body.render_image_id:
-        input_refs.append(InputImageRef(image_id=body.render_image_id, stage=NodeKey.RENDER, role="primary"))
+        try:
+            ik_result = await _upload_to_imagekit(img_bytes, folder=folder, file_name=file_name)
+            img_url = ik_result["url"]
+            ik_file_id = ik_result["file_id"]
+            logger.info(f"ImageKit upload OK: {img_code} -> {img_url[:60]}...")
+        except Exception as e:
+            logger.error(f"ImageKit upload failed for {img_code}: {e}")
+            raise HTTPException(status_code=500, detail="Image upload to CDN failed. Please try again.")
 
-    design_img = DesignImage(
-        image_code=img_code,
-        index=0,
-        season_id=garment.season_id,
-        garment_id=garment_id,
-        node_key=NodeKey.TECH_PACK,
-        run_id=str(run.id),
-        version=version,
-        image_type="tech_pack",
-        view="front",
-        liked=False,
-        starred=False,
-        input_images=input_refs,
-        source=source,
-        ai_model=run.ai.model,
-        ai_prompt=f"Tech pack for {garment.category.value} — {body.construction}",
-        params={
-            "gender": body.gender,
-            "construction": body.construction,
-            "stitch_type": body.stitch_type,
-            "seam_type": body.seam_type,
-            "bom": body.bom,
-            "measurements": body.measurements,
-            "construction_notes": body.construction_notes,
-        },
-        url=img_url,
-        imagekit_file_id=ik_file_id,
-        file_size_bytes=len(img_bytes),
-        file_format="png",
-        note=body.note,
-        created_at=now,
-        updated_at=now,
-    )
-    await design_img.insert()
+        # ─── Save DesignImage ───
+        input_refs = []
+        if body.render_image_id:
+            input_refs.append(InputImageRef(image_id=body.render_image_id, stage=NodeKey.RENDER, role="primary"))
+
+        design_img = DesignImage(
+            image_code=img_code,
+            index=0,
+            season_id=garment.season_id,
+            garment_id=garment_id,
+            node_key=NodeKey.TECH_PACK,
+            run_id=str(run.id),
+            version=version,
+            image_type="tech_pack",
+            view="front",
+            liked=False,
+            starred=False,
+            input_images=input_refs,
+            source=source,
+            ai_model=run.ai.model,
+            ai_prompt=f"Tech pack for {garment.category.value} — {body.construction}",
+            params={
+                "gender": body.gender,
+                "construction": body.construction,
+                "stitch_type": body.stitch_type,
+                "seam_type": body.seam_type,
+                "bom": body.bom,
+                "measurements": body.measurements,
+                "construction_notes": body.construction_notes,
+            },
+            url=img_url,
+            imagekit_file_id=ik_file_id,
+            file_size_bytes=len(img_bytes),
+            file_format="png",
+            note=body.note,
+            created_at=now,
+            updated_at=now,
+        )
+        try:
+            await design_img.insert()
+            break
+        except DuplicateKeyError:
+            count += 1
+            img_code = f"{code}_{count:02d}"
+            logger.warning(f"Duplicate image_code, retrying with {img_code}")
+            try:
+                from app.services.imagekit import delete_image
+                await delete_image(ik_file_id)
+            except Exception:
+                pass
 
     # ─── Update NodeRun ───
     run.output = NodeOutput(images=[img_url])

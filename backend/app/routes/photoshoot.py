@@ -3,6 +3,8 @@ import logging
 from datetime import datetime, timezone
 from typing import Optional
 
+from pymongo.errors import DuplicateKeyError
+
 import httpx
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel
@@ -374,56 +376,69 @@ async def generate_photoshoot(
         logger.info("[SHOOT] Input lineage: viz image_id=%s", str(viz_img.id))
 
     for idx, img_data in enumerate(generated_images):
-        count_str = f"{idx + 1:02d}"
-        img_code = f"{code}_{count_str}"
+        count = idx + 1
+        img_code = f"{code}_{count:02d}"
 
-        file_name = f"{img_code}.png"
-        folder = f"/design-studio/{garment.season_id}/{garment_id}/photoshoots/"
+        while True:
+            file_name = f"{img_code}.png"
+            folder = f"/design-studio/{garment.season_id}/{garment_id}/photoshoots/"
 
-        try:
-            logger.info("[SHOOT] Uploading to ImageKit: %s (%d bytes)", img_code, len(img_data["bytes"]))
-            ik_result = await _upload_to_imagekit(img_data["bytes"], folder=folder, file_name=file_name)
-            img_url = ik_result["url"]
-            ik_file_id = ik_result["file_id"]
-            logger.info("[SHOOT] ImageKit upload OK: %s -> %s", img_code, img_url[:80])
-        except Exception as e:
-            logger.error("[SHOOT] ImageKit upload failed for %s: %s", img_code, e)
-            raise HTTPException(status_code=500, detail="Image upload to CDN failed. Please try again.")
+            try:
+                logger.info("[SHOOT] Uploading to ImageKit: %s (%d bytes)", img_code, len(img_data["bytes"]))
+                ik_result = await _upload_to_imagekit(img_data["bytes"], folder=folder, file_name=file_name)
+                img_url = ik_result["url"]
+                ik_file_id = ik_result["file_id"]
+                logger.info("[SHOOT] ImageKit upload OK: %s -> %s", img_code, img_url[:80])
+            except Exception as e:
+                logger.error("[SHOOT] ImageKit upload failed for %s: %s", img_code, e)
+                raise HTTPException(status_code=500, detail="Image upload to CDN failed. Please try again.")
 
-        design_img = DesignImage(
-            image_code=img_code,
-            index=idx,
-            season_id=garment.season_id,
-            garment_id=garment_id,
-            node_key=NodeKey.PHOTOSHOOT,
-            run_id=str(run.id),
-            version=version,
-            image_type="photo",
-            view="model",
-            liked=False,
-            starred=False,
-            input_images=input_refs,
-            source=img_data["source"],
-            ai_model=run.ai.model,
-            ai_prompt=prompt,
-            params={
-                "model_avatar": model_avatar,
-                "moodboard_influence": body.moodboard_influence,
-                "shot_type": body.shot_type,
-                "location": body.location,
-                "time_of_day": body.time_of_day,
-                "mood": body.mood,
-                "pose": body.pose,
-                "custom_pose": body.custom_pose,
-            },
-            url=img_url,
-            imagekit_file_id=ik_file_id,
-            file_size_bytes=len(img_data["bytes"]),
-            file_format="png",
-            created_at=now,
-            updated_at=now,
-        )
-        await design_img.insert()
+            design_img = DesignImage(
+                image_code=img_code,
+                index=idx,
+                season_id=garment.season_id,
+                garment_id=garment_id,
+                node_key=NodeKey.PHOTOSHOOT,
+                run_id=str(run.id),
+                version=version,
+                image_type="photo",
+                view="model",
+                liked=False,
+                starred=False,
+                input_images=input_refs,
+                source=img_data["source"],
+                ai_model=run.ai.model,
+                ai_prompt=prompt,
+                params={
+                    "model_avatar": model_avatar,
+                    "moodboard_influence": body.moodboard_influence,
+                    "shot_type": body.shot_type,
+                    "location": body.location,
+                    "time_of_day": body.time_of_day,
+                    "mood": body.mood,
+                    "pose": body.pose,
+                    "custom_pose": body.custom_pose,
+                },
+                url=img_url,
+                imagekit_file_id=ik_file_id,
+                file_size_bytes=len(img_data["bytes"]),
+                file_format="png",
+                created_at=now,
+                updated_at=now,
+            )
+            try:
+                await design_img.insert()
+                break
+            except DuplicateKeyError:
+                count += 1
+                img_code = f"{code}_{count:02d}"
+                logger.warning("[SHOOT] Duplicate image_code, retrying with %s", img_code)
+                try:
+                    from app.services.imagekit import delete_image
+                    await delete_image(ik_file_id)
+                except Exception:
+                    pass
+
         output_image_ids.append(str(design_img.id))
         design_images.append(design_img)
         logger.info("[SHOOT] DesignImage created: id=%s, code=%s, source=%s", str(design_img.id), img_code, img_data["source"])

@@ -5,6 +5,8 @@ import base64
 import random
 import string
 
+from pymongo.errors import DuplicateKeyError
+
 from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
 
 from app.models.design_image import DesignImage, InputImageRef
@@ -255,46 +257,56 @@ async def upload_image_to_library(
 
     # Generate image code with random suffix to avoid duplicates
     now = _now()
-    suffix = ''.join(random.choices(string.digits, k=6))
-    img_code = f"{season.code or 'UNK'}_{image_type.upper()}_{suffix}"
 
-    # Upload to ImageKit
-    file_name = f"{img_code}.png"
-    try:
-        ik_result = await upload_image(contents, folder=folder, file_name=file_name)
-        img_url = ik_result["url"]
-        ik_file_id = ik_result["file_id"]
-    except Exception as e:
-        logger.error(f"ImageKit upload failed: {e}")
-        raise HTTPException(status_code=500, detail="Image upload to CDN failed. Please try again.")
+    while True:
+        suffix = ''.join(random.choices(string.digits, k=6))
+        img_code = f"{season.code or 'UNK'}_{image_type.upper()}_{suffix}"
 
-    # Save to DesignImage
-    design_img = DesignImage(
-        image_code=img_code,
-        index=0,
-        season_id=season_id,
-        garment_id=garment_id or "",
-        node_key=NodeKey.SKETCH if image_type == "sketch" else NodeKey.PRINT,
-        run_id="",
-        version=1,
-        image_type=image_type,
-        view="front",
-        liked=False,
-        starred=False,
-        input_images=[],
-        source="upload",
-        ai_model=None,
-        ai_prompt=None,
-        params={},
-        url=img_url,
-        imagekit_file_id=ik_file_id,
-        file_size_bytes=len(contents),
-        file_format=file.content_type or "image/png",
-        note=note,
-        created_at=now,
-        updated_at=now,
-    )
-    await design_img.insert()
+        # Upload to ImageKit
+        file_name = f"{img_code}.png"
+        try:
+            ik_result = await upload_image(contents, folder=folder, file_name=file_name)
+            img_url = ik_result["url"]
+            ik_file_id = ik_result["file_id"]
+        except Exception as e:
+            logger.error(f"ImageKit upload failed: {e}")
+            raise HTTPException(status_code=500, detail="Image upload to CDN failed. Please try again.")
+
+        # Save to DesignImage
+        design_img = DesignImage(
+            image_code=img_code,
+            index=0,
+            season_id=season_id,
+            garment_id=garment_id or "",
+            node_key=NodeKey.SKETCH if image_type == "sketch" else NodeKey.PRINT,
+            run_id="",
+            version=1,
+            image_type=image_type,
+            view="front",
+            liked=False,
+            starred=False,
+            input_images=[],
+            source="upload",
+            ai_model=None,
+            ai_prompt=None,
+            params={},
+            url=img_url,
+            imagekit_file_id=ik_file_id,
+            file_size_bytes=len(contents),
+            file_format=file.content_type or "image/png",
+            note=note,
+            created_at=now,
+            updated_at=now,
+        )
+        try:
+            await design_img.insert()
+            break
+        except DuplicateKeyError:
+            logger.warning(f"Duplicate image_code {img_code}, retrying with new suffix")
+            try:
+                await imagekit_delete(ik_file_id)
+            except Exception:
+                pass
 
     logger.info(f"Uploaded {image_type} image: {img_code} -> {img_url[:60]}...")
     return _serialize_image(design_img)

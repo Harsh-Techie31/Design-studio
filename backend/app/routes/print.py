@@ -4,6 +4,8 @@ import json
 import logging
 from typing import Optional
 
+from pymongo.errors import DuplicateKeyError
+
 import httpx
 from fastapi import APIRouter, Header, HTTPException
 from pydantic import BaseModel
@@ -343,56 +345,70 @@ async def generate_print(
             raise HTTPException(status_code=500, detail="Failed to process image")
 
     # ─── Upload to ImageKit ───
-    img_code = f"{code}_01"
-    file_name = f"{img_code}.png"
-    folder = f"/design-studio/{garment.season_id}/{garment_id}/prints/"
+    count = 1
+    img_code = f"{code}_{count:02d}"
 
-    try:
-        ik_result = await _upload_to_imagekit(img_bytes, folder=folder, file_name=file_name)
-        img_url = ik_result["url"]
-        ik_file_id = ik_result["file_id"]
-        logger.info(f"ImageKit upload OK: {img_code} -> {img_url[:60]}...")
-    except Exception as e:
-        logger.error(f"ImageKit upload failed for {img_code}: {e}")
-        raise HTTPException(status_code=500, detail="Image upload to CDN failed. Please try again.")
+    while True:
+        file_name = f"{img_code}.png"
+        folder = f"/design-studio/{garment.season_id}/{garment_id}/prints/"
 
-    # ─── Save DesignImage ───
-    design_img = DesignImage(
-        image_code=img_code,
-        index=0,
-        season_id=garment.season_id,
-        garment_id=garment_id,
-        node_key=NodeKey.PRINT,
-        run_id=str(run.id),
-        version=version,
-        image_type="print",
-        view="front",
-        liked=False,
-        starred=False,
-        input_images=[],
-        source=source,
-        ai_model=run.ai.model,
-        ai_prompt=prompt,
-        params={
-            "fabric_type": body.fabric_type,
-            "background_color": body.background_color,
-            "scale": body.scale,
-            "repeat_type": body.repeat_type,
-            "spacing_x": body.spacing_x,
-            "spacing_y": body.spacing_y,
-            "rotation": body.rotation,
-            "canvas_width": body.canvas_width,
-            "canvas_height": body.canvas_height,
-        },
-        url=img_url,
-        imagekit_file_id=ik_file_id,
-        file_size_bytes=len(img_bytes),
-        file_format="png",
-        note=body.note,
-        created_at=now,
-        updated_at=now,
-    )
-    await design_img.insert()
+        try:
+            ik_result = await _upload_to_imagekit(img_bytes, folder=folder, file_name=file_name)
+            img_url = ik_result["url"]
+            ik_file_id = ik_result["file_id"]
+            logger.info(f"ImageKit upload OK: {img_code} -> {img_url[:60]}...")
+        except Exception as e:
+            logger.error(f"ImageKit upload failed for {img_code}: {e}")
+            raise HTTPException(status_code=500, detail="Image upload to CDN failed. Please try again.")
+
+        # ─── Save DesignImage ───
+        design_img = DesignImage(
+            image_code=img_code,
+            index=0,
+            season_id=garment.season_id,
+            garment_id=garment_id,
+            node_key=NodeKey.PRINT,
+            run_id=str(run.id),
+            version=version,
+            image_type="print",
+            view="front",
+            liked=False,
+            starred=False,
+            input_images=[],
+            source=source,
+            ai_model=run.ai.model,
+            ai_prompt=prompt,
+            params={
+                "fabric_type": body.fabric_type,
+                "background_color": body.background_color,
+                "scale": body.scale,
+                "repeat_type": body.repeat_type,
+                "spacing_x": body.spacing_x,
+                "spacing_y": body.spacing_y,
+                "rotation": body.rotation,
+                "canvas_width": body.canvas_width,
+                "canvas_height": body.canvas_height,
+            },
+            url=img_url,
+            imagekit_file_id=ik_file_id,
+            file_size_bytes=len(img_bytes),
+            file_format="png",
+            note=body.note,
+            created_at=now,
+            updated_at=now,
+        )
+        try:
+            await design_img.insert()
+            break
+        except DuplicateKeyError:
+            count += 1
+            img_code = f"{code}_{count:02d}"
+            logger.warning(f"Duplicate image_code, retrying with {img_code}")
+            try:
+                from app.services.imagekit import delete_image
+                await delete_image(ik_file_id)
+            except Exception:
+                pass
 
     # ─── Update NodeRun ───
     run.output = NodeOutput(images=[img_url])
