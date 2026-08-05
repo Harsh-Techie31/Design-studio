@@ -32,7 +32,7 @@ export function StageProgressBar({
                 onClick={() =>
                   navigate(`/seasons/${seasonId}/garments/${garmentId}/stage/${def.key}`)
                 }
-                className={`flex items-center gap-2 px-3 py-2 text-xs font-medium transition-all ${
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
                   isActive
                     ? "bg-accent/15 text-accent"
                     : isDone

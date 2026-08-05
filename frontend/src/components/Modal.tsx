@@ -24,7 +24,7 @@ export function Modal({
       onClick={onClose}
     >
       <div
-        className={`flex max-h-[90vh] w-full flex-col ${maxWidthClass} bg-surface shadow-2xl animate-fade-in`}
+        className={`flex max-h-[90vh] w-full flex-col ${maxWidthClass} rounded-xl bg-surface shadow-2xl animate-fade-in`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 pt-6 pb-0">

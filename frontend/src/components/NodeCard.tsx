@@ -19,7 +19,7 @@ export function NodeCard({ def, summary, onOpen }: NodeCardProps) {
   return (
     <button
       onClick={onOpen}
-      className="group flex flex-col items-start gap-3 bg-surface p-5 text-left transition-all hover:bg-surface-hi"
+      className="group flex flex-col items-start gap-3 rounded-xl bg-surface p-5 text-left transition-all hover:bg-surface-hi"
     >
       <div className="flex w-full items-center justify-between">
         <span className="font-mono text-[11px] font-medium text-muted">

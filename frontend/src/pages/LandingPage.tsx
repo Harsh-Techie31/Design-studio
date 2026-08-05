@@ -28,7 +28,7 @@ export function LandingPage() {
         </span>
         <Link
           to="/seasons"
-          className="border border-line px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-bone-dim transition-colors hover:border-accent hover:text-accent"
+          className="rounded-lg border border-line px-5 py-2.5 font-mono text-xs uppercase tracking-wider text-bone-dim transition-colors hover:border-accent hover:text-accent"
         >
           Enter Studio
         </Link>
@@ -61,7 +61,7 @@ export function LandingPage() {
             <div className="mt-10 flex items-center gap-4">
               <Link
                 to="/seasons"
-                className="bg-accent px-7 py-3.5 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-accent-soft"
+                className="bg-accent rounded-lg px-7 py-3.5 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-accent-soft"
               >
                 Enter the Studio
               </Link>

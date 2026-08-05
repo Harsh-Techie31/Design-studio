@@ -1,24 +1,39 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #080808;
-  --color-ink-soft: #0f0f0f;
-  --color-surface: #141414;
-  --color-surface-hi: #1c1c1c;
-  --color-surface-raised: #242424;
-  --color-line: #2a2a2a;
-  --color-line-soft: #1e1e1e;
-  --color-bone: #f5f0e8;
-  --color-bone-dim: #b8b0a4;
-  --color-muted: #706a60;
-  --color-accent: #2dd4bf;
-  --color-accent-soft: #5eead4;
-  --color-accent-dim: #0d9488;
+  /* Surfaces (deepest → raised) */
+  --color-ink: #0C1927;
+  --color-ink-soft: #07264C;
+  --color-surface: #192839;
+  --color-surface-hi: #2A415E;
+  --color-surface-raised: #2A415E;
+
+  /* Borders */
+  --color-line: #2A415E;
+  --color-line-soft: #1e2d42;
+  --color-border-strong: #58728D;
+
+  /* Text */
+  --color-bone: #FFFFFF;
+  --color-bone-dim: #E6EFF4;
+  --color-muted: #B1C1D2;
+  --color-text-disabled: #58728D;
+
+  /* Accent — blue */
+  --color-accent: #305EFF;
+  --color-accent-hover: #4D7FFF;
+  --color-accent-active: #2243B6;
+  --color-accent-subtle: #0D1A48;
+  --color-accent-text: #75A3FF;
+  --color-on-accent: #FFFFFF;
+
+  /* Status utilities */
   --color-signal-green: #3dd68c;
   --color-signal-amber: #e0a030;
 
+  /* Fonts */
   --font-display: "Space Grotesk", "Helvetica Neue", sans-serif;
-  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-sans: "Figtree", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
@@ -29,7 +44,7 @@ html {
 body {
   margin: 0;
   background: var(--color-ink);
-  color: var(--color-bone);
+  color: var(--color-bone-dim);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -41,7 +56,7 @@ body {
 
 ::selection {
   background: var(--color-accent);
-  color: var(--color-ink);
+  color: var(--color-on-accent);
 }
 
 * {

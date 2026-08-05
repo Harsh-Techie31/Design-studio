@@ -23,7 +23,7 @@ export function SeasonCard({
   return (
     <Link
       to={`/seasons/${season.id}`}
-      className="group relative block overflow-hidden border border-line bg-surface transition-all hover:border-accent/40 hover:bg-surface-hi"
+      className="group relative block overflow-hidden rounded-xl border border-line bg-surface transition-all hover:border-accent/40 hover:bg-surface-hi"
     >
       <div className="grid grid-cols-4 gap-px">
         {[0, 1, 2, 3].map((i) => (

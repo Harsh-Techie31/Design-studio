@@ -11,7 +11,7 @@ export function PaletteSwatches({ colors, size = "md" }: PaletteSwatchesProps) {
         <div
           key={i}
           title={c}
-          className={`${dim}`}
+          className={`rounded-sm ${dim}`}
           style={{ backgroundColor: c }}
         />
       ))}

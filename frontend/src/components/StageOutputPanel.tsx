@@ -155,7 +155,7 @@ export function StageOutputPanel({
               <button
                 onClick={onNextStage}
                 disabled={!hasLiked}
-                className={`flex items-center gap-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider transition-all ${
+                className={`flex items-center gap-2 rounded-lg px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider transition-all ${
                   hasLiked
                     ? "bg-accent text-ink hover:bg-accent-soft"
                     : "cursor-not-allowed bg-line text-muted"
@@ -342,7 +342,7 @@ export function StageOutputPanel({
           </p>
           <button
             onClick={onMakeNewGarment}
-            className="flex items-center gap-2 bg-accent px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-ink transition-all hover:bg-accent-soft"
+            className="flex items-center gap-2 bg-accent rounded-lg px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider text-ink transition-all hover:bg-accent-soft"
           >
             <i className="ti ti-plus text-[11px]" />
             Make New Garment
@@ -364,7 +364,7 @@ export function StageOutputPanel({
             <button
               onClick={onNextStage}
               disabled={!hasLiked}
-              className={`flex items-center gap-2 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider transition-all ${
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-wider transition-all ${
                 hasLiked
                   ? "bg-accent text-ink hover:bg-accent-soft"
                   : "cursor-not-allowed bg-line text-muted"

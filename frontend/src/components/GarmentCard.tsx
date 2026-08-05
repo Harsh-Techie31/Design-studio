@@ -60,7 +60,7 @@ export function GarmentCard({
   return (
     <Link
       to={`/seasons/${garment.season_id}/garments/${garment.id}`}
-      className="group relative block overflow-hidden border border-line bg-surface transition-all hover:border-accent/40 hover:bg-surface-hi"
+      className="group relative block overflow-hidden rounded-xl border border-line bg-surface transition-all hover:border-accent/40 hover:bg-surface-hi"
     >
       {bestImage ? (
         <div className="aspect-[4/3] w-full overflow-hidden bg-ink-soft">

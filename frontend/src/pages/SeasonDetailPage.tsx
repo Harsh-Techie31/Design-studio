@@ -258,7 +258,7 @@ export function SeasonDetailPage() {
         <h2 className="font-display text-lg font-semibold tracking-tight text-bone">Garments</h2>
         <button
           onClick={() => setOpen(true)}
-          className="bg-accent px-4 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wider text-ink transition-colors hover:bg-accent-soft"
+          className="bg-accent rounded-lg px-4 py-1.5 font-mono text-[11px] font-medium uppercase tracking-wider text-ink transition-colors hover:bg-accent-soft"
         >
           + New Garment
         </button>
@@ -347,7 +347,7 @@ export function SeasonDetailPage() {
               </p>
               <button
                 onClick={() => setMoodboardOpen(true)}
-                className="bg-accent px-5 py-2 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-accent-soft"
+                className="bg-accent rounded-lg px-5 py-2 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-accent-soft"
               >
                 Start Moodboard
               </button>
@@ -384,7 +384,7 @@ export function SeasonDetailPage() {
                       </p>
                       <button
                         onClick={() => analyzeMoodboard(season!.id)}
-                        className="mt-3 inline-flex items-center gap-1.5 border border-accent/20 bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
+                        className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-accent/20 bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-accent/20"
                       >
                         <i className="ti ti-refresh text-[11px]" />
                         Retry analysis
@@ -533,7 +533,7 @@ export function SeasonDetailPage() {
                   key={c.code}
                   type="button"
                   onClick={() => setCategory(c.code)}
-                  className={`border px-4 py-2.5 text-left text-sm transition-colors ${
+                  className={`rounded-lg border px-4 py-2.5 text-left text-sm transition-colors ${
                     category === c.code
                       ? "border-accent bg-accent/10 text-accent"
                       : "border-line bg-ink text-bone-dim hover:border-accent/40"
@@ -550,7 +550,7 @@ export function SeasonDetailPage() {
           <button
             type="submit"
             disabled={!category}
-            className="mt-1 bg-accent px-5 py-2.5 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
+            className="mt-1 bg-accent rounded-lg px-5 py-2.5 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-40"
           >
             Create Garment
           </button>
@@ -571,7 +571,7 @@ export function SeasonDetailPage() {
           <button
             onClick={() => setPendingDelete(null)}
             disabled={deleting}
-            className="border border-line px-4 py-2 text-sm text-bone transition-colors hover:bg-surface-hi disabled:opacity-40"
+            className="rounded-lg border border-line px-4 py-2 text-sm text-bone transition-colors hover:bg-surface-hi disabled:opacity-40"
           >
             Cancel
           </button>
@@ -587,7 +587,7 @@ export function SeasonDetailPage() {
               }
             }}
             disabled={deleting}
-            className="flex items-center gap-2 bg-accent/20 px-4 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent/30 disabled:opacity-40"
+            className="flex items-center gap-2 rounded-lg bg-accent/20 px-4 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent/30 disabled:opacity-40"
           >
             {deleting && <i className="ti ti-loader-2 animate-spin text-xs" />}
             {deleting ? "Cleaning up..." : "Delete"}

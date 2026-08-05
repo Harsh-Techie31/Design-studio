@@ -12,7 +12,7 @@ export function MoodboardTile({ src, seed, index, className = "" }: MoodboardTil
     return <PlaceholderTile seed={seed} index={index} className={className} />;
   }
   return (
-    <div className={`overflow-hidden ${className}`}>
+    <div className={`overflow-hidden rounded-md ${className}`}>
       <img src={src} alt="" className="h-full w-full object-cover" />
     </div>
   );
