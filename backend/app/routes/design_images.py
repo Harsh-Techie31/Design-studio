@@ -2,6 +2,8 @@ from datetime import datetime, timezone
 from typing import Optional
 import logging
 import base64
+import random
+import string
 
 from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
 
@@ -251,13 +253,10 @@ async def upload_image_to_library(
     }
     folder = folder_map.get(image_type, f"/design-studio/{season_id}/uploads/")
 
-    # Generate image code
+    # Generate image code with random suffix to avoid duplicates
     now = _now()
-    count = await DesignImage.find(
-        DesignImage.season_id == season_id,
-        DesignImage.image_type == image_type,
-    ).count()
-    img_code = f"{season.code or 'UNK'}_{image_type.upper()}_{count + 1:04d}"
+    suffix = ''.join(random.choices(string.digits, k=3))
+    img_code = f"{season.code or 'UNK'}_{image_type.upper()}_{suffix}"
 
     # Upload to ImageKit
     file_name = f"{img_code}.png"
