@@ -206,7 +206,7 @@ export function TechPackTool({
 
     try {
       const result: TechPackGenerateResponse = await generateTechPack(garment.id, {
-        render_image_url: selectedRender.id,
+        render_image_id: selectedRender.id,
         gender: (selectedRender.params?.gender as string) || "male",
         construction,
         stitch_type: stitchType,

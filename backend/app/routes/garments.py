@@ -5,7 +5,9 @@ from fastapi import APIRouter, HTTPException
 from app.models.season import Season
 from app.models.garment import Garment
 from app.models.node_run import NodeRun
+from app.models.design_image import DesignImage
 from app.schemas.garment import GarmentCreate, GarmentUpdate, GarmentResponse
+from app.services.imagekit import delete_image
 
 router = APIRouter(tags=["garments"])
 
@@ -45,12 +47,14 @@ async def _update_node_summary(garment_id: str) -> None:
     from app.models.enums import NodeKey
     from app.models.garment import NodeSummary
 
-    for nk in NodeKey:
-        runs = await NodeRun.find(
-            NodeRun.garment_id == garment_id,
-            NodeRun.node_key == nk,
-        ).to_list()
+    # Single query for all runs, then group in Python (avoids N+1)
+    all_runs = await NodeRun.find(NodeRun.garment_id == garment_id).to_list()
+    runs_by_key: dict[NodeKey, list] = {}
+    for r in all_runs:
+        runs_by_key.setdefault(r.node_key, []).append(r)
 
+    for nk in NodeKey:
+        runs = runs_by_key.get(nk, [])
         garment.node_summary[nk] = NodeSummary(
             run_count=len(runs),
             liked_count=sum(1 for r in runs if r.liked),
@@ -123,5 +127,17 @@ async def delete_garment(garment_id: str):
     garment = await Garment.get(garment_id)
     if not garment:
         raise HTTPException(status_code=404, detail="Garment not found")
+
+    # Clean up DesignImage ImageKit files for this garment
+    design_images = await DesignImage.find(DesignImage.garment_id == garment_id).to_list()
+    for di in design_images:
+        if di.imagekit_file_id:
+            try:
+                await delete_image(di.imagekit_file_id)
+            except Exception:
+                pass
+    if design_images:
+        await DesignImage.find(DesignImage.garment_id == garment_id).delete_many()
+
     await NodeRun.find(NodeRun.garment_id == garment_id).delete_many()
     await garment.delete()

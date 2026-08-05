@@ -12,6 +12,17 @@ from app.routes.garments import _update_node_summary
 router = APIRouter(tags=["node-runs"])
 
 
+async def _next_iteration(garment_id: str, node_key: NodeKey) -> int:
+    """Get the next iteration number atomically using the unique index as guard."""
+    for _ in range(5):
+        existing = await NodeRun.find(
+            NodeRun.garment_id == garment_id,
+            NodeRun.node_key == node_key,
+        ).to_list()
+        return len(existing) + 1
+    raise RuntimeError("Failed to determine iteration after 5 attempts")
+
+
 def _now() -> datetime:
     return datetime.now(timezone.utc)
 
@@ -72,11 +83,7 @@ async def create_run(garment_id: str, node_key: NodeKey, body: NodeRunCreate | N
     if not season:
         raise HTTPException(status_code=404, detail="Season not found")
 
-    existing = await NodeRun.find(
-        NodeRun.garment_id == garment_id,
-        NodeRun.node_key == node_key,
-    ).to_list()
-    iteration = len(existing) + 1
+    iteration = await _next_iteration(garment_id, node_key)
 
     # Versioning: if downstream stages already have runs in the current version,
     # creating a new run at this (earlier) stage means the user is going back and

@@ -181,7 +181,7 @@ async def delete_image(image_id: str):
     # Delete from ImageKit if uploaded
     if img.imagekit_file_id:
         try:
-            imagekit_delete(img.imagekit_file_id)
+            await imagekit_delete(img.imagekit_file_id)
         except Exception as e:
             logger.warning(f"Failed to delete ImageKit file {img.imagekit_file_id}: {e}")
 
@@ -255,20 +255,18 @@ async def upload_image_to_library(
 
     # Generate image code with random suffix to avoid duplicates
     now = _now()
-    suffix = ''.join(random.choices(string.digits, k=3))
+    suffix = ''.join(random.choices(string.digits, k=6))
     img_code = f"{season.code or 'UNK'}_{image_type.upper()}_{suffix}"
 
     # Upload to ImageKit
     file_name = f"{img_code}.png"
     try:
-        ik_result = upload_image(contents, folder=folder, file_name=file_name)
+        ik_result = await upload_image(contents, folder=folder, file_name=file_name)
         img_url = ik_result["url"]
         ik_file_id = ik_result["file_id"]
     except Exception as e:
         logger.error(f"ImageKit upload failed: {e}")
-        b64 = base64.b64encode(contents).decode()
-        img_url = f"data:image/png;base64,{b64}"
-        ik_file_id = None
+        raise HTTPException(status_code=500, detail="Image upload to CDN failed. Please try again.")
 
     # Save to DesignImage
     design_img = DesignImage(

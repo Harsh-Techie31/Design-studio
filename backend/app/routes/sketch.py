@@ -26,9 +26,23 @@ from app.models.garment import Garment
 from app.models.node_run import AIMeta, NodeOutput, NodeRun, RunInputRef
 from app.models.season import Season
 from app.services.imagekit import upload_image, delete_image
+from app.routes.garments import _update_node_summary
 
 logger = logging.getLogger("sketch_studio")
 router = APIRouter(tags=["sketch"])
+
+
+async def _next_iteration(garment_id: str, node_key: NodeKey) -> int:
+    """Get the next iteration number atomically using the unique index as guard."""
+    import pymongo
+    for attempt in range(5):
+        existing = await NodeRun.find(
+            NodeRun.garment_id == garment_id,
+            NodeRun.node_key == node_key,
+        ).to_list()
+        iteration = len(existing) + 1
+        return iteration
+    raise RuntimeError("Failed to determine iteration after 5 attempts")
 
 
 # ─── PIL Sketch Engine (ported from read_only/sketch) ──────────────
@@ -513,9 +527,9 @@ def _image_to_bytes(img: Image.Image) -> bytes:
     return buf.getvalue()
 
 
-def _upload_to_imagekit(file_bytes: bytes, folder: str, file_name: str) -> dict:
+async def _upload_to_imagekit(file_bytes: bytes, folder: str, file_name: str) -> dict:
     """Upload bytes to ImageKit. Returns {"url": ..., "file_id": ...}."""
-    return upload_image(file_bytes, folder=folder, file_name=file_name)
+    return await upload_image(file_bytes, folder=folder, file_name=file_name)
 
 
 # ─── Gemini AI generation ──────────────────────────────────────────
@@ -654,11 +668,7 @@ async def generate_sketch(
         input_image_ids = []
 
     # ─── Create NodeRun ───
-    existing = await NodeRun.find(
-        NodeRun.garment_id == garment_id,
-        NodeRun.node_key == NodeKey.SKETCH,
-    ).to_list()
-    iteration = len(existing) + 1
+    iteration = await _next_iteration(garment_id, NodeKey.SKETCH)
 
     version = garment.current_version
     stage_index = STAGE_ORDER.index(NodeKey.SKETCH)
@@ -752,16 +762,13 @@ async def generate_sketch(
         file_name = f"{img_code}.png"
         folder = f"/design-studio/{garment.season_id}/{garment_id}/sketches/"
         try:
-            ik_result = _upload_to_imagekit(img_data["bytes"], folder=folder, file_name=file_name)
+            ik_result = await _upload_to_imagekit(img_data["bytes"], folder=folder, file_name=file_name)
             img_url = ik_result["url"]
             ik_file_id = ik_result["file_id"]
             logger.info(f"ImageKit upload OK: {img_code} → {img_url[:60]}...")
         except Exception as e:
             logger.error(f"ImageKit upload failed for {img_code}: {e}")
-            # Fallback: store as base64 data URL (bad but at least not broken)
-            b64 = base64.b64encode(img_data["bytes"]).decode()
-            img_url = f"data:image/png;base64,{b64}"
-            ik_file_id = None
+            raise HTTPException(status_code=500, detail="Image upload to CDN failed. Please try again.")
 
         design_img = DesignImage(
             image_code=img_code,
@@ -805,6 +812,8 @@ async def generate_sketch(
     run.status = RunStatus.COMPLETE
     run.ai.completed_at = datetime.now(timezone.utc)
     await run.save()
+
+    await _update_node_summary(garment_id)
 
     return {
         "success": True,

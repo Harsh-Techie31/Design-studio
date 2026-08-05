@@ -15,16 +15,28 @@ from app.models.garment import Garment
 from app.models.node_run import AIMeta, NodeOutput, NodeRun, RunInputRef
 from app.models.season import Season
 from app.services.imagekit import upload_image
+from app.routes.garments import _update_node_summary
 
 logger = logging.getLogger("techpack_studio")
 router = APIRouter(tags=["techpack"])
+
+
+async def _next_iteration(garment_id: str, node_key: NodeKey) -> int:
+    """Get the next iteration number atomically using the unique index as guard."""
+    for _ in range(5):
+        existing = await NodeRun.find(
+            NodeRun.garment_id == garment_id,
+            NodeRun.node_key == node_key,
+        ).to_list()
+        return len(existing) + 1
+    raise RuntimeError("Failed to determine iteration after 5 attempts")
 
 
 # ─── Request model ──────────────────────────────────────────────────
 
 
 class TechPackGenerateRequest(BaseModel):
-    render_image_url: str  # URL from library (the selected render)
+    render_image_id: str  # DesignImage ID from library (the selected render)
     gender: str = "male"
     construction: dict[str, str] = {}  # e.g. {"Waistband": "Curtain", "Fly": "Zip fly"}
     stitch_type: str = "Lockstitch"
@@ -200,8 +212,8 @@ async def _fetch_image_bytes(url: str) -> bytes | None:
     return None
 
 
-def _upload_to_imagekit(file_bytes: bytes, folder: str, file_name: str) -> dict:
-    return upload_image(file_bytes, folder=folder, file_name=file_name)
+async def _upload_to_imagekit(file_bytes: bytes, folder: str, file_name: str) -> dict:
+    return await upload_image(file_bytes, folder=folder, file_name=file_name)
 
 
 # ─── Endpoint ───────────────────────────────────────────────────────
@@ -232,11 +244,7 @@ async def generate_techpack(
         raise HTTPException(status_code=404, detail="Season not found")
 
     # ─── Create NodeRun ───
-    existing = await NodeRun.find(
-        NodeRun.garment_id == garment_id,
-        NodeRun.node_key == NodeKey.TECH_PACK,
-    ).to_list()
-    iteration = len(existing) + 1
+    iteration = await _next_iteration(garment_id, NodeKey.TECH_PACK)
 
     version = garment.current_version
     stage_index = STAGE_ORDER.index(NodeKey.TECH_PACK)
@@ -279,16 +287,16 @@ async def generate_techpack(
     await run.insert()
 
     # ─── Resolve render and its lineage ───
-    logger.info(f"TechPack: render_image_url={body.render_image_url}")
-    render_img = await DesignImage.get(body.render_image_url)
+    logger.info(f"TechPack: render_image_id={body.render_image_id}")
+    render_img = await DesignImage.get(body.render_image_id)
     if not render_img:
         render_img = await DesignImage.find_one(
-            DesignImage.id == body.render_image_url,
+            DesignImage.id == body.render_image_id,
         )
     logger.info(f"TechPack: render_img found={render_img is not None}")
     if not render_img:
         # Try treating it as a URL directly
-        render_url = body.render_image_url
+        render_url = body.render_image_id
         sketch_bytes = None
         fabric_bytes_list: list[bytes] = []
     else:
@@ -390,20 +398,18 @@ async def generate_techpack(
     folder = f"/design-studio/{garment.season_id}/{garment_id}/techpacks/"
 
     try:
-        ik_result = _upload_to_imagekit(img_bytes, folder=folder, file_name=file_name)
+        ik_result = await _upload_to_imagekit(img_bytes, folder=folder, file_name=file_name)
         img_url = ik_result["url"]
         ik_file_id = ik_result["file_id"]
         logger.info(f"ImageKit upload OK: {img_code} -> {img_url[:60]}...")
     except Exception as e:
         logger.error(f"ImageKit upload failed for {img_code}: {e}")
-        b64 = base64.b64encode(img_bytes).decode()
-        img_url = f"data:image/png;base64,{b64}"
-        ik_file_id = None
+        raise HTTPException(status_code=500, detail="Image upload to CDN failed. Please try again.")
 
     # ─── Save DesignImage ───
     input_refs = []
-    if body.render_image_url:
-        input_refs.append(InputImageRef(image_id=body.render_image_url, stage=NodeKey.RENDER, role="primary"))
+    if body.render_image_id:
+        input_refs.append(InputImageRef(image_id=body.render_image_id, stage=NodeKey.RENDER, role="primary"))
 
     design_img = DesignImage(
         image_code=img_code,
@@ -446,6 +452,8 @@ async def generate_techpack(
     run.status = RunStatus.COMPLETE
     run.ai.completed_at = datetime.now(timezone.utc)
     await run.save()
+
+    await _update_node_summary(garment_id)
 
     return {
         "success": True,

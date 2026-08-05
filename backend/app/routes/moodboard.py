@@ -88,16 +88,34 @@ async def upload_moodboard_images(
         logger.error(f"Too many images: {len(season.moodboard.images)} existing + {len(files)} new")
         raise HTTPException(status_code=400, detail="Moodboard can have at most 12 images")
 
+    ALLOWED_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+
     uploaded = []
     base_order = len(season.moodboard.images)
 
     for i, file in enumerate(files):
+        # Validate MIME type
+        if file.content_type and file.content_type not in ALLOWED_TYPES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid file type '{file.content_type}'. Allowed: JPEG, PNG, WebP, GIF."
+            )
+
         file_bytes = await file.read()
+
+        # Validate file size
+        if len(file_bytes) > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=400,
+                detail=f"File '{file.filename}' exceeds 10MB limit ({len(file_bytes)} bytes)."
+            )
+
         ext = file.filename.rsplit(".", 1)[-1] if file.filename and "." in file.filename else "png"
         file_name = f"moodboard_{season_id}_{uuid.uuid4().hex[:8]}.{ext}"
 
         logger.info(f"Uploading to ImageKit: {file_name} ({len(file_bytes)} bytes)")
-        result = upload_image(file_bytes, folder="/moodboard/", file_name=file_name)
+        result = await upload_image(file_bytes, folder="/moodboard/", file_name=file_name)
         logger.info(f"ImageKit upload OK: {result['url'][:60]}...")
 
         img = MoodboardImage(
@@ -138,9 +156,9 @@ async def delete_moodboard_image(season_id: str, image_index: int):
 
     if img.imagekit_file_id:
         try:
-            delete_image(img.imagekit_file_id)
-        except Exception:
-            pass
+            await delete_image(img.imagekit_file_id)
+        except Exception as e:
+            logger.warning(f"Failed to delete ImageKit file {img.imagekit_file_id}: {e}")
 
     season.moodboard.images.pop(image_index)
 

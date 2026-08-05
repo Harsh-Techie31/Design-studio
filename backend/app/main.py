@@ -29,6 +29,9 @@ logging.basicConfig(
 async def lifespan(app: FastAPI):
     await init_db()
     yield
+    from .db import client
+    if client:
+        client.close()
 
 
 app = FastAPI(title="Design Studio API", lifespan=lifespan)

@@ -15,9 +15,21 @@ from app.models.garment import Garment
 from app.models.node_run import AIMeta, NodeOutput, NodeRun
 from app.models.season import Season
 from app.services.imagekit import upload_image
+from app.routes.garments import _update_node_summary
 
 logger = logging.getLogger("pattern_studio")
 router = APIRouter(tags=["pattern"])
+
+
+async def _next_iteration(garment_id: str, node_key: NodeKey) -> int:
+    """Get the next iteration number atomically using the unique index as guard."""
+    for _ in range(5):
+        existing = await NodeRun.find(
+            NodeRun.garment_id == garment_id,
+            NodeRun.node_key == node_key,
+        ).to_list()
+        return len(existing) + 1
+    raise RuntimeError("Failed to determine iteration after 5 attempts")
 
 
 # ─── Request model ──────────────────────────────────────────────────
@@ -55,8 +67,8 @@ async def _fetch_image_bytes(url: str) -> bytes | None:
     return None
 
 
-def _upload_to_imagekit(file_bytes: bytes, folder: str, file_name: str) -> dict:
-    return upload_image(file_bytes, folder=folder, file_name=file_name)
+async def _upload_to_imagekit(file_bytes: bytes, folder: str, file_name: str) -> dict:
+    return await upload_image(file_bytes, folder=folder, file_name=file_name)
 
 
 # ─── My custom prompt for pattern piece generation ──────────────────
@@ -510,11 +522,7 @@ async def generate_pattern(
         raise HTTPException(status_code=404, detail="Season not found")
 
     # ─── Create NodeRun ───
-    existing = await NodeRun.find(
-        NodeRun.garment_id == garment_id,
-        NodeRun.node_key == NodeKey.PATTERN,
-    ).to_list()
-    iteration = len(existing) + 1
+    iteration = await _next_iteration(garment_id, NodeKey.PATTERN)
 
     version = garment.current_version
     stage_index = STAGE_ORDER.index(NodeKey.PATTERN)
@@ -655,15 +663,13 @@ async def generate_pattern(
     folder = f"/design-studio/{garment.season_id}/{garment_id}/patterns/"
 
     try:
-        ik_result = _upload_to_imagekit(img_bytes, folder=folder, file_name=file_name)
+        ik_result = await _upload_to_imagekit(img_bytes, folder=folder, file_name=file_name)
         img_url = ik_result["url"]
         ik_file_id = ik_result["file_id"]
         logger.info(f"ImageKit upload OK: {img_code} -> {img_url[:60]}...")
     except Exception as e:
         logger.error(f"ImageKit upload failed for {img_code}: {e}")
-        b64 = base64.b64encode(img_bytes).decode()
-        img_url = f"data:image/png;base64,{b64}"
-        ik_file_id = None
+        raise HTTPException(status_code=500, detail="Image upload to CDN failed. Please try again.")
 
     # ─── Save DesignImage ───
     input_refs = []
@@ -712,6 +718,8 @@ async def generate_pattern(
     run.status = RunStatus.COMPLETE
     run.ai.completed_at = datetime.now(timezone.utc)
     await run.save()
+
+    await _update_node_summary(garment_id)
 
     return {
         "success": True,

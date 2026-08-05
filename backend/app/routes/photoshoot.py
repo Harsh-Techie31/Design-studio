@@ -20,9 +20,21 @@ from app.services.avatar_reference import (
 )
 from app.services.generation_helpers import build_placeholder_image, fetch_image_bytes
 from app.services.imagekit import upload_image
+from app.routes.garments import _update_node_summary
 
 logger = logging.getLogger("photoshoot_studio")
 router = APIRouter(tags=["photoshoot"])
+
+
+async def _next_iteration(garment_id: str, node_key: NodeKey) -> int:
+    """Get the next iteration number atomically using the unique index as guard."""
+    for _ in range(5):
+        existing = await NodeRun.find(
+            NodeRun.garment_id == garment_id,
+            NodeRun.node_key == node_key,
+        ).to_list()
+        return len(existing) + 1
+    raise RuntimeError("Failed to determine iteration after 5 attempts")
 
 
 # ─── Request model ──────────────────────────────────────────────────
@@ -171,8 +183,8 @@ async def _generate_photoshoot_image(
 # ─── Helpers ─────────────────────────────────────────────────────────
 
 
-def _upload_to_imagekit(file_bytes: bytes, folder: str, file_name: str) -> dict:
-    return upload_image(file_bytes, folder=folder, file_name=file_name)
+async def _upload_to_imagekit(file_bytes: bytes, folder: str, file_name: str) -> dict:
+    return await upload_image(file_bytes, folder=folder, file_name=file_name)
 
 
 # ─── Endpoint ───────────────────────────────────────────────────────
@@ -247,12 +259,8 @@ async def generate_photoshoot(
     logger.info("[SHOOT] Model avatar (carried from viz): %s", model_avatar)
 
     # ─── Create NodeRun ───
-    existing = await NodeRun.find(
-        NodeRun.garment_id == garment_id,
-        NodeRun.node_key == NodeKey.PHOTOSHOOT,
-    ).to_list()
-    iteration = len(existing) + 1
-    logger.info("[SHOOT] Existing runs for photoshoot: %d, new iteration=%d", len(existing), iteration)
+    iteration = await _next_iteration(garment_id, NodeKey.PHOTOSHOOT)
+    logger.info("[SHOOT] New iteration=%d", iteration)
 
     version = garment.current_version
     stage_index = STAGE_ORDER.index(NodeKey.PHOTOSHOOT)
@@ -374,16 +382,13 @@ async def generate_photoshoot(
 
         try:
             logger.info("[SHOOT] Uploading to ImageKit: %s (%d bytes)", img_code, len(img_data["bytes"]))
-            ik_result = _upload_to_imagekit(img_data["bytes"], folder=folder, file_name=file_name)
+            ik_result = await _upload_to_imagekit(img_data["bytes"], folder=folder, file_name=file_name)
             img_url = ik_result["url"]
             ik_file_id = ik_result["file_id"]
             logger.info("[SHOOT] ImageKit upload OK: %s -> %s", img_code, img_url[:80])
         except Exception as e:
             logger.error("[SHOOT] ImageKit upload failed for %s: %s", img_code, e)
-            b64 = base64.b64encode(img_data["bytes"]).decode()
-            img_url = f"data:image/png;base64,{b64}"
-            ik_file_id = None
-            logger.warning("[SHOOT] Using data URL fallback for %s", img_code)
+            raise HTTPException(status_code=500, detail="Image upload to CDN failed. Please try again.")
 
         design_img = DesignImage(
             image_code=img_code,
@@ -430,6 +435,9 @@ async def generate_photoshoot(
     run.ai.completed_at = datetime.now(timezone.utc)
     await run.save()
     logger.info("[SHOOT] NodeRun completed: id=%s, status=complete, images=%d", str(run.id), len(design_images))
+
+    await _update_node_summary(garment_id)
+
     logger.info("=" * 60)
 
     return {

@@ -188,7 +188,7 @@ export async function generateSketch(
 // ─── Tech Pack generation ───────────────────────────────────────────
 
 export interface TechPackGenerateParams {
-  render_image_url: string;
+  render_image_id: string;
   gender: string;
   construction: Record<string, string>;
   stitch_type: string;

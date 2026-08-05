@@ -8,7 +8,9 @@ from app.db import client
 from app.models.season import Season
 from app.models.garment import Garment
 from app.models.node_run import NodeRun
+from app.models.design_image import DesignImage
 from app.schemas.season import SeasonCreate, SeasonUpdate, SeasonResponse
+from app.services.imagekit import delete_image
 
 router = APIRouter(prefix="/api/seasons", tags=["seasons"])
 
@@ -90,6 +92,25 @@ async def delete_season(season_id: str):
     season = await Season.get(season_id)
     if not season:
         raise HTTPException(status_code=404, detail="Season not found")
+
+    # Clean up moodboard image ImageKit files
+    for img in season.moodboard.images:
+        if img.imagekit_file_id:
+            try:
+                await delete_image(img.imagekit_file_id)
+            except Exception:
+                pass
+
+    # Clean up all DesignImage ImageKit files for this season
+    design_images = await DesignImage.find(DesignImage.season_id == season_id).to_list()
+    for di in design_images:
+        if di.imagekit_file_id:
+            try:
+                await delete_image(di.imagekit_file_id)
+            except Exception:
+                pass
+    if design_images:
+        await DesignImage.find(DesignImage.season_id == season_id).delete_many()
 
     garments = await Garment.find(Garment.season_id == season_id).to_list()
 
