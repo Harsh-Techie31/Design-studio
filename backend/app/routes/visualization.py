@@ -1,5 +1,6 @@
 import base64
 import logging
+import asyncio
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -122,26 +123,35 @@ async def _generate_visualization_image(
             },
         }
         url = f"{settings.vertex_base_url}/gemini-3.1-flash-image:generateContent?key={api_key}"
-        resp = await client.post(url, json=payload)
 
-        if resp.status_code != 200:
-            logger.error(f"Gemini visualization gen returned {resp.status_code}: {resp.text[:500]}")
-            return None
+        for attempt in range(4):
+            resp = await client.post(url, json=payload)
 
-        data = resp.json()
-        parts_list = (
-            data.get("candidates", [{}])[0]
-            .get("content", {})
-            .get("parts", [])
-        )
-        for part in parts_list:
-            if "inlineData" in part:
-                mime = part["inlineData"].get("mimeType", "")
-                if mime.startswith("image/"):
-                    b64 = part["inlineData"].get("data")
-                    if b64:
-                        logger.info("Gemini generated visualization image successfully")
-                        return base64.b64decode(b64)
+            if resp.status_code == 429:
+                wait = min(2 ** attempt * 2, 30)
+                logger.warning(f"[VIS] Gemini 429 on attempt {attempt+1}/4, retrying in {wait}s...")
+                await asyncio.sleep(wait)
+                continue
+
+            if resp.status_code != 200:
+                logger.error(f"Gemini visualization gen returned {resp.status_code}: {resp.text[:500]}")
+                return None
+
+            data = resp.json()
+            parts_list = (
+                data.get("candidates", [{}])[0]
+                .get("content", {})
+                .get("parts", [])
+            )
+            for part in parts_list:
+                if "inlineData" in part:
+                    mime = part["inlineData"].get("mimeType", "")
+                    if mime.startswith("image/"):
+                        b64 = part["inlineData"].get("data")
+                        if b64:
+                            logger.info("Gemini generated visualization image successfully")
+                            return base64.b64decode(b64)
+            break
 
     logger.warning("Gemini returned no visualization image")
     return None

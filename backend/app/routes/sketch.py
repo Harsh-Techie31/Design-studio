@@ -3,6 +3,7 @@ import io
 import json
 import logging
 import random
+import asyncio
 
 from pymongo.errors import DuplicateKeyError
 import time
@@ -605,22 +606,30 @@ async def _generate_with_gemini(
 
             url = f"{settings.vertex_base_url}/gemini-3.1-flash-image:generateContent?key={api_key}"
 
-            try:
-                resp = await client.post(url, json=payload)
-                if resp.status_code == 200:
-                    data = resp.json()
-                    parts = data.get("candidates", [{}])[0].get("content", {}).get("parts", [])
-                    for part in parts:
-                        if "inlineData" in part:
-                            mime = part["inlineData"].get("mimeType", "")
-                            if mime.startswith("image/"):
-                                b64 = part["inlineData"].get("data")
-                                if b64:
-                                    images.append(f"data:{mime};base64,{b64}")
-                                break
-            except Exception as e:
-                logger.error(f"Gemini API error on iteration {idx}: {e}")
-                continue
+            for attempt in range(4):
+                try:
+                    resp = await client.post(url, json=payload)
+                    if resp.status_code == 429:
+                        wait = min(2 ** attempt * 2, 30)
+                        logger.warning(f"[SKETCH] Gemini 429 on attempt {attempt+1}/4, retrying in {wait}s...")
+                        await asyncio.sleep(wait)
+                        continue
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        parts = data.get("candidates", [{}])[0].get("content", {}).get("parts", [])
+                        for part in parts:
+                            if "inlineData" in part:
+                                mime = part["inlineData"].get("mimeType", "")
+                                if mime.startswith("image/"):
+                                    b64 = part["inlineData"].get("data")
+                                    if b64:
+                                        images.append(f"data:{mime};base64,{b64}")
+                                    break
+                    break
+                except Exception as e:
+                    logger.error(f"Gemini API error on iteration {idx}: {e}")
+                    await asyncio.sleep(min(2 ** attempt, 10))
+                    continue
 
     return images
 

@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+import asyncio
 
 import httpx
 
@@ -91,12 +92,19 @@ async def analyze_moodboard(image_urls: list[str]) -> dict:
     }
 
     async with httpx.AsyncClient(timeout=120) as client:
-        resp = await client.post(
-            f"{GEMINI_API_URL}?key={settings.ai_key}",
-            json=payload,
-        )
-        logger.info(f"Gemini API response status: {resp.status_code}")
-        resp.raise_for_status()
+        for attempt in range(4):
+            resp = await client.post(
+                f"{GEMINI_API_URL}?key={settings.ai_key}",
+                json=payload,
+            )
+            logger.info(f"Gemini API response status: {resp.status_code}")
+            if resp.status_code == 429:
+                wait = min(2 ** attempt * 2, 30)
+                logger.warning(f"Gemini 429 on attempt {attempt+1}/4, retrying in {wait}s...")
+                await asyncio.sleep(wait)
+                continue
+            resp.raise_for_status()
+            break
 
     data = resp.json()
     logger.info(f"Gemini full response keys: {list(data.keys())}")

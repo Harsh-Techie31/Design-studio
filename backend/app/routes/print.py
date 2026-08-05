@@ -2,6 +2,7 @@ import base64
 import io
 import json
 import logging
+import asyncio
 from typing import Optional
 
 from pymongo.errors import DuplicateKeyError
@@ -208,8 +209,15 @@ async def _generate_with_gemini(
 
         url = f"{settings.vertex_base_url}/gemini-3.1-flash-image:generateContent?key={api_key}"
 
-        logger.info("Calling Gemini 2.5 Flash Image for pattern generation...")
-        resp = await client.post(url, json=payload)
+        logger.info("Calling Gemini for pattern generation...")
+        for attempt in range(4):
+            resp = await client.post(url, json=payload)
+            if resp.status_code == 429:
+                wait = min(2 ** attempt * 2, 30)
+                logger.warning(f"[PRINT] Gemini 429 on attempt {attempt+1}/4, retrying in {wait}s...")
+                await asyncio.sleep(wait)
+                continue
+            break
 
         if resp.status_code != 200:
             logger.error(f"Gemini returned status {resp.status_code}: {resp.text[:500]}")

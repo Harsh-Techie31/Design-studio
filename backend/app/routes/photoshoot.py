@@ -1,5 +1,6 @@
 import base64
 import logging
+import asyncio
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -157,7 +158,15 @@ async def _generate_photoshoot_image(
             },
         }
         url = f"{settings.vertex_base_url}/gemini-3.1-flash-image:generateContent?key={api_key}"
-        resp = await client.post(url, json=payload)
+
+        for attempt in range(4):
+            resp = await client.post(url, json=payload)
+            if resp.status_code == 429:
+                wait = min(2 ** attempt * 2, 30)
+                logger.warning(f"[SHOOT] Gemini 429 on attempt {attempt+1}/4, retrying in {wait}s...")
+                await asyncio.sleep(wait)
+                continue
+            break
 
         if resp.status_code != 200:
             logger.error(f"Gemini photoshoot gen returned {resp.status_code}: {resp.text[:500]}")
