@@ -19,6 +19,7 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
   const [pinterestOpen, setPinterestOpen] = useState(false);
   const [pinterestUrl, setPinterestUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const [nameError, setNameError] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const remaining = MAX_IMAGES - images.length;
@@ -80,9 +81,14 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
     setPinterestOpen(false);
     setPinterestUrl("");
     setSaving(false);
+    setNameError(false);
   }
 
   async function handleSave() {
+    if (!name.trim()) {
+      setNameError(true);
+      return;
+    }
     setSaving(true);
     try {
       await onSave(images, name.trim());
@@ -106,6 +112,22 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
       }}
       title="Start Moodboard"
       maxWidthClass="max-w-3xl"
+      footer={
+        <button
+          onClick={handleSave}
+          disabled={images.length === 0 || !name.trim() || saving}
+          className="flex w-full items-center justify-center gap-2.5 rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-brass-soft disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {saving ? (
+            <>
+              <i className="ti ti-loader-2 animate-spin" />
+              Uploading {images.filter((img) => !img.url.startsWith("mood-placeholder:")).length} images…
+            </>
+          ) : (
+            `Save Moodboard (${images.length}/${MAX_IMAGES})`
+          )}
+        </button>
+      }
     >
       <p className="mb-5 text-sm text-bone-dim">
         Import up to 12 images that set the mood for this season — the palette and themes
@@ -118,55 +140,115 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
         </label>
         <input
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => { setName(e.target.value); setNameError(false); }}
           placeholder="e.g. Ash and Ember"
           disabled={saving}
-          className="w-full rounded-lg border border-line bg-ink-soft px-3.5 py-2.5 text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none disabled:opacity-50"
+          className={`w-full rounded-lg border bg-ink-soft px-3.5 py-2.5 text-bone placeholder:text-muted focus:outline-none disabled:opacity-50 ${
+            nameError ? "border-red-500 focus:border-red-500" : "border-line focus:border-brass/60"
+          }`}
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      {/* Uploaded images — right below name */}
+      {images.length > 0 && (
         <div
-          onDragOver={(e) => {
-            e.preventDefault();
-            setIsDragging(true);
-          }}
+          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
-          onClick={() => !saving && remaining > 0 && inputRef.current?.click()}
-          className={`flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-8 text-center transition-colors ${
-            remaining > 0 && !saving ? "cursor-pointer" : "cursor-default opacity-50"
-          } ${isDragging ? "border-brass bg-brass/5" : "border-line bg-surface hover:border-brass/50"}`}
+          className={`mb-4 rounded-lg transition-colors ${isDragging ? "bg-brass/5 ring-1 ring-brass/30" : ""}`}
         >
-          <span className="text-2xl text-muted">
-            <i className="ti ti-upload" />
-          </span>
-          <p className="text-sm text-bone">Upload images</p>
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            hidden
-            onChange={(e) => {
-              if (e.target.files) addFiles(e.target.files);
-              e.target.value = "";
-            }}
-          />
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+            {images.map((img, i) => (
+              <div key={i} className="group relative aspect-square overflow-hidden rounded-lg">
+                {img.url.startsWith("mood-placeholder:") ? (
+                  <PlaceholderTile seed={i + 1} index={i} className="h-full w-full" />
+                ) : (
+                  <img src={img.url} alt="" className="h-full w-full object-cover" />
+                )}
+                {!saving && (
+                  <button
+                    onClick={() => removeAt(i)}
+                    aria-label="Remove image"
+                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-xs text-bone opacity-0 transition-opacity group-hover:opacity-100"
+                  >
+                    <i className="ti ti-x" />
+                  </button>
+                )}
+              </div>
+            ))}
+            {/* Add more button */}
+            {remaining > 0 && (
+              <button
+                onClick={() => inputRef.current?.click()}
+                className="flex aspect-square items-center justify-center rounded-lg border-2 border-dashed border-line bg-surface text-2xl text-muted transition-colors hover:border-brass/50 hover:text-bone"
+              >
+                <i className="ti ti-plus" />
+              </button>
+            )}
+          </div>
         </div>
+      )}
 
-        <div
-          onClick={() => !saving && remaining > 0 && setPinterestOpen((v) => !v)}
-          className={`flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-8 text-center transition-colors ${
-            remaining > 0 && !saving ? "cursor-pointer" : "cursor-default opacity-50"
-          } ${pinterestOpen ? "border-brass bg-brass/5" : "border-line bg-surface hover:border-brass/50"}`}
-        >
-          <span className="text-2xl text-muted">
-            <i className="ti ti-map-pin" />
-          </span>
-          <p className="text-sm text-bone">Import from Pinterest</p>
+      {/* Upload / Pinterest — only show when no images yet */}
+      {images.length === 0 && (
+        <div className="grid grid-cols-2 gap-3">
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={handleDrop}
+            onClick={() => !saving && remaining > 0 && inputRef.current?.click()}
+            className={`flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-8 text-center transition-colors ${
+              remaining > 0 && !saving ? "cursor-pointer" : "cursor-default opacity-50"
+            } ${isDragging ? "border-brass bg-brass/5" : "border-line bg-surface hover:border-brass/50"}`}
+          >
+            <span className="text-2xl text-muted">
+              <i className="ti ti-upload" />
+            </span>
+            <p className="text-sm text-bone">Upload images</p>
+            <input
+              ref={inputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              onChange={(e) => {
+                if (e.target.files) addFiles(e.target.files);
+                e.target.value = "";
+              }}
+            />
+          </div>
+
+          <div
+            onClick={() => !saving && remaining > 0 && setPinterestOpen((v) => !v)}
+            className={`flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-8 text-center transition-colors ${
+              remaining > 0 && !saving ? "cursor-pointer" : "cursor-default opacity-50"
+            } ${pinterestOpen ? "border-brass bg-brass/5" : "border-line bg-surface hover:border-brass/50"}`}
+          >
+            <span className="text-2xl text-muted">
+              <i className="ti ti-map-pin" />
+            </span>
+            <p className="text-sm text-bone">Import from Pinterest</p>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Hidden file input — always present for the + button */}
+      {images.length > 0 && (
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          hidden
+          onChange={(e) => {
+            if (e.target.files) addFiles(e.target.files);
+            e.target.value = "";
+          }}
+        />
+      )}
 
       {pinterestOpen && (
         <div className="mt-3 rounded-xl border border-line bg-ink-soft p-3.5">
@@ -194,83 +276,45 @@ export function StartMoodboardModal({ open, onClose, onSave }: StartMoodboardMod
 
       <p className="mt-2 text-xs text-muted">{remaining} of {MAX_IMAGES} slots left</p>
 
-      <div className="mt-5 flex flex-col gap-3 border-t border-line pt-5">
-        <div className="flex items-center gap-3">
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
-            <i className="ti ti-check text-xs" />
-          </span>
-          <div className="shrink-0">
-            <p className="text-sm font-medium text-bone">Recommended</p>
-            <p className="text-xs text-muted">One cohesive style & mood</p>
+      {images.length === 0 && (
+        <div className="mt-5 flex flex-col gap-3 border-t border-line pt-5">
+          <div className="flex items-center gap-3">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
+              <i className="ti ti-check text-xs" />
+            </span>
+            <div className="shrink-0">
+              <p className="text-sm font-medium text-bone">Recommended</p>
+              <p className="text-xs text-muted">One cohesive style & mood</p>
+            </div>
+            <div className="grid flex-1 grid-cols-4 gap-1.5 sm:grid-cols-6">
+              {RECOMMENDED_MOODBOARD_SAMPLES.map((src, i) => (
+                <div key={i} className="aspect-square overflow-hidden rounded-md">
+                  <img src={src} alt="" className="h-full w-full object-cover" />
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="grid flex-1 grid-cols-4 gap-1.5 sm:grid-cols-6">
-            {RECOMMENDED_MOODBOARD_SAMPLES.map((src, i) => (
-              <div key={i} className="aspect-square overflow-hidden rounded-md">
-                <img src={src} alt="" className="h-full w-full object-cover" />
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500/15 text-red-400">
-            <i className="ti ti-x text-xs" />
-          </span>
-          <div className="shrink-0">
-            <p className="text-sm font-medium text-bone">Avoid</p>
-            <p className="text-xs text-muted">Mixed styles, inconsistent tone</p>
-          </div>
-          <div className="grid flex-1 grid-cols-4 gap-1.5 sm:grid-cols-6">
-            {AVOID_MOODBOARD_SAMPLES.map((src, i) => (
-              <div
-                key={i}
-                className="aspect-square overflow-hidden rounded-md border border-red-500/40"
-              >
-                <img src={src} alt="" className="h-full w-full object-cover" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {images.length > 0 && (
-        <div className="mt-5 max-h-[240px] overflow-y-auto pr-1">
-          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
-            {images.map((img, i) => (
-              <div key={i} className="group relative aspect-square overflow-hidden rounded-lg">
-                {img.url.startsWith("mood-placeholder:") ? (
-                  <PlaceholderTile seed={i + 1} index={i} className="h-full w-full" />
-                ) : (
-                  <img src={img.url} alt="" className="h-full w-full object-cover" />
-                )}
-                {!saving && (
-                  <button
-                    onClick={() => removeAt(i)}
-                    aria-label="Remove image"
-                    className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/70 text-xs text-bone opacity-0 transition-opacity group-hover:opacity-100"
-                  >
-                    <i className="ti ti-x" />
-                  </button>
-                )}
-              </div>
-            ))}
+          <div className="flex items-center gap-3">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-red-500/15 text-red-400">
+              <i className="ti ti-x text-xs" />
+            </span>
+            <div className="shrink-0">
+              <p className="text-sm font-medium text-bone">Avoid</p>
+              <p className="text-xs text-muted">Mixed styles, inconsistent tone</p>
+            </div>
+            <div className="grid flex-1 grid-cols-4 gap-1.5 sm:grid-cols-6">
+              {AVOID_MOODBOARD_SAMPLES.map((src, i) => (
+                <div
+                  key={i}
+                  className="aspect-square overflow-hidden rounded-md border border-red-500/40"
+                >
+                  <img src={src} alt="" className="h-full w-full object-cover" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
-
-      <button
-        onClick={handleSave}
-        disabled={images.length === 0 || !name.trim() || saving}
-        className="mt-6 flex w-full items-center justify-center gap-2.5 rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-brass-soft disabled:cursor-not-allowed disabled:opacity-40"
-      >
-        {saving ? (
-          <>
-            <i className="ti ti-loader-2 animate-spin" />
-            Uploading {images.filter((img) => !img.url.startsWith("mood-placeholder:")).length} images…
-          </>
-        ) : (
-          `Save Moodboard (${images.length}/${MAX_IMAGES})`
-        )}
-      </button>
     </Modal>
   );
 }

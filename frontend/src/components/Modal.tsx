@@ -5,6 +5,7 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: ReactNode;
+  footer?: ReactNode;
   maxWidthClass?: string;
 }
 
@@ -13,6 +14,7 @@ export function Modal({
   onClose,
   title,
   children,
+  footer,
   maxWidthClass = "max-w-md",
 }: ModalProps) {
   if (!open) return null;
@@ -36,6 +38,11 @@ export function Modal({
           </button>
         </div>
         <div className="overflow-y-auto px-6 pt-4 pb-6">{children}</div>
+        {footer && (
+          <div className="shrink-0 border-t border-line px-6 py-4">
+            {footer}
+          </div>
+        )}
       </div>
     </div>
   );
