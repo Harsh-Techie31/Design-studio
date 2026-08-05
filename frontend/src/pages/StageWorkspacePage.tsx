@@ -171,8 +171,8 @@ export function StageWorkspacePage() {
       {printState.isRemovingBg && (
         <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-ink/60 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-2">
-            <i className="ti ti-loader-2 animate-spin text-2xl text-brass" />
-            <span className="text-xs text-muted">Removing background...</span>
+            <i className="ti ti-loader-2 animate-spin text-2xl text-vermillion" />
+            <span className="font-mono text-xs text-muted">Removing background...</span>
           </div>
         </div>
       )}
@@ -185,7 +185,7 @@ export function StageWorkspacePage() {
         <NavBar />
         <main className="mx-auto max-w-6xl px-6 py-24 text-center">
           <p className="text-bone-dim">Garment not found.</p>
-          <Link to="/seasons" className="mt-4 inline-block text-brass hover:text-brass-soft">
+          <Link to="/seasons" className="mt-4 inline-block font-mono text-xs uppercase tracking-wider text-vermillion hover:text-vermillion-soft">
             Back to Seasons
           </Link>
         </main>
@@ -291,7 +291,7 @@ export function StageWorkspacePage() {
         {currentStage !== "sketch" && currentStage !== "print" && currentStage !== "render" && currentStage !== "techPack" && currentStage !== "pattern" && currentStage !== "visualization" && currentStage !== "photoshoot" && (
           <aside className="flex w-full flex-col items-center justify-center bg-surface p-8 lg:w-[480px]">
             <i className="ti ti-tools text-3xl text-muted" />
-            <p className="mt-3 text-sm text-muted">
+            <p className="mt-3 font-mono text-xs text-muted">
               {NODE_DEFS.find((d) => d.key === currentStage)?.label} tool coming soon
             </p>
             <p className="mt-1 text-xs text-muted">
@@ -447,7 +447,7 @@ function PrintCanvasPreview({
   return (
     <canvas
       ref={canvasRef}
-      className="max-h-full max-w-full rounded-lg border border-line"
+      className="max-h-full max-w-full border border-line"
       style={{ objectFit: "contain" }}
     />
   );

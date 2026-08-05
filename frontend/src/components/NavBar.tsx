@@ -13,24 +13,29 @@ interface NavBarProps {
 
 export function NavBar({ crumbs = [], action }: NavBarProps) {
   return (
-    <header className="sticky top-0 z-30 border-b border-line-soft bg-ink/90 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-2 text-sm">
+    <header className="sticky top-0 z-30 border-b border-line bg-ink/95 backdrop-blur-sm">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-4">
+        <div className="flex items-center gap-3 text-sm">
           <Link
             to="/"
-            className="font-display text-lg tracking-wide text-bone transition-colors hover:text-brass"
+            className="font-mono text-xs font-medium uppercase tracking-widest text-bone transition-colors hover:text-vermillion"
           >
-            Design Studio
+            DS
           </Link>
           {crumbs.map((c, i) => (
-            <span key={i} className="flex items-center gap-2">
-              <span className="text-line">/</span>
+            <span key={i} className="flex items-center gap-3">
+              <span className="text-muted">/</span>
               {c.to ? (
-                <Link to={c.to} className="text-bone-dim transition-colors hover:text-brass">
+                <Link
+                  to={c.to}
+                  className="font-mono text-xs uppercase tracking-wider text-bone-dim transition-colors hover:text-vermillion"
+                >
                   {c.label}
                 </Link>
               ) : (
-                <span className="text-bone">{c.label}</span>
+                <span className="font-mono text-xs uppercase tracking-wider text-bone">
+                  {c.label}
+                </span>
               )}
             </span>
           ))}

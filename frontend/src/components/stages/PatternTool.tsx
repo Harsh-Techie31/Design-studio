@@ -142,10 +142,10 @@ export function PatternTool({ garment, season, onGenerated, techPacks, onStartGe
               <i className="ti ti-pencil text-[11px]" />
             </button>
             <div className="mt-1 font-mono text-[11px] text-muted">{selectedTechPack.image_code}</div>
-            <button onClick={() => setTpPickerOpen(true)} className="mt-1 text-[11px] text-brass hover:text-brass-soft">Switch tech pack</button>
+            <button onClick={() => setTpPickerOpen(true)} className="mt-1 text-[11px] text-vermillion hover:text-vermillion-soft">Switch tech pack</button>
           </div>
         ) : (
-          <button onClick={() => setTpPickerOpen(true)} className="flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed border-line bg-ink-soft p-6 transition-colors hover:border-brass/30">
+          <button onClick={() => setTpPickerOpen(true)} className="flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed border-line bg-ink-soft p-6 transition-colors hover:border-vermillion/30">
             <i className="ti ti-photo text-2xl text-muted" />
             <span className="text-sm text-muted">Select a tech pack</span>
           </button>
@@ -163,8 +163,8 @@ export function PatternTool({ garment, season, onGenerated, techPacks, onStartGe
                 type="number"
                 value={value}
                 onChange={(e) => handleMeasurementChange(field, parseInt(e.target.value) || 0)}
-                className={`w-14 rounded border border-line bg-ink px-1.5 py-0.5 text-right font-mono text-[11px] focus:border-brass/60 focus:outline-none ${
-                  editedMeasurements.has(field) ? "text-bone" : "text-brass"
+                className={`w-14 rounded border border-line bg-ink px-1.5 py-0.5 text-right font-mono text-[11px] focus:border-vermillion/60 focus:outline-none ${
+                  editedMeasurements.has(field) ? "text-bone" : "text-vermillion"
                 }`}
               />
               <span className="text-[9px] text-muted">cm</span>
@@ -185,8 +185,8 @@ export function PatternTool({ garment, season, onGenerated, techPacks, onStartGe
                   onClick={() => setConstruction(prev => ({ ...prev, [cf.field]: opt }))}
                   className={`rounded-full px-2.5 py-1 text-[11px] transition-all ${
                     construction[cf.field] === opt
-                      ? "bg-brass/20 text-brass border border-brass/40"
-                      : "bg-ink text-muted border border-line hover:border-brass/20"
+                      ? "bg-vermillion/20 text-vermillion border border-vermillion/40"
+                      : "bg-ink text-muted border border-line hover:border-vermillion/20"
                   }`}
                 >
                   {opt}
@@ -213,8 +213,8 @@ export function PatternTool({ garment, season, onGenerated, techPacks, onStartGe
                 onClick={() => toggleMarking(m)}
                 className={`rounded-full px-2.5 py-1 text-[11px] transition-all ${
                   patternMarkings.includes(m)
-                    ? "bg-brass/20 text-brass border border-brass/40"
-                    : "bg-ink text-muted border border-line hover:border-brass/20"
+                    ? "bg-vermillion/20 text-vermillion border border-vermillion/40"
+                    : "bg-ink text-muted border border-line hover:border-vermillion/20"
                 }`}
               >
                 {m}
@@ -231,9 +231,9 @@ export function PatternTool({ garment, season, onGenerated, techPacks, onStartGe
           onChange={(e) => { if (e.target.value.length <= 200) setAdditionalNotes(e.target.value); }}
           maxLength={200}
           placeholder="Special pattern instructions (e.g., add extra ease at hip for pleats)"
-          className="w-full min-h-[60px] rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none resize-none"
+          className="w-full min-h-[60px] rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-vermillion/60 focus:outline-none resize-none"
         />
-        <div className={`text-right text-[11px] mt-1 ${additionalNotes.length > 180 ? "text-brass" : "text-muted"}`}>
+        <div className={`text-right text-[11px] mt-1 ${additionalNotes.length > 180 ? "text-vermillion" : "text-muted"}`}>
           {additionalNotes.length}/200
         </div>
       </Section>
@@ -252,7 +252,7 @@ export function PatternTool({ garment, season, onGenerated, techPacks, onStartGe
                 key={n}
                 onClick={() => setNumOutputs(n)}
                 className={`rounded px-3 py-1 text-sm transition-all ${
-                  numOutputs === n ? "bg-brass text-ink font-semibold" : "bg-ink-soft text-muted hover:text-bone-dim"
+                  numOutputs === n ? "bg-vermillion text-ink font-semibold" : "bg-ink-soft text-muted hover:text-bone-dim"
                 }`}
               >
                 {n}
@@ -265,7 +265,7 @@ export function PatternTool({ garment, season, onGenerated, techPacks, onStartGe
           onClick={handleGenerate}
           disabled={isGenerating || !selectedTechPack}
           className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold uppercase tracking-wider transition-all ${
-            !selectedTechPack ? "cursor-not-allowed bg-line text-muted" : "bg-brass text-ink hover:bg-brass-soft"
+            !selectedTechPack ? "cursor-not-allowed bg-line text-muted" : "bg-vermillion text-ink hover:bg-vermillion-soft"
           }`}
         >
           {isGenerating ? (
@@ -298,7 +298,7 @@ function Section({ label, hint, children }: { label: string; hint?: string; chil
   return (
     <div className="mb-6 border-t border-line pt-5 first:border-0 first:pt-0">
       <div className="mb-3 flex items-center gap-2">
-        <label className="text-[13px] font-semibold uppercase tracking-widest text-brass">{label}</label>
+        <label className="text-[13px] font-semibold uppercase tracking-widest text-vermillion">{label}</label>
         {hint && <span className="text-[11px] text-muted">{hint}</span>}
       </div>
       {children}
@@ -327,8 +327,8 @@ function ChipGroup({ label, options, selected, onSelect }: { label: string; opti
             onClick={() => onSelect(opt)}
             className={`rounded-full px-2.5 py-1 text-[11px] transition-all ${
               selected === opt
-                ? "bg-brass/20 text-brass border border-brass/40"
-                : "bg-ink text-muted border border-line hover:border-brass/20"
+                ? "bg-vermillion/20 text-vermillion border border-vermillion/40"
+                : "bg-ink text-muted border border-line hover:border-vermillion/20"
             }`}
           >
             {opt}

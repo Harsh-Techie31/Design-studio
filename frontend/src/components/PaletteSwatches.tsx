@@ -4,14 +4,14 @@ interface PaletteSwatchesProps {
 }
 
 export function PaletteSwatches({ colors, size = "md" }: PaletteSwatchesProps) {
-  const dim = size === "sm" ? "h-6 w-6" : "h-10 w-10";
+  const dim = size === "sm" ? "h-5 w-5" : "h-8 w-8";
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="flex items-center gap-1.5">
       {colors.map((c, i) => (
         <div
           key={i}
           title={c}
-          className={`${dim} rounded-full border border-white/10 shadow-inner`}
+          className={`${dim}`}
           style={{ backgroundColor: c }}
         />
       ))}

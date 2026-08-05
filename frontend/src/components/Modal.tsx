@@ -20,19 +20,19 @@ export function Modal({
   if (!open) return null;
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className={`flex max-h-[90vh] w-full flex-col ${maxWidthClass} rounded-xl border border-line bg-surface shadow-2xl`}
+        className={`flex max-h-[90vh] w-full flex-col ${maxWidthClass} bg-surface shadow-2xl animate-fade-in`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 pt-6 pb-0">
-          <h2 className="font-display text-2xl text-bone">{title}</h2>
+          <h2 className="font-display text-lg font-semibold tracking-tight text-bone">{title}</h2>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-muted transition-colors hover:text-bone"
+            className="text-muted transition-colors hover:text-vermillion"
           >
             <i className="ti ti-x" />
           </button>

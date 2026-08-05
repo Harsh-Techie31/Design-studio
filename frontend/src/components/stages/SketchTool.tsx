@@ -176,7 +176,7 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating, on
       <button
         onClick={() => fileInputRef.current?.click()}
         disabled={isUploading}
-        className="mb-5 flex w-full items-center justify-center gap-2 rounded-lg border border-brass/50 bg-transparent py-2.5 text-sm text-brass transition-colors hover:bg-brass/10 disabled:opacity-50"
+        className="mb-5 flex w-full items-center justify-center gap-2 rounded-lg border border-vermillion/50 bg-transparent py-2.5 text-sm text-vermillion transition-colors hover:bg-vermillion/10 disabled:opacity-50"
       >
         {isUploading ? (
           <>
@@ -193,9 +193,9 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating, on
 
       {/* 1. Category (read-only) */}
       <Section label="1. Category" hint="From garment">
-        <div className="inline-flex items-center gap-2 rounded-lg border border-brass/30 bg-brass/10 px-3 py-1.5">
-          <i className="ti ti-shirt text-sm text-brass" />
-          <span className="text-sm font-medium text-brass">{CATEGORY_LABELS[category]}</span>
+        <div className="inline-flex items-center gap-2 rounded-lg border border-vermillion/30 bg-vermillion/10 px-3 py-1.5">
+          <i className="ti ti-shirt text-sm text-vermillion" />
+          <span className="text-sm font-medium text-vermillion">{CATEGORY_LABELS[category]}</span>
         </div>
       </Section>
 
@@ -251,8 +251,8 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating, on
                       onClick={() => handleMoodboardToggle(i)}
                       className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition-all ${
                         isSelected
-                          ? "border-brass bg-brass/10 text-brass"
-                          : "border-line bg-ink-soft text-muted hover:border-brass/30"
+                          ? "border-vermillion bg-vermillion/10 text-vermillion"
+                          : "border-line bg-ink-soft text-muted hover:border-vermillion/30"
                       }`}
                     >
                       <span
@@ -280,7 +280,7 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating, on
               <div className="mt-3 rounded-lg border border-line bg-ink-soft p-3">
                 <div className="mb-1 flex justify-between">
                   <span className="text-[11px] uppercase tracking-wide text-muted">Mood Influence</span>
-                  <span className="text-[12px] font-bold text-brass">{moodInfluence}%</span>
+                  <span className="text-[12px] font-bold text-vermillion">{moodInfluence}%</span>
                 </div>
                 <input
                   type="range"
@@ -288,7 +288,7 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating, on
                   max="100"
                   value={moodInfluence}
                   onChange={(e) => setMoodInfluence(parseInt(e.target.value))}
-                  className="w-full accent-brass"
+                  className="w-full accent-vermillion"
                 />
               </div>
             )}
@@ -325,7 +325,7 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating, on
             value={note}
             onChange={(e) => setNote(e.target.value.slice(0, 250))}
             placeholder="Optional note..."
-            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2.5 text-sm text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none"
+            className="w-full rounded-lg border border-line bg-ink-soft px-3 py-2.5 text-sm text-bone placeholder:text-muted focus:border-vermillion/60 focus:outline-none"
           />
         </div>
       </Section>
@@ -345,7 +345,7 @@ export function SketchTool({ garment, season, onGenerated, onStartGenerating, on
           className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold uppercase tracking-wider transition-all ${
             !gender || !silhouette
               ? "cursor-not-allowed bg-line text-muted"
-              : "bg-brass text-ink hover:bg-brass-soft"
+              : "bg-vermillion text-ink hover:bg-vermillion-soft"
           }`}
         >
           {isGenerating ? (
@@ -381,7 +381,7 @@ function Section({
   return (
     <div className="mb-6 border-t border-line pt-5 first:border-0 first:pt-0">
       <div className="mb-3 flex items-center gap-2">
-        <label className="text-[13px] font-semibold uppercase tracking-widest text-brass">
+        <label className="text-[13px] font-semibold uppercase tracking-widest text-vermillion">
           {label}
           {required && <span className="ml-0.5 text-red-500">*</span>}
         </label>
@@ -410,8 +410,8 @@ function Chip({
         small ? "px-3 py-2 text-[12px]" : "px-3.5 py-2.5 text-sm"
       } ${
         active
-          ? "border-brass bg-brass/15 font-semibold text-brass"
-          : "border-line bg-ink-soft text-muted hover:border-brass/30"
+          ? "border-vermillion bg-vermillion/15 font-semibold text-vermillion"
+          : "border-line bg-ink-soft text-muted hover:border-vermillion/30"
       }`}
     >
       {children}

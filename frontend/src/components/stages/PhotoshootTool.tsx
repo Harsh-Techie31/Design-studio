@@ -157,14 +157,14 @@ export function PhotoshootTool({ garment, season, onGenerated, onStartGenerating
               <i className="ti ti-pencil text-[11px]" />
             </button>
             <div className="mt-1.5 font-mono text-[11px] text-muted">{vizImage.image_code}</div>
-            <button onClick={() => setVizPickerOpen(true)} className="mt-1 text-[11px] text-brass hover:text-brass-soft">
+            <button onClick={() => setVizPickerOpen(true)} className="mt-1 text-[11px] text-vermillion hover:text-vermillion-soft">
               Switch mockup
             </button>
           </div>
         ) : (
           <button
             onClick={() => setVizPickerOpen(true)}
-            className="flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed border-line bg-ink-soft p-6 transition-colors hover:border-brass/30"
+            className="flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed border-line bg-ink-soft p-6 transition-colors hover:border-vermillion/30"
           >
             <i className="ti ti-cube text-2xl text-muted" />
             <span className="text-sm text-muted">Choose Mockup</span>
@@ -182,7 +182,7 @@ export function PhotoshootTool({ garment, season, onGenerated, onStartGenerating
           className={`flex w-full items-center justify-between rounded-lg border px-3.5 py-2.5 transition-all ${
             !moodboardReady
               ? "cursor-not-allowed border-line bg-ink-soft opacity-50"
-              : "border-line bg-ink-soft hover:border-brass/30"
+              : "border-line bg-ink-soft hover:border-vermillion/30"
           }`}
         >
           <span className="text-sm text-bone-dim">
@@ -190,7 +190,7 @@ export function PhotoshootTool({ garment, season, onGenerated, onStartGenerating
           </span>
           <span
             className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
-              moodboardReady && moodboardInfluence ? "bg-brass" : "bg-line"
+              moodboardReady && moodboardInfluence ? "bg-vermillion" : "bg-line"
             }`}
           >
             <span
@@ -230,7 +230,7 @@ export function PhotoshootTool({ garment, season, onGenerated, onStartGenerating
           value={customPose}
           onChange={(e) => setCustomPose(e.target.value)}
           placeholder="Custom pose details (e.g., hand in pocket, looking away)"
-          className="mt-2 w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none"
+          className="mt-2 w-full rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-vermillion/60 focus:outline-none"
         />
       </Section>
 
@@ -243,9 +243,9 @@ export function PhotoshootTool({ garment, season, onGenerated, onStartGenerating
           }}
           maxLength={200}
           placeholder="Any special notes for the photoshoot..."
-          className="w-full min-h-[60px] rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none resize-none"
+          className="w-full min-h-[60px] rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-vermillion/60 focus:outline-none resize-none"
         />
-        <div className={`text-right text-[11px] mt-1 ${additionalNotes.length > 180 ? "text-brass" : "text-muted"}`}>
+        <div className={`text-right text-[11px] mt-1 ${additionalNotes.length > 180 ? "text-vermillion" : "text-muted"}`}>
           {additionalNotes.length}/200
         </div>
       </Section>
@@ -264,7 +264,7 @@ export function PhotoshootTool({ garment, season, onGenerated, onStartGenerating
                 key={n}
                 onClick={() => setNumOutputs(n)}
                 className={`rounded px-3 py-1 text-sm transition-all ${
-                  numOutputs === n ? "bg-brass text-ink font-semibold" : "bg-ink-soft text-muted hover:text-bone-dim"
+                  numOutputs === n ? "bg-vermillion text-ink font-semibold" : "bg-ink-soft text-muted hover:text-bone-dim"
                 }`}
               >
                 {n}
@@ -277,7 +277,7 @@ export function PhotoshootTool({ garment, season, onGenerated, onStartGenerating
           onClick={handleGenerate}
           disabled={isGenerating || !vizImage}
           className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold uppercase tracking-wider transition-all ${
-            !vizImage ? "cursor-not-allowed bg-line text-muted" : "bg-brass text-ink hover:bg-brass-soft"
+            !vizImage ? "cursor-not-allowed bg-line text-muted" : "bg-vermillion text-ink hover:bg-vermillion-soft"
           }`}
         >
           {isGenerating ? (
@@ -314,7 +314,7 @@ function Section({ label, required, children }: { label: string; required?: bool
   return (
     <div className="mb-6 border-t border-line pt-5 first:border-0 first:pt-0">
       <div className="mb-3 flex items-center gap-2">
-        <label className="text-[13px] font-semibold uppercase tracking-widest text-brass">
+        <label className="text-[13px] font-semibold uppercase tracking-widest text-vermillion">
           {label}
           {required && <span className="ml-0.5 text-red-500">*</span>}
         </label>
@@ -355,8 +355,8 @@ function ChipGroup({
             onClick={() => onSelect(opt)}
             className={`rounded-full px-2.5 py-1 text-[11px] transition-all ${
               selected === opt
-                ? "bg-brass/20 text-brass border border-brass/40"
-                : "bg-ink text-muted border border-line hover:border-brass/20"
+                ? "bg-vermillion/20 text-vermillion border border-vermillion/40"
+                : "bg-ink text-muted border border-line hover:border-vermillion/20"
             }`}
           >
             {opt}

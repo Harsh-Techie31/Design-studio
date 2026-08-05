@@ -18,7 +18,7 @@ export function StageProgressBar({
   const navigate = useNavigate();
 
   return (
-    <nav className="border-b border-line bg-surface px-6 py-3">
+    <nav className="border-b border-line bg-surface px-8 py-3">
       <div className="mx-auto flex items-center gap-1 overflow-x-auto">
         {NODE_DEFS.map((def, i) => {
           const isActive = def.key === currentStage;
@@ -32,22 +32,22 @@ export function StageProgressBar({
                 onClick={() =>
                   navigate(`/seasons/${seasonId}/garments/${garmentId}/stage/${def.key}`)
                 }
-                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all ${
+                className={`flex items-center gap-2 px-3 py-2 text-xs font-medium transition-all ${
                   isActive
-                    ? "bg-brass/15 text-brass border border-brass/30"
+                    ? "bg-vermillion/15 text-vermillion"
                     : isDone
-                    ? "text-bone hover:bg-ink-soft border border-transparent"
+                    ? "text-bone hover:bg-ink-soft"
                     : isStarted
-                    ? "text-bone-dim hover:bg-ink-soft border border-transparent"
-                    : "text-muted hover:bg-ink-soft border border-transparent"
+                    ? "text-bone-dim hover:bg-ink-soft"
+                    : "text-muted hover:bg-ink-soft"
                 }`}
               >
                 <span
-                  className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+                  className={`flex h-5 w-5 items-center justify-center text-[10px] font-bold font-mono ${
                     isActive
-                      ? "bg-brass text-ink"
+                      ? "bg-vermillion text-ink"
                       : isDone
-                      ? "bg-brass/30 text-brass"
+                      ? "bg-vermillion/30 text-vermillion"
                       : isStarted
                       ? "bg-line text-bone-dim"
                       : "bg-ink-soft text-muted"

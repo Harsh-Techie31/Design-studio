@@ -126,14 +126,14 @@ export function VisualizationTool({ garment, season, onGenerated, onStartGenerat
               <i className="ti ti-pencil text-[11px]" />
             </button>
             <div className="mt-1.5 font-mono text-[11px] text-muted">{renderImage.image_code}</div>
-            <button onClick={() => setRenderPickerOpen(true)} className="mt-1 text-[11px] text-brass hover:text-brass-soft">
+            <button onClick={() => setRenderPickerOpen(true)} className="mt-1 text-[11px] text-vermillion hover:text-vermillion-soft">
               Switch render
             </button>
           </div>
         ) : (
           <button
             onClick={() => setRenderPickerOpen(true)}
-            className="flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed border-line bg-ink-soft p-6 transition-colors hover:border-brass/30"
+            className="flex w-full flex-col items-center gap-2 rounded-lg border-2 border-dashed border-line bg-ink-soft p-6 transition-colors hover:border-vermillion/30"
           >
             <i className="ti ti-photo text-2xl text-muted" />
             <span className="text-sm text-muted">Choose Render</span>
@@ -152,8 +152,8 @@ export function VisualizationTool({ garment, season, onGenerated, onStartGenerat
               onClick={() => setModelAvatar(opt.value)}
               className={`rounded-lg border p-3.5 text-center transition-all ${
                 modelAvatar === opt.value
-                  ? "border-brass bg-brass/15 text-bone"
-                  : "border-line bg-ink-soft text-muted hover:border-brass/30"
+                  ? "border-vermillion bg-vermillion/15 text-bone"
+                  : "border-line bg-ink-soft text-muted hover:border-vermillion/30"
               }`}
             >
               <i className="ti ti-user mx-auto mb-2 block text-lg" />
@@ -179,13 +179,13 @@ export function VisualizationTool({ garment, season, onGenerated, onStartGenerat
               onClick={() => setAspectRatio(opt.value)}
               className={`flex items-center gap-2 rounded-lg border px-3 py-2 transition-all ${
                 aspectRatio === opt.value
-                  ? "border-brass/60 bg-brass/10 text-brass"
-                  : "border-line bg-ink-soft text-muted hover:border-brass/20"
+                  ? "border-vermillion/60 bg-vermillion/10 text-vermillion"
+                  : "border-line bg-ink-soft text-muted hover:border-vermillion/20"
               }`}
             >
               <div
                 className={`border ${
-                  aspectRatio === opt.value ? "border-brass/60" : "border-muted/40"
+                  aspectRatio === opt.value ? "border-vermillion/60" : "border-muted/40"
                 }`}
                 style={{
                   width: opt.value === "1:1" ? 16 : opt.value === "4:5" ? 12 : 20,
@@ -207,9 +207,9 @@ export function VisualizationTool({ garment, season, onGenerated, onStartGenerat
           }}
           maxLength={200}
           placeholder="Any special notes for the mockup..."
-          className="w-full min-h-[60px] rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-brass/60 focus:outline-none resize-none"
+          className="w-full min-h-[60px] rounded-lg border border-line bg-ink-soft px-3 py-2 text-sm text-bone placeholder:text-muted focus:border-vermillion/60 focus:outline-none resize-none"
         />
-        <div className={`text-right text-[11px] mt-1 ${additionalNotes.length > 180 ? "text-brass" : "text-muted"}`}>
+        <div className={`text-right text-[11px] mt-1 ${additionalNotes.length > 180 ? "text-vermillion" : "text-muted"}`}>
           {additionalNotes.length}/200
         </div>
       </Section>
@@ -228,7 +228,7 @@ export function VisualizationTool({ garment, season, onGenerated, onStartGenerat
                 key={n}
                 onClick={() => setNumOutputs(n)}
                 className={`rounded px-3 py-1 text-sm transition-all ${
-                  numOutputs === n ? "bg-brass text-ink font-semibold" : "bg-ink-soft text-muted hover:text-bone-dim"
+                  numOutputs === n ? "bg-vermillion text-ink font-semibold" : "bg-ink-soft text-muted hover:text-bone-dim"
                 }`}
               >
                 {n}
@@ -241,7 +241,7 @@ export function VisualizationTool({ garment, season, onGenerated, onStartGenerat
           onClick={handleGenerate}
           disabled={isGenerating || !renderImage}
           className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold uppercase tracking-wider transition-all ${
-            !renderImage ? "cursor-not-allowed bg-line text-muted" : "bg-brass text-ink hover:bg-brass-soft"
+            !renderImage ? "cursor-not-allowed bg-line text-muted" : "bg-vermillion text-ink hover:bg-vermillion-soft"
           }`}
         >
           {isGenerating ? (
@@ -278,7 +278,7 @@ function Section({ label, required, children }: { label: string; required?: bool
   return (
     <div className="mb-6 border-t border-line pt-5 first:border-0 first:pt-0">
       <div className="mb-3 flex items-center gap-2">
-        <label className="text-[13px] font-semibold uppercase tracking-widest text-brass">
+        <label className="text-[13px] font-semibold uppercase tracking-widest text-vermillion">
           {label}
           {required && <span className="ml-0.5 text-red-500">*</span>}
         </label>
@@ -319,8 +319,8 @@ function ChipGroup({
             onClick={() => onSelect(opt)}
             className={`rounded-full px-2.5 py-1 text-[11px] transition-all ${
               selected === opt
-                ? "bg-brass/20 text-brass border border-brass/40"
-                : "bg-ink text-muted border border-line hover:border-brass/20"
+                ? "bg-vermillion/20 text-vermillion border border-vermillion/40"
+                : "bg-ink text-muted border border-line hover:border-vermillion/20"
             }`}
           >
             {opt}

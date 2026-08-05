@@ -31,11 +31,9 @@ export function GarmentCard({
         const allImages = await listImagesForGarment(garment.id);
         if (cancelled) return;
 
-        // Count unique stages that have at least one image
         const stagesWithImages = new Set(allImages.map((img) => img.node_key));
         setUsedCount(stagesWithImages.size);
 
-        // Priority: photoshoot > render > sketch, pick most recent of each type
         if (allImages.length === 0) return;
         for (const priority of IMAGE_PRIORITY) {
           const match = allImages.find((img) => img.node_key === priority.nodeKey);
@@ -62,15 +60,14 @@ export function GarmentCard({
   return (
     <Link
       to={`/seasons/${garment.season_id}/garments/${garment.id}`}
-      className="group relative block overflow-hidden rounded-xl border border-line bg-surface transition-all hover:-translate-y-0.5 hover:border-brass/50"
+      className="group relative block overflow-hidden border border-line bg-surface transition-all hover:border-vermillion/40 hover:bg-surface-hi"
     >
-      {/* Thumbnail: real image or placeholder gradient */}
       {bestImage ? (
         <div className="aspect-[4/3] w-full overflow-hidden bg-ink-soft">
           <img
             src={bestImage}
             alt={garment.name}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         </div>
       ) : (
@@ -78,28 +75,28 @@ export function GarmentCard({
       )}
 
       <div className="p-4">
-        <h3 className="font-display text-xl text-bone transition-colors group-hover:text-brass">
-          {garment.name}
-        </h3>
-        <div className="mt-3 flex items-center gap-2">
-          <div className="h-1 flex-1 overflow-hidden rounded-full bg-line-soft">
-            <div
-              className="h-full rounded-full bg-brass"
-              style={{ width: `${(usedCount / NODE_DEFS.length) * 100}%` }}
-            />
-          </div>
-          <span className="whitespace-nowrap text-xs text-muted">
-            {usedCount}/{NODE_DEFS.length} nodes
+        <div className="flex items-start justify-between">
+          <h3 className="font-display text-base font-semibold tracking-tight text-bone transition-colors group-hover:text-vermillion">
+            {garment.name}
+          </h3>
+          <span className="font-mono text-[10px] text-muted">
+            {usedCount}/{NODE_DEFS.length}
           </span>
+        </div>
+        <div className="mt-2.5 h-0.5 w-full overflow-hidden bg-line-soft">
+          <div
+            className="h-full bg-vermillion transition-all duration-500"
+            style={{ width: `${(usedCount / NODE_DEFS.length) * 100}%` }}
+          />
         </div>
       </div>
       {onDelete && (
         <button
           onClick={handleDelete}
-          className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-lg bg-ink/80 text-muted transition-all hover:bg-red-500/20 hover:text-red-400"
+          className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center bg-ink/80 text-muted transition-all hover:bg-vermillion/20 hover:text-vermillion"
           title="Delete garment"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M3 6h18" />
             <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
             <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />

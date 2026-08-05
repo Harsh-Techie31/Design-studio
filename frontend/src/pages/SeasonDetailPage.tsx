@@ -18,7 +18,7 @@ const SEASON_TABS: { key: SeasonTab; label: string }[] = [
   { key: "prints", label: "Prints" },
   { key: "fabrics", label: "Fabrics" },
   { key: "sketches", label: "Sketches" },
-  { key: "firstRenders", label: "First Renders" },
+  { key: "firstRenders", label: "Renders" },
   { key: "techPacks", label: "Tech Packs" },
   { key: "patterns", label: "Patterns" },
   { key: "garments", label: "Garments" },
@@ -44,6 +44,7 @@ export function SeasonDetailPage() {
   const [tabImages, setTabImages] = useState<DesignImage[]>([]);
   const [tabLoading, setTabLoading] = useState(false);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const season = getSeason(seasonId ?? "");
 
@@ -51,8 +52,8 @@ export function SeasonDetailPage() {
     return (
       <div className="min-h-screen bg-ink text-bone">
         <NavBar />
-        <main className="mx-auto max-w-6xl px-6 py-24 text-center">
-          <i className="ti ti-loader-2 animate-spin text-2xl text-brass" />
+        <main className="mx-auto max-w-7xl px-8 py-24 text-center">
+          <i className="ti ti-loader-2 animate-spin text-2xl text-vermillion" />
         </main>
       </div>
     );
@@ -62,9 +63,9 @@ export function SeasonDetailPage() {
     return (
       <div className="min-h-screen bg-ink text-bone">
         <NavBar />
-        <main className="mx-auto max-w-6xl px-6 py-24 text-center">
+        <main className="mx-auto max-w-7xl px-8 py-24 text-center">
           <p className="text-bone-dim">Season not found.</p>
-          <Link to="/seasons" className="mt-4 inline-block text-brass hover:text-brass-soft">
+          <Link to="/seasons" className="mt-4 inline-block font-mono text-xs uppercase tracking-wider text-vermillion hover:text-vermillion-soft">
             Back to Seasons
           </Link>
         </main>
@@ -80,7 +81,6 @@ export function SeasonDetailPage() {
   const brief = season!.moodboard.analysis.brief;
   const status = season!.moodboard.status;
 
-  // Fetch images for non-overview tabs
   useEffect(() => {
     if (tab === "overview" || tab === "garments" || !seasonId) {
       setTabImages([]);
@@ -147,13 +147,13 @@ export function SeasonDetailPage() {
     if (tabLoading) {
       return (
         <div className="flex items-center justify-center py-16">
-          <i className="ti ti-loader-2 animate-spin text-xl text-brass" />
+          <i className="ti ti-loader-2 animate-spin text-xl text-vermillion" />
         </div>
       );
     }
     if (images.length === 0) {
       return (
-        <div className="rounded-xl border border-dashed border-line py-16 text-center text-sm text-bone-dim">
+        <div className="border border-dashed border-line py-16 text-center text-sm text-bone-dim">
           {emptyMessage}
         </div>
       );
@@ -166,12 +166,12 @@ export function SeasonDetailPage() {
     const renderCard = (img: DesignImage) => (
       <div
         key={img.id}
-        className={`group relative overflow-hidden rounded-xl border-2 transition-all ${
+        className={`group relative overflow-hidden transition-all ${
           img.starred
-            ? "border-amber-400/60 hover:border-amber-400"
+            ? "ring-2 ring-signal-amber/60"
             : img.liked
-              ? "border-green-500/60 hover:border-green-500"
-              : "border-line hover:border-brass/30"
+              ? "ring-2 ring-signal-green/60"
+              : ""
         }`}
       >
         <div className="aspect-[3/4] bg-ink-soft">
@@ -179,19 +179,19 @@ export function SeasonDetailPage() {
         </div>
         <button
           onClick={() => handleDeleteImage(img.id)}
-          className="absolute right-1.5 top-1.5 rounded-lg bg-red-500/80 p-1.5 text-white opacity-0 transition-opacity hover:bg-red-600 group-hover:opacity-100"
+          className="absolute right-1.5 top-1.5 bg-vermillion p-1.5 text-white opacity-0 transition-opacity hover:bg-vermillion-soft group-hover:opacity-100"
           title="Delete image"
         >
           <i className="ti ti-trash text-xs" />
         </button>
         {img.starred && (
-          <div className="absolute left-1.5 top-1.5 rounded-full bg-amber-400 px-1.5 py-0.5">
+          <div className="absolute left-1.5 top-1.5 bg-signal-amber px-1.5 py-0.5">
             <span className="text-[7px] font-bold uppercase text-ink">Starred</span>
           </div>
         )}
         {img.liked && !img.starred && (
-          <div className="absolute left-1.5 top-1.5 rounded-full bg-green-500 px-1.5 py-0.5">
-            <span className="text-[7px] font-bold uppercase text-white">Selected</span>
+          <div className="absolute left-1.5 top-1.5 bg-signal-green px-1.5 py-0.5">
+            <span className="text-[7px] font-bold uppercase text-ink">Selected</span>
           </div>
         )}
         <div className="flex items-center justify-between px-2 py-1.5">
@@ -200,10 +200,10 @@ export function SeasonDetailPage() {
           </span>
           <button
             onClick={() => handleToggleLike(img.id)}
-            className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide transition-all ${
+            className={`px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider transition-all ${
               img.liked
-                ? "bg-green-500 text-white"
-                : "bg-ink text-muted hover:bg-green-500/20 hover:text-green-400"
+                ? "bg-signal-green text-ink"
+                : "bg-ink text-muted hover:bg-signal-green/20 hover:text-signal-green"
             }`}
           >
             {img.liked ? "Selected" : "Select"}
@@ -217,10 +217,10 @@ export function SeasonDetailPage() {
         {starred.length > 0 && (
           <div>
             <div className="mb-2 flex items-center gap-2">
-              <i className="ti ti-star-filled text-xs text-amber-400" />
-              <span className="text-[11px] font-bold uppercase tracking-widest text-amber-400">Starred</span>
+              <i className="ti ti-star-filled text-xs text-signal-amber" />
+              <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-signal-amber">Starred</span>
             </div>
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+            <div className="grid grid-cols-3 gap-px sm:grid-cols-4 lg:grid-cols-5">
               {starred.map(renderCard)}
             </div>
           </div>
@@ -228,10 +228,10 @@ export function SeasonDetailPage() {
         {selected.length > 0 && (
           <div>
             <div className="mb-2 flex items-center gap-2">
-              <i className="ti ti-circle-check-filled text-xs text-green-400" />
-              <span className="text-[11px] font-bold uppercase tracking-widest text-green-400">Selected</span>
+              <i className="ti ti-circle-check-filled text-xs text-signal-green" />
+              <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-signal-green">Selected</span>
             </div>
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+            <div className="grid grid-cols-3 gap-px sm:grid-cols-4 lg:grid-cols-5">
               {selected.map(renderCard)}
             </div>
           </div>
@@ -240,10 +240,10 @@ export function SeasonDetailPage() {
           <div>
             {(starred.length > 0 || selected.length > 0) && (
               <div className="mb-2 flex items-center gap-2">
-                <span className="text-[11px] font-bold uppercase tracking-widest text-muted">All</span>
+                <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-muted">All</span>
               </div>
             )}
-            <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-5">
+            <div className="grid grid-cols-3 gap-px sm:grid-cols-4 lg:grid-cols-5">
               {rest.map(renderCard)}
             </div>
           </div>
@@ -256,37 +256,37 @@ export function SeasonDetailPage() {
     <section className="mt-16 first:mt-0">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h2 className="font-display text-2xl text-bone">Garments</h2>
+          <h2 className="font-display text-xl font-semibold tracking-tight text-bone">Garments</h2>
           <p className="mt-1 text-sm text-bone-dim">
             Everything you build here draws on this season's mood.
           </p>
         </div>
         <button
           onClick={() => setOpen(true)}
-          className="rounded-full bg-brass px-5 py-2 text-sm font-medium text-ink transition-colors hover:bg-brass-soft"
+          className="bg-vermillion px-5 py-2 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-vermillion-soft"
         >
           + New Garment
         </button>
       </div>
 
       {studioLoading ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-line bg-surface overflow-hidden animate-pulse">
+            <div key={i} className="bg-surface overflow-hidden animate-pulse">
               <div className="h-48 bg-line/30" />
               <div className="p-4 space-y-3">
-                <div className="h-5 w-32 rounded bg-line/30" />
-                <div className="h-3 w-24 rounded bg-line/20" />
+                <div className="h-5 w-32 bg-line/30" />
+                <div className="h-3 w-24 bg-line/20" />
               </div>
             </div>
           ))}
         </div>
       ) : garments.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-line py-20 text-center text-bone-dim">
+        <div className="border border-dashed border-line py-20 text-center text-bone-dim">
           No garments yet in this season.
         </div>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {garments.map((garment) => (
             <GarmentCard
               key={garment.id}
@@ -306,20 +306,20 @@ export function SeasonDetailPage() {
     <div className="min-h-screen bg-ink text-bone">
       <NavBar crumbs={[{ label: "Seasons", to: "/seasons" }, { label: season.code ?? "Untitled" }]} />
 
-      <main className="mx-auto max-w-6xl px-6 py-10">
+      <main className="mx-auto max-w-7xl px-8 py-10">
         <div className="mb-6 flex items-center justify-between px-0">
-          <h1 className="font-display text-4xl text-bone">{season.code ?? "Untitled"}</h1>
-          <span className="text-sm text-muted">Created {season.created_at.slice(0, 10)}</span>
+          <h1 className="font-display text-3xl font-bold tracking-tight text-bone">{season.code ?? "Untitled"}</h1>
+          <span className="font-mono text-[11px] text-muted">{season.created_at.slice(0, 10)}</span>
         </div>
 
-        <div className="mb-10 flex gap-1 border-b border-line">
+        <div className="mb-10 flex gap-0 border-b border-line">
           {SEASON_TABS.map((t) => (
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`-mb-px border-b-2 px-4 py-3 text-sm transition-colors ${
+              className={`-mb-px border-b-2 px-4 py-3 font-mono text-xs uppercase tracking-wider transition-colors ${
                 tab === t.key
-                  ? "border-brass text-bone"
+                  ? "border-vermillion text-bone"
                   : "border-transparent text-muted hover:text-bone-dim"
               }`}
             >
@@ -330,68 +330,66 @@ export function SeasonDetailPage() {
 
         {tab === "overview" && (
         <>
-        {/* Moodboard */}
         <section>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-display text-xl text-bone-dim">
+            <h2 className="font-display text-base font-semibold tracking-tight text-bone-dim">
               Moodboard
               {season.moodboard.name && (
-                <span className="font-normal italic text-brass"> - {season.moodboard.name}</span>
+                <span className="ml-2 font-normal text-vermillion"> — {season.moodboard.name}</span>
               )}
             </h2>
             {moodboardImages.length > 0 && (
-              <span className="text-xs uppercase tracking-wide text-muted">
+              <span className="font-mono text-[11px] text-muted">
                 {moodboardImages.length} images
               </span>
             )}
           </div>
 
           {moodboardImages.length === 0 ? (
-            <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-dashed border-line py-20 text-center">
+            <div className="flex flex-col items-center justify-center gap-4 border border-dashed border-line py-20 text-center">
               <p className="text-sm text-bone-dim">
                 No moodboard yet — import up to 12 images to set the mood for this season.
               </p>
               <button
                 onClick={() => setMoodboardOpen(true)}
-                className="rounded-full bg-brass px-5 py-2 text-sm font-medium text-ink transition-colors hover:bg-brass-soft"
+                className="bg-vermillion px-5 py-2 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-vermillion-soft"
               >
                 Start Moodboard
               </button>
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6">
+              <div className="grid grid-cols-4 gap-px sm:grid-cols-6">
                 {moodboardImages.map((img, i) => (
                   <MoodboardTile
                     key={i}
                     src={img.url}
                     seed={seed}
                     index={i}
-                    className="aspect-square rounded-md"
+                    className="aspect-square"
                   />
                 ))}
               </div>
 
-              {/* Analysis Status */}
               {status === "analyzing" && (
-                <div className="mt-4 flex items-center gap-3 rounded-xl border border-brass/20 bg-brass/[0.03] px-5 py-4">
-                  <i className="ti ti-loader-2 animate-spin text-lg text-brass" />
+                <div className="mt-4 flex items-center gap-3 border border-vermillion/20 bg-vermillion/[0.03] px-5 py-4">
+                  <i className="ti ti-loader-2 animate-spin text-lg text-vermillion" />
                   <span className="text-sm text-bone-dim">Analyzing your mood…</span>
                 </div>
               )}
 
               {status === "failed" && (
-                <div className="mt-6 rounded-xl border border-red-500/20 bg-red-500/[0.04] px-5 py-4">
+                <div className="mt-6 border border-vermillion/20 bg-vermillion/[0.04] px-5 py-4">
                   <div className="flex items-start gap-3">
-                    <i className="ti ti-alert-triangle mt-0.5 text-base text-red-400/80" />
+                    <i className="ti ti-alert-triangle mt-0.5 text-base text-vermillion/80" />
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-red-400">Analysis failed</p>
-                      <p className="mt-1 text-xs text-red-400/60">
+                      <p className="text-sm font-medium text-vermillion">Analysis failed</p>
+                      <p className="mt-1 text-xs text-vermillion/60">
                         {season.moodboard.analysis.error ?? "Something went wrong. Please try again."}
                       </p>
                       <button
                         onClick={() => analyzeMoodboard(season!.id)}
-                        className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20"
+                        className="mt-3 inline-flex items-center gap-1.5 border border-vermillion/20 bg-vermillion/10 px-3 py-1.5 text-xs font-medium text-vermillion transition-colors hover:bg-vermillion/20"
                       >
                         <i className="ti ti-refresh text-[11px]" />
                         Retry analysis
@@ -401,19 +399,18 @@ export function SeasonDetailPage() {
                 </div>
               )}
 
-              {/* Palette + Keywords + Brief */}
               {(palette.length > 0 || keywords.length > 0) && (
-                <div className="mt-6 flex flex-col gap-5 rounded-xl border border-line bg-surface p-5 sm:flex-row sm:items-start sm:justify-between">
+                <div className="mt-6 flex flex-col gap-5 bg-surface p-5 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:gap-10">
                     {palette.length > 0 && (
                       <div>
-                        <p className="mb-2 text-xs uppercase tracking-wide text-muted">Palette</p>
+                        <p className="mb-2 font-mono text-[11px] uppercase tracking-wider text-muted">Palette</p>
                         <PaletteSwatches colors={palette} />
                       </div>
                     )}
                     {keywords.length > 0 && (
                       <div>
-                        <p className="mb-2 text-xs uppercase tracking-wide text-muted">Mood</p>
+                        <p className="mb-2 font-mono text-[11px] uppercase tracking-wider text-muted">Mood</p>
                         <KeywordChips keywords={keywords} />
                       </div>
                     )}
@@ -421,7 +418,7 @@ export function SeasonDetailPage() {
 
                   {brief && (
                     <div className="sm:max-w-xs">
-                      <span className="text-xs uppercase tracking-wide text-muted">Creative Brief</span>
+                      <span className="font-mono text-[11px] uppercase tracking-wider text-muted">Creative Brief</span>
                       <p className="mt-2 text-sm leading-relaxed text-bone-dim">{brief}</p>
                     </div>
                   )}
@@ -438,9 +435,9 @@ export function SeasonDetailPage() {
         {tab === "prints" && (
           <section>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-xl text-bone-dim">Prints</h2>
+              <h2 className="font-display text-base font-semibold tracking-tight text-bone-dim">Prints</h2>
               {tabImages.length > 0 && (
-                <span className="text-xs uppercase tracking-wide text-muted">
+                <span className="font-mono text-[11px] text-muted">
                   {tabImages.length} prints
                 </span>
               )}
@@ -452,9 +449,9 @@ export function SeasonDetailPage() {
         {tab === "fabrics" && (
           <section>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-xl text-bone-dim">Fabrics</h2>
+              <h2 className="font-display text-base font-semibold tracking-tight text-bone-dim">Fabrics</h2>
               {tabImages.length > 0 && (
-                <span className="text-xs uppercase tracking-wide text-muted">
+                <span className="font-mono text-[11px] text-muted">
                   {tabImages.length} fabrics
                 </span>
               )}
@@ -466,9 +463,9 @@ export function SeasonDetailPage() {
         {tab === "sketches" && (
           <section>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-xl text-bone-dim">Sketches</h2>
+              <h2 className="font-display text-base font-semibold tracking-tight text-bone-dim">Sketches</h2>
               {tabImages.length > 0 && (
-                <span className="text-xs uppercase tracking-wide text-muted">
+                <span className="font-mono text-[11px] text-muted">
                   {tabImages.length} sketches
                 </span>
               )}
@@ -480,9 +477,9 @@ export function SeasonDetailPage() {
         {tab === "firstRenders" && (
           <section>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-xl text-bone-dim">First Renders</h2>
+              <h2 className="font-display text-base font-semibold tracking-tight text-bone-dim">Renders</h2>
               {tabImages.length > 0 && (
-                <span className="text-xs uppercase tracking-wide text-muted">
+                <span className="font-mono text-[11px] text-muted">
                   {tabImages.length} renders
                 </span>
               )}
@@ -494,9 +491,9 @@ export function SeasonDetailPage() {
         {tab === "techPacks" && (
           <section>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-xl text-bone-dim">Tech Packs</h2>
+              <h2 className="font-display text-base font-semibold tracking-tight text-bone-dim">Tech Packs</h2>
               {tabImages.length > 0 && (
-                <span className="text-xs uppercase tracking-wide text-muted">
+                <span className="font-mono text-[11px] text-muted">
                   {tabImages.length} tech packs
                 </span>
               )}
@@ -508,9 +505,9 @@ export function SeasonDetailPage() {
         {tab === "patterns" && (
           <section>
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="font-display text-xl text-bone-dim">Patterns</h2>
+              <h2 className="font-display text-base font-semibold tracking-tight text-bone-dim">Patterns</h2>
               {tabImages.length > 0 && (
-                <span className="text-xs uppercase tracking-wide text-muted">
+                <span className="font-mono text-[11px] text-muted">
                   {tabImages.length} patterns
                 </span>
               )}
@@ -532,7 +529,7 @@ export function SeasonDetailPage() {
       >
         <form onSubmit={handleCreate} className="flex flex-col gap-4">
           <div>
-            <label className="mb-1.5 block text-xs uppercase tracking-wide text-muted">
+            <label className="mb-1.5 block font-mono text-[11px] uppercase tracking-wider text-muted">
               Category
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -541,10 +538,10 @@ export function SeasonDetailPage() {
                   key={c.code}
                   type="button"
                   onClick={() => setCategory(c.code)}
-                  className={`rounded-lg border px-4 py-2.5 text-left text-sm transition-colors ${
+                  className={`border px-4 py-2.5 text-left text-sm transition-colors ${
                     category === c.code
-                      ? "border-brass bg-brass/10 text-brass"
-                      : "border-line bg-ink-soft text-bone-dim hover:border-brass/40"
+                      ? "border-vermillion bg-vermillion/10 text-vermillion"
+                      : "border-line bg-ink text-bone-dim hover:border-vermillion/40"
                   }`}
                 >
                   {c.label}
@@ -552,13 +549,13 @@ export function SeasonDetailPage() {
               ))}
             </div>
           </div>
-          <p className="text-[11px] text-muted">
-            Name will be auto-generated as <span className="font-mono text-bone-dim">{season?.code || "SS27"}_{"{CATEGORY}"}_{"{###}"}</span>
+          <p className="font-mono text-[11px] text-muted">
+            Name: <span className="text-bone-dim">{season?.code || "SS27"}_{"{CATEGORY}"}_{"{###}"}</span>
           </p>
           <button
             type="submit"
             disabled={!category}
-            className="mt-1 rounded-full bg-brass px-5 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-brass-soft disabled:cursor-not-allowed disabled:opacity-40"
+            className="mt-1 bg-vermillion px-5 py-2.5 font-mono text-xs font-medium uppercase tracking-wider text-ink transition-colors hover:bg-vermillion-soft disabled:cursor-not-allowed disabled:opacity-40"
           >
             Create Garment
           </button>
@@ -571,26 +568,34 @@ export function SeasonDetailPage() {
         onSave={handleMoodboardSave}
       />
 
-      <Modal open={!!pendingDelete} onClose={() => setPendingDelete(null)} title="Delete Garment">
+      <Modal open={!!pendingDelete} onClose={() => !deleting && setPendingDelete(null)} title="Delete Garment">
         <p className="text-sm text-bone-dim">
           Are you sure you want to delete <span className="font-medium text-bone">{pendingDelete?.name}</span>? This will remove all its pipeline runs and generated images. This action cannot be undone.
         </p>
         <div className="mt-6 flex justify-end gap-3">
           <button
             onClick={() => setPendingDelete(null)}
-            className="rounded-lg border border-line px-4 py-2 text-sm text-bone transition-colors hover:bg-surface-hi"
+            disabled={deleting}
+            className="border border-line px-4 py-2 text-sm text-bone transition-colors hover:bg-surface-hi disabled:opacity-40"
           >
             Cancel
           </button>
           <button
             onClick={async () => {
               if (!pendingDelete) return;
-              await deleteGarment(pendingDelete.id);
-              setPendingDelete(null);
+              setDeleting(true);
+              try {
+                await deleteGarment(pendingDelete.id);
+                setPendingDelete(null);
+              } finally {
+                setDeleting(false);
+              }
             }}
-            className="rounded-lg bg-red-500/20 px-4 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/30"
+            disabled={deleting}
+            className="flex items-center gap-2 bg-vermillion/20 px-4 py-2 text-sm font-medium text-vermillion transition-colors hover:bg-vermillion/30 disabled:opacity-40"
           >
-            Delete
+            {deleting && <i className="ti ti-loader-2 animate-spin text-xs" />}
+            {deleting ? "Cleaning up..." : "Delete"}
           </button>
         </div>
       </Modal>
