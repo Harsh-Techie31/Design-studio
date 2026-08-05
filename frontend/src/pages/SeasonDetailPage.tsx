@@ -272,7 +272,7 @@ export function SeasonDetailPage() {
       {studioLoading ? (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="bg-surface overflow-hidden animate-pulse">
+            <div key={i} className="border border-line bg-surface overflow-hidden animate-pulse">
               <div className="h-48 bg-line/30" />
               <div className="p-4 space-y-3">
                 <div className="h-5 w-32 bg-line/30" />
